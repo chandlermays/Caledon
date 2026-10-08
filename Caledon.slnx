@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="SDL_Debug" />
+    <BuildType Name="SDL_Release" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="CaledonEditor/CaledonEditor.vcxproj" Id="8fb677c9-fc25-4f7c-9a0f-b2ef37a39fb4" />
+  <Project Path="CaledonEngine/CaledonEngine.vcxproj" Id="b8238347-3dbf-4b8e-8a7b-94e34c856de6" />
+  <Project Path="Game/Game.vcxproj" Id="0c18716e-1d4a-425d-9514-9c7b02103e93" />
+  <Project Path="PacManModule/PacManModule.vcxproj" Id="935cb251-6059-4956-b1f1-0f9406ed2b36" />
+</Solution>
