@@ -5,5 +5,93 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source Files\Systems">
+      <UniqueIdentifier>{72bc374c-31ee-42dc-be1b-8036285d40ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Engine">
+      <UniqueIdentifier>{71bd2a0f-3dd5-4826-8d7f-767f93d33269}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Input">
+      <UniqueIdentifier>{26c6774f-e0d3-444b-b752-794cb5e29688}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Utilities">
+      <UniqueIdentifier>{8e3842ef-ef74-477d-ac74-30bc654d1cbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\API">
+      <UniqueIdentifier>{6367142a-9e37-4df4-999a-f51da86690e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\API\SDL">
+      <UniqueIdentifier>{abca65a5-ac0e-4a47-8059-afb608395591}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Systems\Engine\EngineManager.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\IRenderable.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\IUpdatable.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\ISubsystem.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\EngineConfig.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\EngineContext.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\LoggingSubsystem.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Input\InputManager.h">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Input\Input.h">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Input\InputAction.h">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Input\InputActionMap.h">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Input\InputActions.h">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="API\SDL\SDLInput.h">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Systems\Engine\EngineManager.cpp">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Engine\EngineContext.cpp">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Engine\LoggingSubsystem.cpp">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Input\InputManager.cpp">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Input\Input.cpp">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Input\InputAction.cpp">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Input\InputActionMap.cpp">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Input\InputActions.cpp">
+      <Filter>Source Files\Systems\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="API\SDL\SDLInput.cpp">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

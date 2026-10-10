@@ -6,12 +6,20 @@
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\Application">
-      <UniqueIdentifier>{e6d2ab2d-6d75-41d1-b29d-8ea643c25f53}</UniqueIdentifier>
+      <UniqueIdentifier>{5ee52552-c15a-4024-8353-deae61126d14}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Application\Application.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
     <ClCompile Include="Application\Main.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Application\Application.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

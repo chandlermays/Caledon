@@ -17,22 +17,32 @@
       <Configuration>Release</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="SDL_Debug|Win32">
-      <Configuration>SDL_Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="SDL_Debug|x64">
-      <Configuration>SDL_Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="SDL_Release|Win32">
-      <Configuration>SDL_Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="SDL_Release|x64">
-      <Configuration>SDL_Release</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="API\SDL\SDLInput.h" />
+    <ClInclude Include="Systems\Engine\EngineConfig.h" />
+    <ClInclude Include="Systems\Engine\EngineContext.h" />
+    <ClInclude Include="Systems\Engine\EngineManager.h" />
+    <ClInclude Include="Systems\Engine\IRenderable.h" />
+    <ClInclude Include="Systems\Engine\IUpdatable.h" />
+    <ClInclude Include="Systems\Engine\ISubsystem.h" />
+    <ClInclude Include="Systems\Engine\LoggingSubsystem.h" />
+    <ClInclude Include="Systems\Input\Input.h" />
+    <ClInclude Include="Systems\Input\InputAction.h" />
+    <ClInclude Include="Systems\Input\InputActionMap.h" />
+    <ClInclude Include="Systems\Input\InputActions.h" />
+    <ClInclude Include="Systems\Input\InputManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="API\SDL\SDLInput.cpp" />
+    <ClCompile Include="Systems\Engine\EngineContext.cpp" />
+    <ClCompile Include="Systems\Engine\EngineManager.cpp" />
+    <ClCompile Include="Systems\Engine\LoggingSubsystem.cpp" />
+    <ClCompile Include="Systems\Input\Input.cpp" />
+    <ClCompile Include="Systems\Input\InputAction.cpp" />
+    <ClCompile Include="Systems\Input\InputActionMap.cpp" />
+    <ClCompile Include="Systems\Input\InputActions.cpp" />
+    <ClCompile Include="Systems\Input\InputManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -48,20 +58,7 @@
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
@@ -74,20 +71,7 @@
     <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v145</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
@@ -102,25 +86,13 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -130,16 +102,6 @@
     <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|Win32'">
-    <OutDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|Win32'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
@@ -154,34 +116,7 @@
     <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
     <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|x64'">
-    <OutDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|x64'">
-    <OutDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)Build\Intermediate\$(ProjectName)\$(Configuration)\</IntDir>
-    <IncludePath>$(ProjectDir)lib;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);$(SolutionDir)$(ProjectName)\lib\Lua\include;$(SolutionDir)$(ProjectName)\lib\SDL\include;$(SolutionDir)$(ProjectName)\lib\SDL_Image\include;$(SolutionDir)$(ProjectName)\lib\SDL_TTF\include;$(SolutionDir)$(ProjectName)\lib\SDL_Mixer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Manifest>
-      <EnableSegmentHeap>true</EnableSegmentHeap>
-    </Manifest>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
@@ -222,25 +157,6 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);$(SolutionDir)$(ProjectName)\lib\Lua\include;$(SolutionDir)$(ProjectName)\lib\SDL\include;$(SolutionDir)$(ProjectName)\lib\SDL_Image\include;$(SolutionDir)$(ProjectName)\lib\SDL_TTF\include;$(SolutionDir)$(ProjectName)\lib\SDL_Mixer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Manifest>
-      <EnableSegmentHeap>true</EnableSegmentHeap>
-    </Manifest>
     <Lib>
       <AdditionalDependencies>sdl3.lib;sdl3_image.lib;sdl3_ttf.lib;sdl3_mixer.lib;sdl3_net.lib;lua.lib</AdditionalDependencies>
     </Lib>
@@ -264,23 +180,6 @@
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Debug|x64'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);$(SolutionDir)$(ProjectName)\lib\Lua\include;$(SolutionDir)$(ProjectName)\lib\SDL\include;$(SolutionDir)$(ProjectName)\lib\SDL_Image\include;$(SolutionDir)$(ProjectName)\lib\SDL_TTF\include;$(SolutionDir)$(ProjectName)\lib\SDL_Mixer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Manifest>
-      <EnableSegmentHeap>true</EnableSegmentHeap>
-    </Manifest>
     <Lib>
       <AdditionalDependencies>sdl3.lib;sdl3_image.lib;sdl3_ttf.lib;sdl3_mixer.lib;sdl3_net.lib;lua.lib</AdditionalDependencies>
     </Lib>
@@ -289,25 +188,6 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <WarningLevel>Level4</WarningLevel>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)$(ProjectName);$(SolutionDir)$(ProjectName)\lib\Lua\include;$(SolutionDir)$(ProjectName)\lib\SDL\include;$(SolutionDir)$(ProjectName)\lib\SDL_Image\include;$(SolutionDir)$(ProjectName)\lib\SDL_TTF\include;$(SolutionDir)$(ProjectName)\lib\SDL_Mixer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Manifest>
-      <EnableSegmentHeap>true</EnableSegmentHeap>
-    </Manifest>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='SDL_Release|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
