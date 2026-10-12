@@ -23,6 +23,30 @@
     <Filter Include="Source Files\API\SDL">
       <UniqueIdentifier>{abca65a5-ac0e-4a47-8059-afb608395591}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Systems\Rendering">
+      <UniqueIdentifier>{b33d6a3a-5846-4e44-92bf-e12edd72073f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Window">
+      <UniqueIdentifier>{8e75dc6f-6f24-41d9-80fa-d52829568c9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Rendering\Camera">
+      <UniqueIdentifier>{0f6c84ff-f358-4485-b709-d13311c1e3da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Rendering\Resources">
+      <UniqueIdentifier>{46b1a146-656c-45a8-a8c6-a110bf1978ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Rendering\Shapes">
+      <UniqueIdentifier>{c8c82350-3c53-4344-89f6-1c48093b29cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Components">
+      <UniqueIdentifier>{43651887-2a2f-4731-8299-0b4dfa6b559d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Utilities\Math">
+      <UniqueIdentifier>{567fb016-8d9d-48b9-931a-e583db68b34d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Scene">
+      <UniqueIdentifier>{d4423b82-022b-4d93-9418-a6c713fbf3fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Systems\Engine\EngineManager.h">
@@ -64,6 +88,90 @@
     <ClInclude Include="API\SDL\SDLInput.h">
       <Filter>Source Files\API\SDL</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Window\Window.h">
+      <Filter>Source Files\Systems\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Camera\Camera2D.h">
+      <Filter>Source Files\Systems\Rendering\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Resources\Image.h">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Resources\Texture.h">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Resources\Sprite.h">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Resources\Spritesheet.h">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Shapes\Shape.h">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Shapes\Square.h">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Shapes\Circle.h">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Shapes\Triangle.h">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Shapes\Capsule.h">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="API\SDL\SDLImage.h">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="API\SDL\SDLRenderer.h">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="API\SDL\SDLWindow.h">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="API\SDL\SDLTexture.h">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SpriteComponent.h">
+      <Filter>Source Files\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Renderer.h">
+      <Filter>Source Files\Systems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Color.h">
+      <Filter>Source Files\Systems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Math\Constants.h">
+      <Filter>Source Files\Systems\Utilities\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Math\Rect.h">
+      <Filter>Source Files\Systems\Utilities\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Math\Vector2.h">
+      <Filter>Source Files\Systems\Utilities\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\RenderingSubsystem.h">
+      <Filter>Source Files\Systems\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Window\WindowSubsystem.h">
+      <Filter>Source Files\Systems\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\GameObject.h">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\Component.h">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\Scene.h">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\SceneSubsystem.h">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\Transform.h">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -93,5 +201,73 @@
     <ClCompile Include="API\SDL\SDLInput.cpp">
       <Filter>Source Files\API\SDL</Filter>
     </ClCompile>
+    <ClCompile Include="Systems\Rendering\Resources\Sprite.cpp">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Resources\Spritesheet.cpp">
+      <Filter>Source Files\Systems\Rendering\Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp">
+      <Filter>Source Files\Systems\Rendering\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Shapes\Shape.cpp">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Shapes\Circle.cpp">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Shapes\Capsule.cpp">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Shapes\Triangle.cpp">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Shapes\Square.cpp">
+      <Filter>Source Files\Systems\Rendering\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="API\SDL\SDLImage.cpp">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="API\SDL\SDLRenderer.cpp">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="API\SDL\SDLWindow.cpp">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="API\SDL\SDLTexture.cpp">
+      <Filter>Source Files\API\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Window\Window.cpp">
+      <Filter>Source Files\Systems\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SpriteComponent.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp">
+      <Filter>Source Files\Systems\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Window\WindowSubsystem.cpp">
+      <Filter>Source Files\Systems\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Scene\Component.cpp">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Scene\GameObject.cpp">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Scene\Scene.cpp">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Scene\SceneSubsystem.cpp">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Scene\Transform.cpp">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Systems\Scene\Component.inl">
+      <Filter>Source Files\Systems\Scene</Filter>
+    </None>
   </ItemGroup>
 </Project>

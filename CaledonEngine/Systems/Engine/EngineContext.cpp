@@ -15,9 +15,9 @@ CaledonEngine::EngineContext::EngineContext(const EngineConfig& config)
 	, m_quitRequested{ false }
 {}
 
-/*-------------------------------------------------------------------------------
-| --- FindSubsystem: Looks up an initialized subsystem by name ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- FindSubsystem:
+---------------------------------------------------------------------------------------*/
 CaledonEngine::ISubsystem* CaledonEngine::EngineContext::FindSubsystem(std::string_view name) const noexcept
 {
 	for (const PublishedEntry& entry : m_published)
@@ -29,41 +29,41 @@ CaledonEngine::ISubsystem* CaledonEngine::EngineContext::FindSubsystem(std::stri
 	return nullptr;
 }
 
-/*-------------------------------------------------------------------------------
-| --- Config: Returns the immutable startup configuration ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- Config:
+---------------------------------------------------------------------------------------*/
 const CaledonEngine::EngineConfig& CaledonEngine::EngineContext::Config() const noexcept
 {
 	return m_config;
 }
 
-/*-------------------------------------------------------------------------------
-| --- RequestQuit: Asks the main loop to exit after the current frame ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- RequestQuit:
+---------------------------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::RequestQuit() noexcept
 {
 	m_quitRequested.store(true);
 }
 
-/*-------------------------------------------------------------------------------
-| --- IsQuitRequested: True once any caller has requested a quit ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- IsQuitRequested:
+---------------------------------------------------------------------------------------*/
 bool CaledonEngine::EngineContext::IsQuitRequested() const noexcept
 {
 	return m_quitRequested.load();
 }
 
-/*-------------------------------------------------------------------------------
-| --- Publish: Makes a successfully initialized subsystem visible to lookups ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- Publish:
+---------------------------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::Publish(ISubsystem& subsystem)
 {
 	m_published.push_back(PublishedEntry{ std::string{ subsystem.Name() }, &subsystem });
 }
 
-/*-------------------------------------------------------------------------------
-| --- Retract: Hides a subsystem from lookups just before it shuts down ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- Retract:
+---------------------------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::Retract(ISubsystem& subsystem) noexcept
 {
 	std::erase_if(m_published, [&subsystem](const PublishedEntry& entry)
@@ -72,9 +72,9 @@ void CaledonEngine::EngineContext::Retract(ISubsystem& subsystem) noexcept
 		});
 }
 
-/*-------------------------------------------------------------------------------
-| --- ResetQuit: Clears the quit flag when the engine starts up ---
--------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------
+| --- ResetQuit:
+---------------------------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::ResetQuit() noexcept
 {
 	m_quitRequested.store(false);

@@ -1,2 +1,11 @@
 [LOG] [Engine] Initialized subsystem 'Logging'
+[DISPLAY] [Window] Opened window 'Caledon Engine' (1280x720)
+[LOG] [Engine] Initialized subsystem 'Window'
 [LOG] [Engine] Initialized subsystem 'Input'
+[DISPLAY] [Rendering] Renderer started (SDL)
+[LOG] [Engine] Initialized subsystem 'Rendering'
+[LOG] [Input] Quit event received (window closed or OS quit signal): requesting engine shutdown
+[LOG] [Engine] Shutting down subsystem 'Rendering'
+[LOG] [Engine] Shutting down subsystem 'Input'
+[LOG] [Engine] Shutting down subsystem 'Window'
+[LOG] [Engine] Shutting down subsystem 'Logging'

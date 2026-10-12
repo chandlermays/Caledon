@@ -6,7 +6,9 @@
 
 #include "CaledonEngine/Systems/Engine/EngineManager.h"
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
+#include "CaledonEngine/Systems/Window/WindowSubsystem.H"
 #include "CaledonEngine/Systems/Input/InputManager.h"
+#include "CaledonEngine/Systems/Rendering/RenderingSubsystem.h"
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -34,8 +36,10 @@ bool Game::Application::Initialize()
 	m_pEngineManager = std::make_unique<CaledonEngine::EngineManager>();
 
 	// Registration order IS initialization order (shutdown runs in reverse).
-	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::LoggingSubsystem>()))		return false;
-	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputManager>()))			return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::LoggingSubsystem>()))			return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::WindowSubsystem>()))			return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputManager>()))				return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::RenderingSubsystem>()))		return false;
 
 	if (!m_pEngineManager->Initialize())
 	{

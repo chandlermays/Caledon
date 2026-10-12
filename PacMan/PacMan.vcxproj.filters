@@ -16,9 +16,15 @@
     <ClCompile Include="Application\Main.cpp">
       <Filter>Source Files\Application</Filter>
     </ClCompile>
+    <ClCompile Include="Application\Sandbox.cpp">
+      <Filter>Source Files\Application</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application\Application.h">
+      <Filter>Source Files\Application</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Sandbox.h">
       <Filter>Source Files\Application</Filter>
     </ClInclude>
   </ItemGroup>

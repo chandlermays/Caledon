@@ -19,7 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="API\SDL\SDLImage.h" />
     <ClInclude Include="API\SDL\SDLInput.h" />
+    <ClInclude Include="API\SDL\SDLRenderer.h" />
+    <ClInclude Include="API\SDL\SDLTexture.h" />
+    <ClInclude Include="API\SDL\SDLWindow.h" />
+    <ClInclude Include="Components\SpriteComponent.h" />
     <ClInclude Include="Systems\Engine\EngineConfig.h" />
     <ClInclude Include="Systems\Engine\EngineContext.h" />
     <ClInclude Include="Systems\Engine\EngineManager.h" />
@@ -32,9 +37,37 @@
     <ClInclude Include="Systems\Input\InputActionMap.h" />
     <ClInclude Include="Systems\Input\InputActions.h" />
     <ClInclude Include="Systems\Input\InputManager.h" />
+    <ClInclude Include="Systems\Rendering\Camera\Camera2D.h" />
+    <ClInclude Include="Systems\Rendering\Color.h" />
+    <ClInclude Include="Systems\Rendering\Renderer.h" />
+    <ClInclude Include="Systems\Rendering\RenderingSubsystem.h" />
+    <ClInclude Include="Systems\Rendering\Resources\Image.h" />
+    <ClInclude Include="Systems\Rendering\Resources\Sprite.h" />
+    <ClInclude Include="Systems\Rendering\Resources\Spritesheet.h" />
+    <ClInclude Include="Systems\Rendering\Resources\Texture.h" />
+    <ClInclude Include="Systems\Rendering\Shapes\Capsule.h" />
+    <ClInclude Include="Systems\Rendering\Shapes\Circle.h" />
+    <ClInclude Include="Systems\Rendering\Shapes\Shape.h" />
+    <ClInclude Include="Systems\Rendering\Shapes\Square.h" />
+    <ClInclude Include="Systems\Rendering\Shapes\Triangle.h" />
+    <ClInclude Include="Systems\Scene\Component.h" />
+    <ClInclude Include="Systems\Scene\GameObject.h" />
+    <ClInclude Include="Systems\Scene\Scene.h" />
+    <ClInclude Include="Systems\Scene\SceneSubsystem.h" />
+    <ClInclude Include="Systems\Scene\Transform.h" />
+    <ClInclude Include="Systems\Window\Window.h" />
+    <ClInclude Include="Systems\Window\WindowSubsystem.h" />
+    <ClInclude Include="Utilities\Math\Constants.h" />
+    <ClInclude Include="Utilities\Math\Rect.h" />
+    <ClInclude Include="Utilities\Math\Vector2.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="API\SDL\SDLImage.cpp" />
     <ClCompile Include="API\SDL\SDLInput.cpp" />
+    <ClCompile Include="API\SDL\SDLRenderer.cpp" />
+    <ClCompile Include="API\SDL\SDLTexture.cpp" />
+    <ClCompile Include="API\SDL\SDLWindow.cpp" />
+    <ClCompile Include="Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Engine\EngineContext.cpp" />
     <ClCompile Include="Systems\Engine\EngineManager.cpp" />
     <ClCompile Include="Systems\Engine\LoggingSubsystem.cpp" />
@@ -43,6 +76,25 @@
     <ClCompile Include="Systems\Input\InputActionMap.cpp" />
     <ClCompile Include="Systems\Input\InputActions.cpp" />
     <ClCompile Include="Systems\Input\InputManager.cpp" />
+    <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
+    <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />
+    <ClCompile Include="Systems\Rendering\Resources\Sprite.cpp" />
+    <ClCompile Include="Systems\Rendering\Resources\Spritesheet.cpp" />
+    <ClCompile Include="Systems\Rendering\Shapes\Capsule.cpp" />
+    <ClCompile Include="Systems\Rendering\Shapes\Circle.cpp" />
+    <ClCompile Include="Systems\Rendering\Shapes\Shape.cpp" />
+    <ClCompile Include="Systems\Rendering\Shapes\Square.cpp" />
+    <ClCompile Include="Systems\Rendering\Shapes\Triangle.cpp" />
+    <ClCompile Include="Systems\Scene\Component.cpp" />
+    <ClCompile Include="Systems\Scene\GameObject.cpp" />
+    <ClCompile Include="Systems\Scene\Scene.cpp" />
+    <ClCompile Include="Systems\Scene\SceneSubsystem.cpp" />
+    <ClCompile Include="Systems\Scene\Transform.cpp" />
+    <ClCompile Include="Systems\Window\Window.cpp" />
+    <ClCompile Include="Systems\Window\WindowSubsystem.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Systems\Scene\Component.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
