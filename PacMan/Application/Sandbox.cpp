@@ -40,20 +40,23 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 	WindowSubsystem* pWindowSubsystem = context.Get<WindowSubsystem>();
 	if (!pScenes || !pWindowSubsystem || !pWindowSubsystem->GetWindow())
 	{
-		CE_LOG(context, LogLevel::Error, "SceneSandbox", "Needs the Window and Scene subsystems. Register it after them");
+		CE_LOG(context, LogLevel::Error, "SceneSandbox", "Needs the Window and Scene subsystems.");
 		return false;
 	}
 
 	const Window& window = *pWindowSubsystem->GetWindow();
 
+	// Create Player GameObject
 	auto pGameObject = std::make_unique<GameObject>();
-	pGameObject->SetName("Box");
+	pGameObject->SetName("Player");
 	pGameObject->GetTransform().SetPosition({ window.GetWidth() / 2.0f, window.GetHeight() / 2.0f });
 
+	// 1. Add Sprite Component
 	auto pSpriteComponent = std::make_unique<SpriteComponent>();
 	pSpriteComponent->SetSprite(Sprite::CreateFromShape(std::make_unique<Square>(Color::Cyan(), 50)));
 	pGameObject->AddComponent(std::move(pSpriteComponent));
 
+	// Create Scene and add GameObject
 	auto pScene = std::make_unique<Scene>();
 	pScene->SetName("Sandbox");
 	pScene->AddGameObject(std::move(pGameObject));
@@ -66,7 +69,7 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 
 	pScenes->AddScene(std::move(pScene));
 
-	CE_LOG(context, LogLevel::Display, "SceneSandbox", "Test scene ready (1 GameObject)");
+	CE_LOG(context, LogLevel::Display, "SceneSandbox", "Test scene ready with visible object (Milestone 2 complete)");
 	return true;
 }
 

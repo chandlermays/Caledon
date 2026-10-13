@@ -14,9 +14,6 @@
     <Filter Include="Source Files\Systems\Input">
       <UniqueIdentifier>{26c6774f-e0d3-444b-b752-794cb5e29688}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Systems\Utilities">
-      <UniqueIdentifier>{8e3842ef-ef74-477d-ac74-30bc654d1cbf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\API">
       <UniqueIdentifier>{6367142a-9e37-4df4-999a-f51da86690e5}</UniqueIdentifier>
     </Filter>
@@ -41,11 +38,14 @@
     <Filter Include="Source Files\Components">
       <UniqueIdentifier>{43651887-2a2f-4731-8299-0b4dfa6b559d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Systems\Utilities\Math">
-      <UniqueIdentifier>{567fb016-8d9d-48b9-931a-e583db68b34d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Systems\Scene">
       <UniqueIdentifier>{d4423b82-022b-4d93-9418-a6c713fbf3fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities">
+      <UniqueIdentifier>{8e3842ef-ef74-477d-ac74-30bc654d1cbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities\Math">
+      <UniqueIdentifier>{567fb016-8d9d-48b9-931a-e583db68b34d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -143,13 +143,13 @@
       <Filter>Source Files\Systems\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\Math\Constants.h">
-      <Filter>Source Files\Systems\Utilities\Math</Filter>
+      <Filter>Source Files\Utilities\Math</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\Math\Rect.h">
-      <Filter>Source Files\Systems\Utilities\Math</Filter>
+      <Filter>Source Files\Utilities\Math</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\Math\Vector2.h">
-      <Filter>Source Files\Systems\Utilities\Math</Filter>
+      <Filter>Source Files\Utilities\Math</Filter>
     </ClInclude>
     <ClInclude Include="Systems\Rendering\RenderingSubsystem.h">
       <Filter>Source Files\Systems\Rendering</Filter>

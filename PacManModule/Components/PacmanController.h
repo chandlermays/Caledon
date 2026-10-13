@@ -6,23 +6,28 @@
 
 #include "CaledonEngine/Systems/Scene/Component.h"
 
-#include "Input/PacmanInputActions.h"
+#include "PacmanModule/Input/PacmanInputActions.h"
+
+#include <memory>
+#include <vector>
 
 namespace PacmanModule
 {
 	class PacmanController : public CaledonEngine::Component
 	{
 	private:
-		PacmanInputActions* m_pInputActions;
-		CaledonEngine::InputActionMap* m_pGameplayActionMap;
+		std::shared_ptr<PacmanInputActions> m_pInputActions;								//
+		CaledonEngine::InputActionMap* m_pGameplayActionMap;								//
 
-		std::vector<CaledonEngine::InputAction*> m_subscribedActions;
+		std::vector<CaledonEngine::InputAction*> m_subscribedActions;						//
 
-		float m_moveSpeed;
-		float m_horizontalInput;
-		float m_verticalInput;
+		float m_horizontalInput;															//
+		float m_verticalInput;																//
 
-		void ConfigureInputBindings();
+		void ConfigureInputBindings();														//
+		void UnsubscribeAll();																//
+
+		void UpdateMovement();																//
 
 	public:
 		PacmanController();																	// Constructor
@@ -32,14 +37,11 @@ namespace PacmanModule
 		PacmanController(PacmanController&&) = delete;										// Prevent move-construction
 		PacmanController& operator=(PacmanController&&) = delete;							// Prevent move-assignment
 
-		const std::string& GetTypeName() const override;
+		const std::string& GetTypeName() const override;									// Returns the type name of the Component
 
-		void SetInputActions(PacmanInputActions* pInputActions);
+		void SetInputActions(std::shared_ptr<PacmanInputActions> pInputActions);			//
 
-		void OnMoveHorizontal(float value);
-		void OnMoveVertical(float value);
-
-		void SetMoveSpeed(float speed);
-		float GetMoveSpeed() const;
+		void OnMoveHorizontal(float value);													//
+		void OnMoveVertical(float value);													//
 	};
 }

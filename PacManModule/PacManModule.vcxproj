@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Components\MovementComponent.h" />
     <ClInclude Include="Components\PacmanController.h" />
     <ClInclude Include="Input\PacmanInputActions.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Components\MovementComponent.cpp" />
     <ClCompile Include="Components\PacmanController.cpp" />
     <ClCompile Include="Input\PacmanInputActions.cpp" />
   </ItemGroup>

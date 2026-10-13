@@ -4,6 +4,8 @@
 ------------------------------*/
 #include "PacmanController.h"
 
+#include "MovementComponent.h"
+
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
@@ -14,7 +16,6 @@ PacmanModule::PacmanController::PacmanController()
 	: CaledonEngine::Component{ }
 	, m_pInputActions{ nullptr }
 	, m_pGameplayActionMap{ nullptr }
-	, m_moveSpeed{ 0 }
 	, m_horizontalInput{ 0.0f }
 	, m_verticalInput{ 0.0f }
 { }
@@ -24,13 +25,7 @@ PacmanModule::PacmanController::PacmanController()
 -------------------------------------------------------*/
 PacmanModule::PacmanController::~PacmanController()
 {
-	for (CaledonEngine::InputAction* pAction : m_subscribedActions)
-	{
-		if (pAction)
-		{
-			pAction->Unsubscribe(this);
-		}
-	}
+	UnsubscribeAll();
 }
 
 /*-------------------------------------------------------------
@@ -45,9 +40,21 @@ const std::string& PacmanModule::PacmanController::GetTypeName() const
 /*------------------------------------------------------------------------
 | --- SetInputActions:
 ------------------------------------------------------------------------*/
-void PacmanModule::PacmanController::SetInputActions(PacmanInputActions* pInputActions)
+void PacmanModule::PacmanController::SetInputActions(std::shared_ptr<PacmanInputActions> pInputActions)
 {
-	m_pInputActions = pInputActions;
+	// Drop any previous subscriptions first
+	UnsubscribeAll();
+
+	m_pInputActions = std::move(pInputActions);
+	m_pGameplayActionMap = nullptr;
+
+	if (m_pInputActions)
+	{
+		m_pInputActions->Initialize();
+		m_pGameplayActionMap = m_pInputActions->GetGameplayActionMap();
+	}
+
+	ConfigureInputBindings();
 }
 
 /*------------------------------------------------------------------------
@@ -56,6 +63,7 @@ void PacmanModule::PacmanController::SetInputActions(PacmanInputActions* pInputA
 void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 {
 	m_horizontalInput = value;
+	UpdateMovement();
 }
 
 /*------------------------------------------------------------------------
@@ -64,24 +72,14 @@ void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 void PacmanModule::PacmanController::OnMoveVertical(float value)
 {
 	m_verticalInput = value;
+	UpdateMovement();
 }
 
-/*------------------------------------------------------------------------
-| --- SetMoveSpeed:
-------------------------------------------------------------------------*/
-void PacmanModule::PacmanController::SetMoveSpeed(float speed)
-{
-	m_moveSpeed = speed;
-}
 
-/*------------------------------------------------------------------------
-| --- GetMoveSpeed:
-------------------------------------------------------------------------*/
-float PacmanModule::PacmanController::GetMoveSpeed() const
-{
-	return m_moveSpeed;
-}
 
+/*------------------------------------
+| --- Private Method Definitions --- |
+------------------------------------*/
 /*------------------------------------------------------------------------
 | --- ConfigureInputBindings:
 ------------------------------------------------------------------------*/
@@ -103,5 +101,33 @@ void PacmanModule::PacmanController::ConfigureInputBindings()
 	{
 		pMoveVertical->OnValue(this, &PacmanController::OnMoveVertical);
 		m_subscribedActions.emplace_back(pMoveVertical);
+	}
+}
+
+/*------------------------------------------------------------------------
+| --- UnsubscribeAll:
+------------------------------------------------------------------------*/
+void PacmanModule::PacmanController::UnsubscribeAll()
+{
+	for (CaledonEngine::InputAction* pAction : m_subscribedActions)
+	{
+		if (pAction)
+		{
+			pAction->Unsubscribe(this);
+		}
+	}
+
+	m_subscribedActions.clear();
+}
+
+/*------------------------------------------------------------------------
+| --- UpdateMovement:
+------------------------------------------------------------------------*/
+void PacmanModule::PacmanController::UpdateMovement()
+{
+	if (MovementComponent* pMovement = GetComponent<MovementComponent>())
+	{
+		CaledonEngine::Vector2f direction(m_horizontalInput, m_verticalInput);
+		pMovement->SetDirection(direction);
 	}
 }

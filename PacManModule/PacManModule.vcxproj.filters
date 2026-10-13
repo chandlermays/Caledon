@@ -19,6 +19,9 @@
     <ClCompile Include="Input\PacmanInputActions.cpp">
       <Filter>Source Files\Input</Filter>
     </ClCompile>
+    <ClCompile Include="Components\MovementComponent.cpp">
+      <Filter>Source Files\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Components\PacmanController.h">
@@ -26,6 +29,9 @@
     </ClInclude>
     <ClInclude Include="Input\PacmanInputActions.h">
       <Filter>Source Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\MovementComponent.h">
+      <Filter>Source Files\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

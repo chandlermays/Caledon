@@ -20,7 +20,9 @@ PacmanModule::PacmanInputActions::PacmanInputActions()
 ----------------------------------------------------------------------------*/
 void PacmanModule::PacmanInputActions::Initialize()
 {
-	// check that this hasn't already been initialized
+	// Early return if the map has already been initialized
+	if (m_pGameplayActionMap)
+		return;
 
 	ConfigureGameplayMap();
 }
@@ -46,6 +48,13 @@ void PacmanModule::PacmanInputActions::ConfigureGameplayMap()
 	using CaledonEngine::ActionType;
 	using CaledonEngine::ControlType;
 	using CaledonEngine::KeyCode;
+
+	// If a "Gameplay" map already exists, adopt it instead of adding a duplicate
+	if (CaledonEngine::InputActionMap* pExists = GetActionMapByName("Gameplay"))
+	{
+		m_pGameplayActionMap = pExists;
+		return;
+	}
 
 	AddActionMap("Gameplay");
 
