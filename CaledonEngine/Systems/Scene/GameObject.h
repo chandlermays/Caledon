@@ -3,6 +3,7 @@
 | Author: Chandler Mays
 ------------------------------*/
 #pragma once
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -10,7 +11,6 @@
 namespace CaledonEngine
 {
 	class Component;
-	class EngineContext;
 	class Scene;
 	class Transform;
 
@@ -36,9 +36,8 @@ namespace CaledonEngine
 		GameObject(GameObject&&) = delete;																	// Prevent move-construction
 		GameObject& operator=(GameObject&&) = delete;														// Prevent move-assignment
 
-		bool Initialize(EngineContext& context);															// Initializes this GameObject and its components
+		bool Initialize();																					// Initializes this GameObject and its components
 		void Update(float);																					// Updates this GameObject and its components
-		void Render();																						// Renders this GameObject and its components
 
 		Scene* GetScene() const;																			// Returns a pointer to the Scene this GameObject is in
 		void SetScene(Scene* pScene);																		// Sets the Scene this GameObject is in

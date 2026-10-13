@@ -8,7 +8,6 @@
 
 namespace CaledonEngine
 {
-	class EngineContext;
 	class GameObject;
 
 	class Component
@@ -26,9 +25,8 @@ namespace CaledonEngine
 		Component(Component&&) = delete;													// Prevent move-construction
 		Component& operator=(Component&&) = delete;											// Prevent move-assignment
 
-		virtual bool Initialize(EngineContext& context) { return true; }					// Initializes the Component
+		virtual bool Initialize() { return true; }											// Initializes the Component
 		virtual void Update(float) {};														// Updates the Component, if applicable
-		virtual void Render() {};															// Renders the Component, if applicable
 
 		virtual const std::string& GetTypeName() const = 0;									// Returns the type name of the Component
 

@@ -2,10 +2,10 @@
 
 #include "Systems/Scene/Scene.h"
 #include "Systems/Engine/EngineContext.h"
-#include "Systems/Engine/EngineManager.h"
 #include "Systems/Engine/LoggingSubsystem.h"
-#include "Systems/Rendering/RenderingSubsystem.h"
-#include "Systems/Rendering/Renderer.h"
+
+#include <algorithm>
+#include <format>
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -15,8 +15,6 @@
 ------------------------------------------------------------------------*/
 CaledonEngine::SceneSubsystem::SceneSubsystem()
 	: m_pCurrentScene{ nullptr }
-	, m_pRenderer{ nullptr }
-	, m_pRenderTarget{ nullptr }
 { }
 
 /*-------------------------------------------------------
@@ -28,11 +26,25 @@ CaledonEngine::SceneSubsystem::~SceneSubsystem()
 }
 
 /*------------------------------------------------------------------------
+| --- Name:
+------------------------------------------------------------------------*/
+std::string_view CaledonEngine::SceneSubsystem::Name() const noexcept
+{
+	return kName;
+}
+
+/*------------------------------------------------------------------------
 | --- Initialize: 
 ------------------------------------------------------------------------*/
-bool CaledonEngine::SceneSubsystem::Initialize(EngineContext& context)
+bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
-	return false;
+	if (m_pCurrentScene != nullptr && !m_pCurrentScene->Initialize())
+	{
+		CE_LOG(context, LogLevel::Error, "Scene", std::format("Scene '{}' failed to initialize", m_pCurrentScene->GetName()));
+		return false;
+	}
+
+	return true;
 }
 
 /*------------------------------------------------------------------------
@@ -41,8 +53,6 @@ bool CaledonEngine::SceneSubsystem::Initialize(EngineContext& context)
 void CaledonEngine::SceneSubsystem::Shutdown() noexcept
 {
 	UnloadAllScenes();
-	m_pRenderer = nullptr;
-	m_pRenderTarget = nullptr;
 }
 
 /*------------------------------------------------------------------------
@@ -53,28 +63,6 @@ void CaledonEngine::SceneSubsystem::Update(float deltaTime)
 	if (m_pCurrentScene != nullptr && m_pCurrentScene->IsActive())
 	{
 		m_pCurrentScene->Update(deltaTime);
-	}
-}
-
-/*------------------------------------------------------------------------
-| --- Render:
-------------------------------------------------------------------------*/
-void CaledonEngine::SceneSubsystem::Render()
-{
-	if (m_pCurrentScene == nullptr || !m_pCurrentScene->IsActive())
-		return;
-
-	if (m_pRenderer && m_pRenderTarget)
-	{
-		m_pRenderer->SetRenderTarget(m_pRenderTarget);
-		m_pRenderer->Clear();
-	}
-
-	m_pCurrentScene->Render();
-
-	if (m_pRenderer && m_pRenderTarget)
-	{
-		m_pRenderer->SetRenderTarget(nullptr);
 	}
 }
 
@@ -106,8 +94,16 @@ void CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 /*------------------------------------------------------------------------
 | --- RemoveScene:
 ------------------------------------------------------------------------*/
-void CaledonEngine::SceneSubsystem::RemoveScene(std::unique_ptr<Scene> pScene)
+void CaledonEngine::SceneSubsystem::RemoveScene(Scene* pScene)
 {
+	if (pScene == nullptr)
+		return;
+
+	if (m_pCurrentScene == pScene)
+		m_pCurrentScene = nullptr;
+
+	m_pScenes.erase(std::remove_if(m_pScenes.begin(), m_pScenes.end(),
+		[pScene](const std::unique_ptr<Scene>& p) { return p.get() == pScene; }), m_pScenes.end());
 }
 
 /*------------------------------------------------------------------------
@@ -144,20 +140,4 @@ int CaledonEngine::SceneSubsystem::GetSceneIndex(Scene* pScene) const
 	}
 
 	return -1;
-}
-
-/*------------------------------------------------------------------------
-| --- GetRenderTarget:
-------------------------------------------------------------------------*/
-CaledonEngine::Texture* CaledonEngine::SceneSubsystem::GetRenderTarget() const
-{
-	return m_pRenderTarget;
-}
-
-/*------------------------------------------------------------------------
-| --- SetRenderTarget:
-------------------------------------------------------------------------*/
-void CaledonEngine::SceneSubsystem::SetRenderTarget(Texture* pTexture)
-{
-	m_pRenderTarget = pTarget;
 }

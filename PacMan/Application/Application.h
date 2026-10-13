@@ -15,7 +15,7 @@ namespace Game
 	class Application
 	{
 	private:
-		std::unique_ptr<CaledonEngine::EngineManager> m_pEngineManager;
+		std::unique_ptr<CaledonEngine::EngineManager> m_pEngineManager;							//
 
 	public:
 		Application();																			// Constructor
@@ -25,8 +25,8 @@ namespace Game
 		Application(Application&&) = delete;													// Prevent move-construction
 		Application& operator=(Application&&) = delete;											// Prevent move-assignment
 
-		bool Initialize();
-		void Run();
-		void Shutdown();
+		bool Initialize();																		//
+		void Run();																				//
+		void Shutdown();																		//
 	};
 }

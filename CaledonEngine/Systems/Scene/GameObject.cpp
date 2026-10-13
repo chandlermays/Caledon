@@ -4,10 +4,10 @@
 ------------------------------*/
 #include "GameObject.h"
 
-#include "Systems/Engine/LoggingSubsystem.h"
 #include "Systems/Scene/Component.h"
 #include "Systems/Scene/Transform.h"
 
+#include <algorithm>
 #include <cassert>
 
 /*-----------------------------------
@@ -17,7 +17,8 @@
 | --- Constructor: Constructs the GameObject with default values --- |
 --------------------------------------------------------------------*/
 CaledonEngine::GameObject::GameObject()
-	: m_pParent{ nullptr }
+	: m_pScene { nullptr }
+	, m_pParent{ nullptr }
 	, m_name{ "GameObject" }
 	, m_tag{ "Untagged" }
 	, m_isActive{ true }
@@ -40,21 +41,20 @@ CaledonEngine::GameObject::~GameObject()
 /*--------------------------------------------------------------------
 | --- Initialize: Initializes this GameObject and its components --- |
 --------------------------------------------------------------------*/
-bool CaledonEngine::GameObject::Initialize(EngineContext& context)
+bool CaledonEngine::GameObject::Initialize()
 {
 	bool success = true;
 	for (const auto& pComponent : m_components)
 	{
-		if (pComponent != nullptr && !pComponent->Initialize(context))
+		if (pComponent != nullptr && !pComponent->Initialize())
 		{
-			CE_LOG(context, LogLevel::Error, "GameObject", std::format("Component '{}' on '{}' failed to initialize", pComponent->GetTypeName(), m_name));
 			success = false;
 		}
 	}
 
 	for (const auto& pChild : m_children)
 	{
-		if (pChild != nullptr && !pChild->Initialize(context))
+		if (pChild != nullptr && !pChild->Initialize())
 		{
 			success = false;
 		}
@@ -84,30 +84,6 @@ void CaledonEngine::GameObject::Update(float deltaTime)
 		if (pChild != nullptr && pChild->IsActive())
 		{
 			pChild->Update(deltaTime);
-		}
-	}
-}
-
-/*------------------------------------------------------------
-| --- Render: Renders this GameObject and its components --- |
-------------------------------------------------------------*/
-void CaledonEngine::GameObject::Render()
-{
-	if (!m_isActive)
-		return;
-
-	for (const auto& pComponent : m_components)
-	{
-		if (pComponent != nullptr && pComponent->IsActive())
-		{
-			pComponent->Render();
-		}
-	}
-	for (const auto& pChild : m_children)
-	{
-		if (pChild != nullptr && pChild->IsActive())
-		{
-			pChild->Render();
 		}
 	}
 }
@@ -232,6 +208,7 @@ void CaledonEngine::GameObject::SetActive(bool isActive)
 ----------------------------------------------------------------*/
 const CaledonEngine::Transform& CaledonEngine::GameObject::GetTransform() const
 {
+	assert(m_pTransform && "GameObject::GetTransform called on a destroyed GameObject.");
 	return *m_pTransform;
 }
 

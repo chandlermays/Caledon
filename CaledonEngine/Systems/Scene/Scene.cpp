@@ -6,6 +6,8 @@
 
 #include "Systems/Scene/GameObject.h"
 
+#include <algorithm>
+
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
@@ -55,20 +57,6 @@ void CaledonEngine::Scene::Update(float deltaTime)
 		if (pObject->IsActive())
 		{
 			pObject->Update(deltaTime);
-		}
-	}
-}
-
-/*--------------------------------------------------------
-| --- Render: Renders this Scene and its GameObjects --- |
---------------------------------------------------------*/
-void CaledonEngine::Scene::Render()
-{
-	for (const auto& pObject : m_gameObjects)
-	{
-		if (pObject && pObject->IsActive())
-		{
-			pObject->Render();
 		}
 	}
 }

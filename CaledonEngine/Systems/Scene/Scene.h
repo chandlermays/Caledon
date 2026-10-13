@@ -31,7 +31,6 @@ namespace CaledonEngine
 
 		bool Initialize();															// Initializes this Scene and its GameObjects
 		void Update(float);															// Updates this Scene and its GameObjects
-		void Render();																// Renders this Scene and its GameObjects
 
 		const std::string& GetName() const;											// Returns the name of this Scene
 		void SetName(const std::string& name);										// Sets the name of this Scene

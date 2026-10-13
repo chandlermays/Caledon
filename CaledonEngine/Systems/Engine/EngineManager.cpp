@@ -168,6 +168,7 @@ CaledonEngine::EngineContext& CaledonEngine::EngineManager::Context() noexcept
 }
 
 
+
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
@@ -220,6 +221,16 @@ void CaledonEngine::EngineManager::Render()
 {
 	for (IRenderable* pRenderable : m_pRenderables)
 	{
+		pRenderable->BeginFrame();
+	}
+
+	for (IRenderable* pRenderable : m_pRenderables)
+	{
 		pRenderable->Render();
+	}
+
+	for (IRenderable* pRenderable : m_pRenderables)
+	{
+		pRenderable->EndFrame();
 	}
 }

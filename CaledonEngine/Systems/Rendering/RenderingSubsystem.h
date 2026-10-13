@@ -8,24 +8,28 @@
 
 #include <memory>
 #include <string_view>
+#include <vector>
 
 namespace CaledonEngine
 {
 	class EngineContext;
+	class GameObject;
 	class Renderer;
+	class SceneSubsystem;
+	class SpriteComponent;
+	class Texture;
 
-	/*-----------------------------------------------------------------------------------------------
-	| RenderingSubsystem: Owns the Renderer (replaces the legacy GraphicsManager). The window now
-	| lives in its own WindowSubsystem; this one only draws into it.
-	|
-	| - Register it AFTER the WindowSubsystem. Initialize() fails (and logs why) if no window is up.
-	|   Shutdown runs in reverse order, so the renderer is always destroyed before the window.
-	| - It is an IRenderable, so EngineManager calls Render() once per frame.
-	-----------------------------------------------------------------------------------------------*/
 	class RenderingSubsystem final : public ISubsystem, public IRenderable
 	{
 	private:
 		std::unique_ptr<Renderer> m_pRendererAPI;								// The Platform Backend Renderer
+		EngineContext* m_pContext;												//
+		SceneSubsystem* m_pScenes;												//
+		Texture* m_pRenderTarget;												//
+		std::vector<const SpriteComponent*> m_drawList;							//
+
+		void CacheSprites(const GameObject& gameObject);						//
+		void RenderSprite(const SpriteComponent& sprite);						//
 
 	public:
 		static constexpr std::string_view kName = "Rendering";					//
@@ -36,10 +40,13 @@ namespace CaledonEngine
 		std::string_view Name() const noexcept override;						//
 		bool Initialize(EngineContext& context) override;						//
 		void Shutdown() noexcept override;										//
-		void Render() override;													//
 
-		void BeginFrame();														//
-		void EndFrame();														//
+		void BeginFrame() override;												//
+		void Render() override;													//
+		void EndFrame() override;												//
+
+		Texture* GetRenderTarget() const noexcept;								//
+		void SetRenderTarget(Texture* pTarget);									//
 
 		Renderer* GetRenderer() const noexcept;									//
 	};

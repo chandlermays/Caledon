@@ -9,6 +9,9 @@
 #include "CaledonEngine/Systems/Window/WindowSubsystem.H"
 #include "CaledonEngine/Systems/Input/InputManager.h"
 #include "CaledonEngine/Systems/Rendering/RenderingSubsystem.h"
+#include "CaledonEngine/Systems/Scene/SceneSubsystem.h"
+
+#include "Sandbox.h"
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -40,6 +43,9 @@ bool Game::Application::Initialize()
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::WindowSubsystem>()))			return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputManager>()))				return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::RenderingSubsystem>()))		return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::SceneSubsystem>()))			return false;
+
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<Sandbox>()))									return false;
 
 	if (!m_pEngineManager->Initialize())
 	{

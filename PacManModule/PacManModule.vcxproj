@@ -18,6 +18,14 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Components\PacmanController.h" />
+    <ClInclude Include="Input\PacmanInputActions.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Components\PacmanController.cpp" />
+    <ClCompile Include="Input\PacmanInputActions.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

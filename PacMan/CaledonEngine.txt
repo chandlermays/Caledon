@@ -4,8 +4,6 @@
 [LOG] [Engine] Initialized subsystem 'Input'
 [DISPLAY] [Rendering] Renderer started (SDL)
 [LOG] [Engine] Initialized subsystem 'Rendering'
-[LOG] [Input] Quit event received (window closed or OS quit signal): requesting engine shutdown
-[LOG] [Engine] Shutting down subsystem 'Rendering'
-[LOG] [Engine] Shutting down subsystem 'Input'
-[LOG] [Engine] Shutting down subsystem 'Window'
-[LOG] [Engine] Shutting down subsystem 'Logging'
+[LOG] [Engine] Initialized subsystem 'Scene'
+[DISPLAY] [SceneSandbox] Test scene ready (1 GameObject)
+[LOG] [Engine] Initialized subsystem 'SceneSandbox'
