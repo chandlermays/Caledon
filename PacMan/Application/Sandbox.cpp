@@ -8,7 +8,7 @@
 #include "CaledonEngine/Systems/Engine/EngineContext.h"
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
 #include "CaledonEngine/Systems/Rendering/Resources/Sprite.h"
-#include "CaledonEngine/Systems/Rendering/Shapes/Square.h"
+#include "CaledonEngine/Systems/Rendering/Shapes/Circle.h"
 #include "CaledonEngine/Systems/Scene/GameObject.h"
 #include "CaledonEngine/Systems/Scene/Scene.h"
 #include "CaledonEngine/Systems/Scene/SceneSubsystem.h"
@@ -53,7 +53,7 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 
 	// 1. Add Sprite Component
 	auto pSpriteComponent = std::make_unique<SpriteComponent>();
-	pSpriteComponent->SetSprite(Sprite::CreateFromShape(std::make_unique<Square>(Color::Cyan(), 50)));
+	pSpriteComponent->SetSprite(Sprite::CreateFromShape(std::make_unique<Circle>(Color::Yellow(), 50)));
 	pGameObject->AddComponent(std::move(pSpriteComponent));
 
 	// Create Scene and add GameObject

@@ -5,7 +5,7 @@
 [DISPLAY] [Rendering] Renderer started (SDL)
 [LOG] [Engine] Initialized subsystem 'Rendering'
 [LOG] [Engine] Initialized subsystem 'Scene'
-[DISPLAY] [SceneSandbox] Test scene ready with movable player (Milestone 3 complete)
+[DISPLAY] [SceneSandbox] Test scene ready with visible object (Milestone 2 complete)
 [LOG] [Engine] Initialized subsystem 'SceneSandbox'
 [LOG] [Input] Quit event received (window closed or OS quit signal): requesting engine shutdown
 [LOG] [Engine] Shutting down subsystem 'SceneSandbox'
