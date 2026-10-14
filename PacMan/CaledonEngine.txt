@@ -4,13 +4,9 @@
 [LOG] [Engine] Initialized subsystem 'Input'
 [DISPLAY] [Rendering] Renderer started (SDL)
 [LOG] [Engine] Initialized subsystem 'Rendering'
+[LOG] [Engine] Initialized subsystem 'ComponentRegistry'
+[DISPLAY] [Module] Loaded 'PacManModule.dll' (2 components)
+[LOG] [Engine] Initialized subsystem 'Module'
 [LOG] [Engine] Initialized subsystem 'Scene'
-[DISPLAY] [SceneSandbox] Test scene ready with visible object (Milestone 2 complete)
+[DISPLAY] [SceneSandbox] Test scene ready (Player)
 [LOG] [Engine] Initialized subsystem 'SceneSandbox'
-[LOG] [Input] Quit event received (window closed or OS quit signal): requesting engine shutdown
-[LOG] [Engine] Shutting down subsystem 'SceneSandbox'
-[LOG] [Engine] Shutting down subsystem 'Scene'
-[LOG] [Engine] Shutting down subsystem 'Rendering'
-[LOG] [Engine] Shutting down subsystem 'Input'
-[LOG] [Engine] Shutting down subsystem 'Window'
-[LOG] [Engine] Shutting down subsystem 'Logging'

@@ -47,6 +47,9 @@
     <Filter Include="Source Files\Utilities\Math">
       <UniqueIdentifier>{567fb016-8d9d-48b9-931a-e583db68b34d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Systems\Module">
+      <UniqueIdentifier>{2156c0d2-7642-40bf-a823-b8667f1f9c5e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Systems\Engine\EngineManager.h">
@@ -172,6 +175,18 @@
     <ClInclude Include="Systems\Scene\Transform.h">
       <Filter>Source Files\Systems\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Module\DynamicLibrary.h">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Module\ComponentRegistry.h">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Module\ModuleInterface.h">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Module\ModuleSubsystem.h">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -263,6 +278,15 @@
     </ClCompile>
     <ClCompile Include="Systems\Scene\Transform.cpp">
       <Filter>Source Files\Systems\Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Module\ComponentRegistry.cpp">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Module\DynamicLibrary.cpp">
+      <Filter>Source Files\Systems\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Module\ModuleSubsystem.cpp">
+      <Filter>Source Files\Systems\Module</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

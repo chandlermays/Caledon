@@ -27,6 +27,7 @@
     <ClCompile Include="Components\MovementComponent.cpp" />
     <ClCompile Include="Components\PacmanController.cpp" />
     <ClCompile Include="Input\PacmanInputActions.cpp" />
+    <ClCompile Include="PacmanModule.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
@@ -115,8 +116,9 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(TargetDir)$(TargetFileName)" "$(SolutionDir)Build\$(Configuration)\PacMan\"
+
+xcopy /y /d "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)Build\$(Configuration)\PacMan\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -140,8 +142,9 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(TargetDir)$(TargetFileName)" "$(SolutionDir)Build\$(Configuration)\PacMan\"
+
+xcopy /y /d "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)Build\$(Configuration)\PacMan\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,8 +166,9 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(TargetDir)$(TargetFileName)" "$(SolutionDir)Build\$(Configuration)\PacMan\"
+
+xcopy /y /d "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)Build\$(Configuration)\PacMan\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -188,8 +192,9 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>xcopy /y /d "$(TargetDir)$(TargetFileName)" "$(SolutionDir)Build\$(Configuration)\PacMan\"
+
+xcopy /y /d "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)Build\$(Configuration)\PacMan\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

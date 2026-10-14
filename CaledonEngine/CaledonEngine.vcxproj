@@ -37,6 +37,10 @@
     <ClInclude Include="Systems\Input\InputActionMap.h" />
     <ClInclude Include="Systems\Input\InputActions.h" />
     <ClInclude Include="Systems\Input\InputManager.h" />
+    <ClInclude Include="Systems\Module\ComponentRegistry.h" />
+    <ClInclude Include="Systems\Module\DynamicLibrary.h" />
+    <ClInclude Include="Systems\Module\ModuleInterface.h" />
+    <ClInclude Include="Systems\Module\ModuleSubsystem.h" />
     <ClInclude Include="Systems\Rendering\Camera\Camera2D.h" />
     <ClInclude Include="Systems\Rendering\Color.h" />
     <ClInclude Include="Systems\Rendering\Renderer.h" />
@@ -76,6 +80,9 @@
     <ClCompile Include="Systems\Input\InputActionMap.cpp" />
     <ClCompile Include="Systems\Input\InputActions.cpp" />
     <ClCompile Include="Systems\Input\InputManager.cpp" />
+    <ClCompile Include="Systems\Module\ComponentRegistry.cpp" />
+    <ClCompile Include="Systems\Module\DynamicLibrary.cpp" />
+    <ClCompile Include="Systems\Module\ModuleSubsystem.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />
     <ClCompile Include="Systems\Rendering\Resources\Sprite.cpp" />

@@ -127,7 +127,7 @@ void PacmanModule::PacmanController::UpdateMovement()
 {
 	if (MovementComponent* pMovement = GetComponent<MovementComponent>())
 	{
-		CaledonEngine::Vector2f direction(m_horizontalInput, m_verticalInput);
+		CaledonEngine::Vector2f direction(m_horizontalInput, -m_verticalInput);
 		pMovement->SetDirection(direction);
 	}
 }

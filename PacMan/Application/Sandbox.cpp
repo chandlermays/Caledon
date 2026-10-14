@@ -9,14 +9,17 @@
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
 #include "CaledonEngine/Systems/Rendering/Resources/Sprite.h"
 #include "CaledonEngine/Systems/Rendering/Shapes/Circle.h"
+#include "CaledonEngine/Systems/Scene/Component.h"
 #include "CaledonEngine/Systems/Scene/GameObject.h"
 #include "CaledonEngine/Systems/Scene/Scene.h"
 #include "CaledonEngine/Systems/Scene/SceneSubsystem.h"
 #include "CaledonEngine/Systems/Scene/Transform.h"
+#include "CaledonEngine/Systems/Module/ComponentRegistry.h"
 #include "CaledonEngine/Systems/Window/Window.h"
 #include "CaledonEngine/Systems/Window/WindowSubsystem.h"
 
 #include <memory>
+#include <string>
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -38,25 +41,35 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 
 	SceneSubsystem* pScenes = context.Get<SceneSubsystem>();
 	WindowSubsystem* pWindowSubsystem = context.Get<WindowSubsystem>();
-	if (!pScenes || !pWindowSubsystem || !pWindowSubsystem->GetWindow())
+	ComponentRegistry* pRegistry = context.Get<ComponentRegistry>();
+	if (!pScenes || !pRegistry || !pWindowSubsystem || !pWindowSubsystem->GetWindow())
 	{
-		CE_LOG(context, LogLevel::Error, "SceneSandbox", "Needs the Window and Scene subsystems.");
+		CE_LOG(context, LogLevel::Error, "SceneSandbox", "Needs the Window, Scene and ComponentRegistry subsystems. Register it after them");
 		return false;
 	}
 
 	const Window& window = *pWindowSubsystem->GetWindow();
 
-	// Create Player GameObject
+	auto pSpriteComponent = std::make_unique<SpriteComponent>();
+	pSpriteComponent->SetSprite(Sprite::CreateFromShape(std::make_unique<Circle>(Color::Yellow(), 50)));
+
 	auto pGameObject = std::make_unique<GameObject>();
 	pGameObject->SetName("Player");
 	pGameObject->GetTransform().SetPosition({ window.GetWidth() / 2.0f, window.GetHeight() / 2.0f });
-
-	// 1. Add Sprite Component
-	auto pSpriteComponent = std::make_unique<SpriteComponent>();
-	pSpriteComponent->SetSprite(Sprite::CreateFromShape(std::make_unique<Circle>(Color::Yellow(), 50)));
 	pGameObject->AddComponent(std::move(pSpriteComponent));
 
-	// Create Scene and add GameObject
+	// Game-side components come from the module and are created by name; the Game never links against them.
+	for (const char* pName : { "MovementComponent", "PacmanController" })
+	{
+		std::unique_ptr<Component> pComponent = pRegistry->Create(pName);
+		if (!pComponent)
+		{
+			CE_LOG(context, LogLevel::Error, "SceneSandbox", std::string{ "The module did not register '" } + pName + "'");
+			return false;
+		}
+		pGameObject->AddComponent(std::move(pComponent));
+	}
+
 	auto pScene = std::make_unique<Scene>();
 	pScene->SetName("Sandbox");
 	pScene->AddGameObject(std::move(pGameObject));
@@ -69,7 +82,7 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 
 	pScenes->AddScene(std::move(pScene));
 
-	CE_LOG(context, LogLevel::Display, "SceneSandbox", "Test scene ready with visible object (Milestone 2 complete)");
+	CE_LOG(context, LogLevel::Display, "SceneSandbox", "Test scene ready (Player)");
 	return true;
 }
 
