@@ -6,7 +6,7 @@
 
 #include "CaledonEngine/Systems/Engine/EngineManager.h"
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
-#include "CaledonEngine/Systems/Window/WindowSubsystem.H"
+#include "CaledonEngine/Systems/Window/WindowSubsystem.h"
 #include "CaledonEngine/Systems/Input/InputManager.h"
 #include "CaledonEngine/Systems/Module/ComponentRegistry.h"
 #include "CaledonEngine/Systems/Module/ModuleSubsystem.h"

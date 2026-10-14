@@ -1,5 +1,5 @@
 /*------------------------------
-| File: ComponentRegistry.h
+| File: DynamicLibrary.h
 | Author: Chandler Mays
 ------------------------------*/
 #pragma once

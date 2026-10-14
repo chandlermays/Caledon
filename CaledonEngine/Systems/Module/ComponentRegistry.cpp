@@ -20,7 +20,7 @@ std::string_view CaledonEngine::ComponentRegistry::Name() const noexcept
 /*--------------------------------------------------------------------------
 | --- Initialize:
 --------------------------------------------------------------------------*/
-bool CaledonEngine::ComponentRegistry::Initialize(EngineContext& context)
+bool CaledonEngine::ComponentRegistry::Initialize([[maybe_unused]] EngineContext& context)
 {
 	//...
 	return true;

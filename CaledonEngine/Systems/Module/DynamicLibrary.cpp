@@ -9,9 +9,9 @@
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
-/*--------------------------------------------------------------------------
-| --- Constructor: Constructs the PacmanController with default values --- |
---------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------
+| --- Constructor: Constructs the DynamicLibrary with default values --- |
+------------------------------------------------------------------------*/
 CaledonEngine::DynamicLibrary::DynamicLibrary()
     : m_pHandle{ nullptr }
     , m_lastError{ 0 }

@@ -62,7 +62,11 @@ void PacmanModule::PacmanController::SetInputActions(std::shared_ptr<PacmanInput
 ------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 {
+	if (value == 0.0f)
+		return;
+
 	m_horizontalInput = value;
+	m_verticalInput = 0.0f;
 	UpdateMovement();
 }
 
@@ -71,7 +75,11 @@ void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 ------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::OnMoveVertical(float value)
 {
+	if (value == 0.0f)
+		return;
+
 	m_verticalInput = value;
+	m_horizontalInput = 0.0f;
 	UpdateMovement();
 }
 

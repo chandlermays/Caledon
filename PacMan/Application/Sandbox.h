@@ -5,6 +5,7 @@
 #pragma once
 #include "CaledonEngine/Systems/Engine/ISubsystem.h"
 
+#include <memory>
 #include <string_view>
 
 namespace CaledonEngine
