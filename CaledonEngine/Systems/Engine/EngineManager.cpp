@@ -4,6 +4,7 @@
 ------------------------------*/
 #include "EngineManager.h"
 
+#include "../Engine/FixedTimestep.h"
 #include "../Engine/LoggingSubsystem.h"
 
 #include <algorithm>
@@ -19,9 +20,10 @@
 -------------------------------------------------------------------------*/
 CaledonEngine::EngineManager::EngineManager(const EngineConfig& config)
 	: m_context{ config }
-	, m_entries{}
-	, m_pUpdatables{}
-	, m_pRenderables{}
+	, m_entries{ }
+	, m_pFixedUpdatables{ }
+	, m_pUpdatables{ }
+	, m_pRenderables{ }
 	, m_state{ State::Created }
 {}
 
@@ -91,6 +93,10 @@ void CaledonEngine::EngineManager::Run()
 		? std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(1.0 / config.targetFps))
 		: Clock::duration::zero();
 
+	// Fixed-rate simulation (physics). Disabled entirely when fixedUpdateHz is 0.
+	FixedTimestep fixedTimestep{ (config.fixedUpdateHz > 0) ? 1.0 / config.fixedUpdateHz : 0.0, static_cast<int>(config.maxFixedStepsPerFrame) };
+	const float fixedDeltaTime = static_cast<float>(fixedTimestep.Step());
+
 	m_state = State::Running;
 
 	std::uint64_t frameCount = 0;
@@ -103,6 +109,14 @@ void CaledonEngine::EngineManager::Run()
 		lastFrameStart = frameStart;
 
 		const float deltaTime = std::min(rawDeltaTime, config.maxFrameTimeSeconds);
+
+		// Fixed steps first, so Update sees the freshest physics state and anything it changes
+		// (velocities, forces) is simulated on the next fixed step.
+		const int fixedSteps = fixedTimestep.Advance(deltaTime);
+		for (int i = 0; i < fixedSteps && !m_context.IsQuitRequested(); ++i)
+		{
+			FixedUpdate(fixedDeltaTime);
+		}
 
 		Update(deltaTime);
 		Render();
@@ -137,6 +151,7 @@ void CaledonEngine::EngineManager::Shutdown() noexcept
 	m_state = State::Shutdown;
 
 	// These point into the entries below, so they go first.
+	m_pFixedUpdatables.clear();
 	m_pUpdatables.clear();
 	m_pRenderables.clear();
 
@@ -175,7 +190,7 @@ CaledonEngine::EngineContext& CaledonEngine::EngineManager::Context() noexcept
 /*---------------------------------------------------------------------------------------
 | --- AddSubsystem:
 ---------------------------------------------------------------------------------------*/
-bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSubsystem, IUpdatable* pUpdatable, IRenderable* pRenderable)
+bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSubsystem, IFixedUpdatable* pFixedUpdatable, IUpdatable* pUpdatable, IRenderable* pRenderable)
 {
 	if (m_state != State::Created || !pSubsystem)
 		return false;
@@ -194,6 +209,9 @@ bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSub
 
 	m_entries.push_back(SubsystemEntry{ std::move(pSubsystem), false });
 
+	if (pFixedUpdatable)
+		m_pFixedUpdatables.push_back(pFixedUpdatable);
+
 	if (pUpdatable)
 		m_pUpdatables.push_back(pUpdatable);
 
@@ -201,6 +219,17 @@ bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSub
 		m_pRenderables.push_back(pRenderable);
 
 	return true;
+}
+
+/*---------------------------------------------------------------------------------------
+| --- FixedUpdate: 
+---------------------------------------------------------------------------------------*/
+void CaledonEngine::EngineManager::FixedUpdate(float fixedDeltaTime)
+{
+	for (IFixedUpdatable* pFixedUpdatable : m_pFixedUpdatables)
+	{
+		pFixedUpdatable->FixedUpdate(fixedDeltaTime);
+	}
 }
 
 /*---------------------------------------------------------------------------------------

@@ -35,9 +35,6 @@
     <Filter Include="Source Files\Systems\Rendering\Shapes">
       <UniqueIdentifier>{c8c82350-3c53-4344-89f6-1c48093b29cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Components">
-      <UniqueIdentifier>{43651887-2a2f-4731-8299-0b4dfa6b559d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Systems\Scene">
       <UniqueIdentifier>{d4423b82-022b-4d93-9418-a6c713fbf3fa}</UniqueIdentifier>
     </Filter>
@@ -49,6 +46,30 @@
     </Filter>
     <Filter Include="Source Files\Systems\Module">
       <UniqueIdentifier>{2156c0d2-7642-40bf-a823-b8667f1f9c5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics">
+      <UniqueIdentifier>{c74962df-4526-405e-8981-deaa1de07442}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics\Components">
+      <UniqueIdentifier>{882e9b8e-8049-47f7-bc18-2d2d206e9733}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Rendering\Components">
+      <UniqueIdentifier>{16cb4382-1739-4f1e-a8ac-f5f263c65c69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics\Materials">
+      <UniqueIdentifier>{1cb199b9-7d67-478e-ae30-54e30ecb4a37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics\Types">
+      <UniqueIdentifier>{5f1ddfe2-093e-4507-87ae-13bb9a06099c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics\Queries">
+      <UniqueIdentifier>{1d86a19d-aac5-4539-95ca-793582f7ec4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Systems\Physics\Events">
+      <UniqueIdentifier>{580a39a9-04c2-4e88-9d1f-1dc4ce59897d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Utilities\Geometry">
+      <UniqueIdentifier>{97a45528-7dc5-463d-a598-69acc0381ef6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -136,9 +157,6 @@
     <ClInclude Include="API\SDL\SDLTexture.h">
       <Filter>Source Files\API\SDL</Filter>
     </ClInclude>
-    <ClInclude Include="Components\SpriteComponent.h">
-      <Filter>Source Files\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Systems\Rendering\Renderer.h">
       <Filter>Source Files\Systems\Rendering</Filter>
     </ClInclude>
@@ -146,9 +164,6 @@
       <Filter>Source Files\Systems\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\Math\Constants.h">
-      <Filter>Source Files\Utilities\Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities\Math\Rect.h">
       <Filter>Source Files\Utilities\Math</Filter>
     </ClInclude>
     <ClInclude Include="Utilities\Math\Vector2.h">
@@ -186,6 +201,87 @@
     </ClInclude>
     <ClInclude Include="Systems\Module\ModuleSubsystem.h">
       <Filter>Source Files\Systems\Module</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Physics2DSubsystem.h">
+      <Filter>Source Files\Systems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\SpriteComponent.h">
+      <Filter>Source Files\Systems\Rendering\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Rendering\Components\SpriteComponent.h">
+      <Filter>Source Files\Systems\Rendering\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodyType2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodyConstraints2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodyInterpolation2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodySleepMode2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\CollisionDetectionMode2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\ForceMode2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\ColliderDistance2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\SlideConfig2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\SlideResults2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Materials\PhysicsMaterial2D.h">
+      <Filter>Source Files\Systems\Physics\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Materials\PhysicsMaterialCombine2D.h">
+      <Filter>Source Files\Systems\Physics\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\Collider2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\BoxCollider2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\CircleCollider2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\RigidBody2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\IFixedUpdatable.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Engine\FixedTimestep.h">
+      <Filter>Source Files\Systems\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Geometry\AABB2D.h">
+      <Filter>Source Files\Utilities\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities\Geometry\Rect.h">
+      <Filter>Source Files\Utilities\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Events\Collision2D.h">
+      <Filter>Source Files\Systems\Physics\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Events\ContactPoint2D.h">
+      <Filter>Source Files\Systems\Physics\Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Queries\ColliderHit2D.h">
+      <Filter>Source Files\Systems\Physics\Queries</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Queries\ContactFilter2D.h">
+      <Filter>Source Files\Systems\Physics\Queries</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Scene\LayerMask.h">
+      <Filter>Source Files\Systems\Scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -255,9 +351,6 @@
     <ClCompile Include="Systems\Window\Window.cpp">
       <Filter>Source Files\Systems\Window</Filter>
     </ClCompile>
-    <ClCompile Include="Components\SpriteComponent.cpp">
-      <Filter>Source Files\Components</Filter>
-    </ClCompile>
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp">
       <Filter>Source Files\Systems\Rendering</Filter>
     </ClCompile>
@@ -287,6 +380,30 @@
     </ClCompile>
     <ClCompile Include="Systems\Module\ModuleSubsystem.cpp">
       <Filter>Source Files\Systems\Module</Filter>
+    </ClCompile>
+    <ClCompile Include="Components\SpriteComponent.cpp">
+      <Filter>Source Files\Systems\Rendering\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp">
+      <Filter>Source Files\Systems\Rendering\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Materials\PhysicsMaterial2D.cpp">
+      <Filter>Source Files\Systems\Physics\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\Collider2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\BoxCollider2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\CircleCollider2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\RigidBody2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Physics2DSubsystem.cpp">
+      <Filter>Source Files\Systems\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

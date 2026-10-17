@@ -6,6 +6,7 @@
 #include "EngineConfig.h"
 #include "EngineContext.h"
 #include "ISubsystem.h"
+#include "IFixedUpdatable.h"
 #include "IUpdatable.h"
 #include "IRenderable.h"
 
@@ -34,11 +35,13 @@ namespace CaledonEngine
 
 		EngineContext m_context;
 		std::vector<SubsystemEntry> m_entries;
+		std::vector<IFixedUpdatable*> m_pFixedUpdatables;
 		std::vector<IUpdatable*> m_pUpdatables;
 		std::vector<IRenderable*> m_pRenderables;
 		State m_state;
 
-		bool AddSubsystem(std::unique_ptr<ISubsystem> pSubsystem, IUpdatable* pUpdatable, IRenderable* pRenderable);
+		bool AddSubsystem(std::unique_ptr<ISubsystem> pSubsystem, IFixedUpdatable* pFixedUpdatable, IUpdatable* pUpdatable, IRenderable* pRenderable);
+		void FixedUpdate(float fixedDeltaTime);
 		void Update(float deltaTime);
 		void Render();
 
@@ -55,11 +58,15 @@ namespace CaledonEngine
 		{
 			static_assert(std::is_base_of_v<ISubsystem, T>, "RegisterSubsystem: T must derive from ISubsystem");
 
+			IFixedUpdatable* pFixedUpdatable = nullptr;
 			IUpdatable* pUpdatable = nullptr;
 			IRenderable* pRenderable = nullptr;
 
 			if (pSubsystem)
 			{
+				if constexpr (std::is_base_of_v<IFixedUpdatable, T>)
+					pFixedUpdatable = static_cast<IFixedUpdatable*>(pSubsystem.get());
+
 				if constexpr (std::is_base_of_v<IUpdatable, T>)
 					pUpdatable = static_cast<IUpdatable*>(pSubsystem.get());
 
@@ -67,7 +74,7 @@ namespace CaledonEngine
 					pRenderable = static_cast<IRenderable*>(pSubsystem.get());
 			}
 
-			return AddSubsystem(std::move(pSubsystem), pUpdatable, pRenderable);
+			return AddSubsystem(std::move(pSubsystem), pFixedUpdatable, pUpdatable, pRenderable);
 		}
 
 		bool Initialize();
