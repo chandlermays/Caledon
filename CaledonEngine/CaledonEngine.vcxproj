@@ -46,9 +46,12 @@
     <ClInclude Include="Systems\Physics\Components\BoxCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\CircleCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\Collider2D.h" />
+    <ClInclude Include="Systems\Physics\Components\CompositeCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\RigidBody2D.h" />
     <ClInclude Include="Systems\Physics\Events\Collision2D.h" />
     <ClInclude Include="Systems\Physics\Events\ContactPoint2D.h" />
+    <ClInclude Include="Systems\Physics\LayerMask.h" />
+    <ClInclude Include="Systems\Physics\LayerRegistry.h" />
     <ClInclude Include="Systems\Physics\Materials\PhysicsMaterial2D.h" />
     <ClInclude Include="Systems\Physics\Materials\PhysicsMaterialCombine2D.h" />
     <ClInclude Include="Systems\Physics\Queries\ColliderHit2D.h" />
@@ -60,6 +63,8 @@
     <ClInclude Include="Systems\Physics\Types\ColliderDistance2D.h" />
     <ClInclude Include="Systems\Physics\Types\CollisionDetectionMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\ForceMode2D.h" />
+    <ClInclude Include="Systems\Physics\Types\GenerationType.h" />
+    <ClInclude Include="Systems\Physics\Types\GeometryType.h" />
     <ClInclude Include="Systems\Physics\Types\SlideConfig2D.h" />
     <ClInclude Include="Systems\Physics\Types\SlideResults2D.h" />
     <ClInclude Include="Systems\Physics\Physics2DSubsystem.h" />
@@ -112,8 +117,12 @@
     <ClCompile Include="Systems\Physics\Components\CircleCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\Collider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\RigidBody2D.cpp" />
+    <ClCompile Include="Systems\Physics\Events\Collision2D.cpp" />
+    <ClCompile Include="Systems\Physics\LayerMask.cpp" />
+    <ClCompile Include="Systems\Physics\LayerRegistry.cpp" />
     <ClCompile Include="Systems\Physics\Materials\PhysicsMaterial2D.cpp" />
     <ClCompile Include="Systems\Physics\Physics2DSubsystem.cpp" />
+    <ClCompile Include="Systems\Physics\Queries\ColliderHit2D.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
     <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />

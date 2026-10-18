@@ -4,25 +4,37 @@
 ------------------------------*/
 #pragma once
 
+#include "Utilities/Math/Vector2.h"
+
 // Details about a specific point of contact involved in a 2D physics collision
 // A contact point described a point of intersection between two Collider2D
+//
+// 'collider', 'otherCollider', 'rigidbody' and 'otherRigidbody' are non-owning pointers into the Scene, valid for the
+// duration of the callback that delivered this contact. Don't keep a ContactPoint2D across frames.
 
 namespace CaledonEngine
 {
+	class Collider2D;
+	class RigidBody2D;
+
 	struct ContactPoint2D
 	{
-//		Collider2D m_collider;						// The incoming Collider2D involved in the collision with the otherCollider
-//		Collider2D m_otherCollider;					// The other Collider2D involved in the collision with the collider
-//		RigidBody2D m_rigidbody;					// The incoming Rigidbody2D involved in the collision with the otherRigidbody
-//		RigidBody2D m_otherRigidbody;				// The other Rigidbody2D involved in the collision with the rigidbody
-//		Vector2 m_normal;							// Surface normal at the contact point
-//		Vector2 m_point;							// The point of contact between the two colliders in world space
-//		Vector2 m_relativeVelocity;					// Gets the relative velocity of the two colliders at the contact point
-//		float m_bounciness;							// The effective bounciness used for the ContactPoint2D
-//		float friction;								// The effective friction used for the ContactPoint2D
-//		float m_normalImpulse;						// Gets the impulse applied at the contact point along the ContactPoint2D.normal
-//		float m_separation;							// Gets the distance between the colliders at the contact point
-//		float m_tangentImpulse;						// Gets the impulse applied at the contact point which is perpendicular to the ContactPoint2D.normal
-//		bool m_enabled;								// Indicates whether the collision response or reaction is enabled or disabled
+		Collider2D* pCollider = nullptr;													// 
+		Collider2D* pOtherCollider = nullptr;												// 
+
+		RigidBody2D* pRigidBody = nullptr;													// 
+		RigidBody2D* pOtherRigidBody = nullptr;												// 
+
+		Vector2f normal{};																	// 
+		Vector2f point{};																	// 
+		Vector2f relativeVelocity{};														// 
+
+		float bounciness = 0.0f;															// 
+		float friction = 0.0f;																// 
+		float normalImpulse = 0.0f;															// 
+		float separation = 0.0f;															// 
+		float tangentImpulse = 0.0f;														// 
+
+		bool enabled = true;																// 
 	};
 }

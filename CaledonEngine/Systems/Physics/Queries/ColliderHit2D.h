@@ -4,21 +4,32 @@
 ------------------------------*/
 #pragma once
 
-// Returns information about 2D Colliders detected by a 2D physics query in the scene
-// It contains many pieces of information about a detection result including the Collider2D detected
-// Always first check to see if it contains a valid result which indicates that a hit (intersection) was detected
+#include "Utilities/Math/Vector2.h"
+
+// Stores the results of a 2D physics query, including the detected Collider2D.
+// Always check for a valid result before accessing hit information.
+// ColliderHit2D is a short-lived snapshot; its non-owning collider and rigidbody pointers
+// may become invalid if the referenced objects are destroyed, so don't retain hits across frames.
 
 namespace CaledonEngine
 {
+	class Collider2D;
+	class RigidBody2D;
+	class Transform;
+
 	struct ColliderHit2D
 	{
-//		Vector2 centroid					// The world space centroid(center) of the physics query shape when it intersects
-//		Collider2D collider					// The Collider2D detected by the physics query
-//		float distance						// The distance the physics query traversed before it detected a Collider2D
-//		float fraction						// The fraction of the distance specified to the physics query before it detected a Collider2D
-//		Vector2 normal						// The surface normal of the detected Collider2D
-//		Vector2 point						// The world space position where the physics query shape intersected with the detected Collider2D surface
-//		RigidBody2D rigidbody				// The Rigidbody2D that the Collider2D detected by the physics query is attached to
-//		Transform transform					// The Transform on the GameObject that the Collider2D is attached to
+		Vector2f centroid{ };																// 
+		Collider2D* pCollider = nullptr;													// 
+		float distance = 0.0f;																// 
+		float fraction = 0.0f;																// 
+		Vector2f normal{ };																	// 
+		Vector2f point{ };																	// 
+		RigidBody2D* pRigidBody = nullptr;													// 
+
+		bool IsValid() const noexcept { return pCollider != nullptr; }						//
+		explicit operator bool() const noexcept { return IsValid(); }						// 
+
+		Transform* GetTransform() const noexcept;											// 
 	};
 }

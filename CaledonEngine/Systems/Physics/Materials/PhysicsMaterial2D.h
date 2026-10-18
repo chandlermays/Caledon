@@ -5,13 +5,10 @@
 #pragma once
 #include "PhysicsMaterialCombine2D.h"
 
-// Defines the surface properties of a Collider2D.
-// When two Collider2D come into contact, the physics system uses both
-// friction and bounciness if it needs to calculate a collision response.
-//
-// Materials are plain shared data: a Collider2D (or RigidBody2D) holds a std::shared_ptr to one, and a collider with no
-// material uses the PhysicsSubsystem's default. There is deliberately no global default here: a static would be a different
-// object in every exe/dll that links the engine library.
+// Defines shared surface properties, including friction and bounciness, used in collision response.
+// Colliders and rigid bodies can share a material via std::shared_ptr.
+// Colliders without a material use the PhysicsSubsystem's default, avoiding a global static
+// that could create separate instances across executables or DLLs.
 
 namespace CaledonEngine
 {

@@ -15,6 +15,7 @@
 #include "Systems/Physics/Types/ForceMode2D.h"
 #include "Systems/Physics/Types/SlideResults2D.h"
 #include "Systems/Physics/Types/SlideConfig2D.h"
+#include "Systems/Physics/LayerMask.h"
 #include "Utilities/Math/Vector2.h"
 
 #include <memory>
@@ -40,10 +41,10 @@ namespace CaledonEngine
 		Vector2f m_centerOfMass;														// the center of mass of this RigidBody2D in local space
 		CollisionDetectionMode2D m_collisionDetectionMode;								// the method used by the physics engine to check if two objects have collided
 		BodyConstraints2D m_constraints;												// controls which degrees of freedom are allowed for the simulation of this RigidBody2D
-		// LayerMask m_excludeLayers;													// the additional Layers that all Collider2D attached to this RigidBody2D should exclude when deciding if a contact with another Collider2D should happen or not
+		LayerMask m_excludeLayers;														// the additional Layers that all Collider2D attached to this RigidBody2D should exclude when deciding if a contact with another Collider2D should happen or not
 		bool m_freezeRotation;															// controls whether physics will change the rotation of the object
 		float m_gravityScale;															// the degree to which this object is affected by gravity
-		// LayerMask m_includeLayers;													// the additional Layers that all Collider2D attached to this RigidBody2D should include when deciding if a contact with another Collider2D should happen or not
+		LayerMask m_includeLayers;														// the additional Layers that all Collider2D attached to this RigidBody2D should include when deciding if a contact with another Collider2D should happen or not
 		float m_inertia;																// the RigidBody's resistance to changes in angular velocity (rotation)
 		BodyInterpolation2D m_interpolation;											// Physics interpolation used between updates
 		float m_linearDamping;															// the linear damping of the RigidBody2D linear velocity

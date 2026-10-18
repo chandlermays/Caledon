@@ -283,6 +283,21 @@
     <ClInclude Include="Systems\Scene\LayerMask.h">
       <Filter>Source Files\Systems\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\LayerMask.h">
+      <Filter>Source Files\Systems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\LayerRegistry.h">
+      <Filter>Source Files\Systems\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\CompositeCollider2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\GenerationType.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\GeometryType.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -404,6 +419,18 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\Physics2DSubsystem.cpp">
       <Filter>Source Files\Systems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\LayerRegistry.cpp">
+      <Filter>Source Files\Systems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\LayerMask.cpp">
+      <Filter>Source Files\Systems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Queries\ColliderHit2D.cpp">
+      <Filter>Source Files\Systems\Physics\Queries</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Events\Collision2D.cpp">
+      <Filter>Source Files\Systems\Physics\Events</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
