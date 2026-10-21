@@ -56,12 +56,18 @@
     <ClInclude Include="Systems\Physics\Materials\PhysicsMaterialCombine2D.h" />
     <ClInclude Include="Systems\Physics\Queries\ColliderHit2D.h" />
     <ClInclude Include="Systems\Physics\Queries\ContactFilter2D.h" />
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShape2D.h" />
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.h" />
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeType2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodyConstraints2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodyInterpolation2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodySleepMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodyType2D.h" />
+    <ClInclude Include="Systems\Physics\Types\CapsuleDirection2D.h" />
     <ClInclude Include="Systems\Physics\Types\ColliderDistance2D.h" />
+    <ClInclude Include="Systems\Physics\Types\ColliderErrorState2D.h" />
     <ClInclude Include="Systems\Physics\Types\CollisionDetectionMode2D.h" />
+    <ClInclude Include="Systems\Physics\Types\CompositeOperation.h" />
     <ClInclude Include="Systems\Physics\Types\ForceMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\GenerationType.h" />
     <ClInclude Include="Systems\Physics\Types\GeometryType.h" />
@@ -116,6 +122,7 @@
     <ClCompile Include="Systems\Physics\Components\BoxCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\CircleCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\Collider2D.cpp" />
+    <ClCompile Include="Systems\Physics\Components\CompositeCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\RigidBody2D.cpp" />
     <ClCompile Include="Systems\Physics\Events\Collision2D.cpp" />
     <ClCompile Include="Systems\Physics\LayerMask.cpp" />
@@ -123,6 +130,7 @@
     <ClCompile Include="Systems\Physics\Materials\PhysicsMaterial2D.cpp" />
     <ClCompile Include="Systems\Physics\Physics2DSubsystem.cpp" />
     <ClCompile Include="Systems\Physics\Queries\ColliderHit2D.cpp" />
+    <ClCompile Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
     <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />

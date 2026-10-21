@@ -13,5 +13,7 @@ namespace CaledonEngine
 	{
 		Synchronous,				// Update synchronously immediately when a Collider used by the Composite Collider changes
 		Manual						// Do not automatically update when a Collider used by the Composite Collider changes
+
+		// ..expand for Caledon's capabilities
 	};
 }

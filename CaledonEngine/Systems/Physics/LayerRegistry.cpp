@@ -2,6 +2,7 @@
 | File: LayerRegistry.cpp
 | Author: Chandler Mays
 ------------------------------*/
+
 #include "LayerRegistry.h"
 #include "../Engine/EngineContext.h"
 #include "../Engine/LoggingSubsystem.h"

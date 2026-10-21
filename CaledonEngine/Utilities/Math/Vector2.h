@@ -180,7 +180,7 @@ namespace CaledonEngine
 		-----------------------------------------------------------------------------*/
 		inline Vector2 Rotate(const T angleDegrees) const
 		{
-			T radians = angleDegrees * static_cast<T>(CaledonEngine::Math::DEG2RAD);
+			T radians = angleDegrees * static_cast<T>(CaledonEngine::Math::Deg2Rad);
 			T cosA = static_cast<T>(std::cos(radians));
 			T sinA = static_cast<T>(std::sin(radians));
 
@@ -192,7 +192,7 @@ namespace CaledonEngine
 		--------------------------------------------------------------------------*/
 		static inline T Angle(const Vector2& from, const Vector2& to)
 		{
-			return std::acos(Dot(from, to) / (from.Magnitude() * to.Magnitude())) * static_cast<T>(CaledonEngine::Math::RAD2DEG);
+			return std::acos(Dot(from, to) / (from.Magnitude() * to.Magnitude())) * static_cast<T>(CaledonEngine::Math::Rad2Deg);
 		}
 
 		/*------------------------------------------------------------------------------

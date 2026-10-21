@@ -71,6 +71,9 @@
     <Filter Include="Source Files\Utilities\Geometry">
       <UniqueIdentifier>{97a45528-7dc5-463d-a598-69acc0381ef6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Systems\Physics\Shapes">
+      <UniqueIdentifier>{4651ffcf-5a61-4f93-aa64-c9f0982fa5e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Systems\Engine\EngineManager.h">
@@ -298,6 +301,24 @@
     <ClInclude Include="Systems\Physics\Types\GeometryType.h">
       <Filter>Source Files\Systems\Physics\Types</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShape2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeType2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\CapsuleDirection2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\ColliderErrorState2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\CompositeOperation.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -431,6 +452,12 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\Events\Collision2D.cpp">
       <Filter>Source Files\Systems\Physics\Events</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\CompositeCollider2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

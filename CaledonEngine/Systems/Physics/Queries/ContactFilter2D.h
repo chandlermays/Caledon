@@ -155,7 +155,7 @@ namespace CaledonEngine
 		---------------------------------------------------------------------------------------*/
 		bool IsFilteringNormalAngle(const Vector2f& normal) const noexcept
 		{
-			return IsFilteringNormalAngle(std::atan2(normal.y, normal.x) * Math::RAD2DEG);
+			return IsFilteringNormalAngle(std::atan2(normal.y, normal.x) * Math::Rad2Deg);
 		}
 
 		/*---------------------------------------------------------------------------------------
