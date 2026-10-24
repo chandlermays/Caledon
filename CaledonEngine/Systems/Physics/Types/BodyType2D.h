@@ -4,13 +4,15 @@
 ------------------------------*/
 #pragma once
 
+#include <cstdint>
+
 // The physical behavior type of a RigidBody2D.
 // Controls the physical behavior of a RigidBody2D: how it should move, react to forces,
 // and interact with the rest of the physics simulation.
 
 namespace CaledonEngine
 {
-	enum class BodyType2D
+	enum class BodyType2D : uint8_t
 	{
 		// Reacts to gravity and applied forces. Should be moved using forces and never repositioned
 		// explicitly. Collides with all other body types. When an attached Collider2D is set to trigger,

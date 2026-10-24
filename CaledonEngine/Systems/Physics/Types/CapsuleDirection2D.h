@@ -4,11 +4,13 @@
 ------------------------------*/
 #pragma once
 
+#include <cstdint>
+
 // The direction that the capsule sides can extend
 
 namespace CaledonEngine
 {
-	enum CapsuleDirection2D
+	enum class CapsuleDirection2D : uint8_t
 	{
 		Horizontal,
 		Vertical

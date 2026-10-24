@@ -16,7 +16,7 @@
 /*----------------------------------------------------------------------
 | --- Constructor: Constructs the InputManager with default values --- |
 ----------------------------------------------------------------------*/
-CaledonEngine::InputManager::InputManager()
+CaledonEngine::InputSubsystem::InputSubsystem()
 	: m_pInputAPI{ nullptr }
 	, m_pInputActions{ nullptr }
 	, m_pContext{ nullptr }
@@ -25,7 +25,7 @@ CaledonEngine::InputManager::InputManager()
 /*---------------------------------------------------------------------------------------
 | --- Name:
 ---------------------------------------------------------------------------------------*/
-std::string_view CaledonEngine::InputManager::Name() const noexcept
+std::string_view CaledonEngine::InputSubsystem::Name() const noexcept
 {
 	return kName;
 }
@@ -33,7 +33,7 @@ std::string_view CaledonEngine::InputManager::Name() const noexcept
 /*---------------------------------------------------------------------------------------
 | --- Initiailze:
 ---------------------------------------------------------------------------------------*/
-bool CaledonEngine::InputManager::Initialize(EngineContext& context)
+bool CaledonEngine::InputSubsystem::Initialize(EngineContext& context)
 {
 	m_pInputAPI = std::make_unique<SDLInput>();
 	if (!m_pInputAPI->Initialize())
@@ -50,7 +50,7 @@ bool CaledonEngine::InputManager::Initialize(EngineContext& context)
 /*---------------------------------------------------------------------------------------
 | --- Shutdown:
 ---------------------------------------------------------------------------------------*/
-void CaledonEngine::InputManager::Shutdown() noexcept
+void CaledonEngine::InputSubsystem::Shutdown() noexcept
 {
 	if (m_pInputAPI)
 	{
@@ -64,7 +64,7 @@ void CaledonEngine::InputManager::Shutdown() noexcept
 /*---------------------------------------------------------------------------------------
 | --- Update:
 ---------------------------------------------------------------------------------------*/
-void CaledonEngine::InputManager::Update([[maybe_unused]] float deltaTime)
+void CaledonEngine::InputSubsystem::Update([[maybe_unused]] float deltaTime)
 {
 	if (ProcessEvents() && m_pContext)
 	{
@@ -76,7 +76,7 @@ void CaledonEngine::InputManager::Update([[maybe_unused]] float deltaTime)
 /*---------------------------------------------------------------------------------------
 | --- ProcessEvents:
 ---------------------------------------------------------------------------------------*/
-bool CaledonEngine::InputManager::ProcessEvents()
+bool CaledonEngine::InputSubsystem::ProcessEvents()
 {
 	if (m_pInputAPI)
 	{
@@ -94,7 +94,7 @@ bool CaledonEngine::InputManager::ProcessEvents()
 /*---------------------------------------------------------------------------------------
 | --- SetInputActions:
 ---------------------------------------------------------------------------------------*/
-void CaledonEngine::InputManager::SetInputActions(InputActions* pInputActions)
+void CaledonEngine::InputSubsystem::SetInputActions(InputActions* pInputActions)
 {
 	m_pInputActions = pInputActions;
 }
@@ -102,7 +102,7 @@ void CaledonEngine::InputManager::SetInputActions(InputActions* pInputActions)
 /*---------------------------------------------------------------------------------------
 | --- GetInputAPI:
 ---------------------------------------------------------------------------------------*/
-CaledonEngine::Input* CaledonEngine::InputManager::GetInputAPI() const
+CaledonEngine::Input* CaledonEngine::InputSubsystem::GetInputAPI() const
 {
 	return m_pInputAPI.get();
 }
@@ -110,7 +110,7 @@ CaledonEngine::Input* CaledonEngine::InputManager::GetInputAPI() const
 /*---------------------------------------------------------------------------------------
 | --- GetInputActions:
 ---------------------------------------------------------------------------------------*/
-CaledonEngine::InputActions* CaledonEngine::InputManager::GetInputActions() const
+CaledonEngine::InputActions* CaledonEngine::InputSubsystem::GetInputActions() const
 {
 	return m_pInputActions;
 }
@@ -123,7 +123,7 @@ CaledonEngine::InputActions* CaledonEngine::InputManager::GetInputActions() cons
 /*---------------------------------------------------------------------------------------
 | --- ProcessInputActions:
 ---------------------------------------------------------------------------------------*/
-void CaledonEngine::InputManager::ProcessInputActions()
+void CaledonEngine::InputSubsystem::ProcessInputActions()
 {
 	if (!m_pInputActions || !m_pInputActions->IsEnabled())
 		return;
@@ -146,7 +146,7 @@ void CaledonEngine::InputManager::ProcessInputActions()
 /*---------------------------------------------------------------------------------------
 | --- ProcessAction:
 ---------------------------------------------------------------------------------------*/
-void CaledonEngine::InputManager::ProcessAction(InputAction* pAction)
+void CaledonEngine::InputSubsystem::ProcessAction(InputAction* pAction)
 {
 	if (!pAction || !pAction->IsEnabled())
 		return;
@@ -180,7 +180,7 @@ void CaledonEngine::InputManager::ProcessAction(InputAction* pAction)
 /*---------------------------------------------------------------------------------------
 | --- CalculateAxisValue:
 ---------------------------------------------------------------------------------------*/
-float CaledonEngine::InputManager::CalculateAxisValue(InputAction* pAction)
+float CaledonEngine::InputSubsystem::CalculateAxisValue(InputAction* pAction)
 {
 	if (!pAction || !m_pInputAPI)
 		return 0.0f;

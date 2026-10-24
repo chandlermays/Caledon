@@ -43,7 +43,7 @@ bool Game::Application::Initialize()
 	// Registration order IS initialization order (shutdown runs in reverse).
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::LoggingSubsystem>()))						return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::WindowSubsystem>()))						return false;
-	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputManager>()))							return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputSubsystem>()))							return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::RenderingSubsystem>()))					return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::ComponentRegistry>()))						return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::ModuleSubsystem>("PacManModule.dll")))		return false;

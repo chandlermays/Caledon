@@ -11,7 +11,7 @@ namespace CaledonEngine
 {
 	class EngineContext;
 
-	class InputManager : public ISubsystem, public IUpdatable
+	class InputSubsystem : public ISubsystem, public IUpdatable
 	{
 	private:
 		std::unique_ptr<Input> m_pInputAPI;										//
@@ -25,12 +25,12 @@ namespace CaledonEngine
 	public:
 		static constexpr std::string_view kName = "Input";						//
 
-		InputManager();															// Constructor
-		~InputManager() override = default;										// Destructor
-		InputManager(const InputManager&) = delete;								// Prevent copy-construction
-		InputManager& operator=(const InputManager&) = delete;					// Prevent copy-assignment
-		InputManager(InputManager&&) = delete;									// Prevent move-construction
-		InputManager& operator=(InputManager&&) = delete;						// Prevent move-assignment
+		InputSubsystem();														// Constructor
+		~InputSubsystem() override = default;									// Destructor
+		InputSubsystem(const InputSubsystem&) = delete;							// Prevent copy-construction
+		InputSubsystem& operator=(const InputSubsystem&) = delete;				// Prevent copy-assignment
+		InputSubsystem(InputSubsystem&&) = delete;								// Prevent move-construction
+		InputSubsystem& operator=(InputSubsystem&&) = delete;					// Prevent move-assignment
 
 		std::string_view Name() const noexcept override;						// 
 		bool Initialize(EngineContext& context) override;						//

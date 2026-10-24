@@ -4,11 +4,13 @@
 ------------------------------*/
 #pragma once
 
+#include <cstdint>
+
 // Controls how collisions are detected when a RigidBody2D moves
 
 namespace CaledonEngine
 {
-	enum class CollisionDetectionMode2D
+	enum class CollisionDetectionMode2D : uint8_t
 	{
 		Discrete,			// When a RigidBody2D moves, only collisions at the new position are detected
 		Continuous			// Ensures that all collisions are detected when a RigidBody2D moves

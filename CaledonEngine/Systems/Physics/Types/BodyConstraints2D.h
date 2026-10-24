@@ -4,13 +4,15 @@
 ------------------------------*/
 #pragma once
 
+#include <cstdint>
+
 // Flags used to constrain the motion of a RigidBody2D.
 // This is a bitmask enum - combine flags with bitwise OR (e.g. BodyConstraints2D::FreezePositionX | BodyConstraints2D::FreezeRotation)
 // rather than assigning a single value.
 
 namespace CaledonEngine
 {
-	enum class BodyConstraints2D
+	enum class BodyConstraints2D : uint8_t
 	{
 		None = 0,														// No constraints
 		FreezePositionX = 1 << 0,										// Freeze motion along the X-axis

@@ -100,85 +100,85 @@ namespace CaledonEngine
 		virtual void OnCollisionExit2D(const Collision2D& collision);														// Sent when a collider on another object stops touching this object's collider
 		virtual void OnCollisionStay2D(const Collision2D& collision);														// Sent each frame where a collider on another object is touching this object's collider
 		virtual void OnTriggerEnter2D(const Collision2D& collision);														// Sent when another object enters a trigger collider attached to this object
-		virtual void OnTriggerExit2D(const Collision2D& collision);															// Send when another object leaves a trigger collider attached to this object
+		virtual void OnTriggerExit2D(const Collision2D& collision);															// Sent when another object leaves a trigger collider attached to this object
 		virtual void OnTriggerStay2D(const Collision2D& collision);															// Sent each frame where another object is within a trigger collider attached to this object
 		
-		RigidBody2D* GetAttachedRigidBody() const noexcept																	{ return m_pAttachedRigidBody; }
-		void SetAttachedRigidBody(RigidBody2D* pBody) noexcept																{ m_pAttachedRigidBody = pBody; }
+		RigidBody2D* GetAttachedRigidBody() const noexcept																	{ return m_pAttachedRigidBody; }					// Returns the RigidBody2D attached to this Collider2D
+		void SetAttachedRigidBody(RigidBody2D* pBody) noexcept																{ m_pAttachedRigidBody = pBody; }					// Sets the RigidBody2D attached to this Collider2D
 
-		PhysicsMaterialCombine2D GetBounceCombine() const noexcept															{ return m_bounceCombine; }
-		void SetBounceCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_bounceCombine = combine; }
-		float GetBounciness() const noexcept																				{ return m_bounciness; }
-		void SetBouniness(float bounciness) noexcept																		{ m_bounciness = bounciness; }
+		PhysicsMaterialCombine2D GetBounceCombine() const noexcept															{ return m_bounceCombine; }							// Returns the bounciness combine mode of this Collider2D
+		void SetBounceCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_bounceCombine = combine; }						// Sets the bounciness combine mode of this Collider2D
+		float GetBounciness() const noexcept																				{ return m_bounciness; }							// Returns the bounciness value of this Collider2D
+		void SetBouniness(float bounciness) noexcept																		{ m_bounciness = bounciness; }						// Sets the bounciness value of this Collider2D
 		
-		float GetDensity() const noexcept																					{ return m_density; }
-		void SetDensity(float density) noexcept																				{ m_density = density; }
+		float GetDensity() const noexcept																					{ return m_density; }								// Returns the density value of this Collider2D
+		void SetDensity(float density) noexcept																				{ m_density = density; }							// Sets the density value of this Collider2D
 		
-		float GetFriction() const noexcept																					{ return m_friction; }
-		void SetFriction(float friction) noexcept																			{ m_friction = friction; }
-		PhysicsMaterialCombine2D GetFrictionCombine() const noexcept														{ return m_frictionCombine; }
-		void SetFrictionCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_frictionCombine = combine; }
+		float GetFriction() const noexcept																					{ return m_friction; }								// Returns the friction value of this Collider2D
+		void SetFriction(float friction) noexcept																			{ m_friction = friction; }							// Sets the friction value of this Collider2D
+		PhysicsMaterialCombine2D GetFrictionCombine() const noexcept														{ return m_frictionCombine; }						// Returns the friction combine mode of this Collider2D
+		void SetFrictionCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_frictionCombine = combine; }					// Sets the friction combine mode of this Collider2D
 		
-		bool IsTrigger() const noexcept																						{ return m_isTrigger; }
-		void SetIsTrigger(bool isTrigger) noexcept																			{ m_isTrigger = isTrigger; }
+		bool IsTrigger() const noexcept																						{ return m_isTrigger; }								// Returns whether this Collider2D is a trigger or not
+		void SetIsTrigger(bool isTrigger) noexcept																			{ m_isTrigger = isTrigger; }						// Sets whether this Collider2D is a trigger or not
 		
-		const Vector2f& GetOffset() const noexcept																			{ return m_offset; }
-		void SetOffset(const Vector2f& offset) noexcept																		{ m_offset = offset; }
+		const Vector2f& GetOffset() const noexcept																			{ return m_offset; }								// Returns the local offset of this Collider2D's geometry
+		void SetOffset(const Vector2f& offset) noexcept																		{ m_offset = offset; }								// Sets the local offset of this Collider2D's geometry
 
-		const PhysicsMaterial2D& GetSharedMaterial() const noexcept															{ return m_sharedMaterial; }
-		void SetSharedMaterial(const PhysicsMaterial2D& material);
+		const PhysicsMaterial2D& GetSharedMaterial() const noexcept															{ return m_sharedMaterial; }						// Returns the shared physics material of this Collider2D
+		void SetSharedMaterial(const PhysicsMaterial2D& material);																												// Sets the shared physics material of this Collider2D
 		
-		const LayerMask& GetCallbackLayer() const noexcept																	{ return m_callbackLayers; }
-		void SetCallbackLayers(LayerMask layers) noexcept																	{ m_callbackLayers = layers; }
-		const LayerMask& GetContactCaptureLayers() const noexcept															{ return m_contactCaptureLayers; }
-		void SetContactCaptureLayers(LayerMask layers) noexcept																{ m_contactCaptureLayers = layers; }
-		const LayerMask& GetExcludeLayers() const noexcept																	{ return m_excludeLayers; }
-		void SetExcludeLayers(LayerMask layers) noexcept																	{ m_excludeLayers = layers; }
-		const LayerMask& GetForceReceiveLayers() const noexcept																{ return m_forceReceiveLayers; }
-		void SetForceReceiveLayers(LayerMask layers) noexcept																{ m_forceReceiveLayers = layers; }
-		const LayerMask& GetForceSendLayers() const noexcept																{ return m_forceSendLayers; }
-		void SetForceSendLayers(LayerMask layers) noexcept																	{ m_forceSendLayers = layers; }
-		const LayerMask& GetIncludeLayers() const noexcept																	{ return m_includeLayers; }
-		void SetIncludeLayers(LayerMask layers) noexcept																	{ m_includeLayers = layers; }
-		const LayerMask& GetContactMask() const noexcept																	{ return m_contactMask; }
-		void SetContactMask(LayerMask mask) noexcept																		{ m_contactMask = mask; }
+		const LayerMask& GetCallbackLayer() const noexcept																	{ return m_callbackLayers; }						// Returns the callback layers that this Collider2D will use
+		void SetCallbackLayers(LayerMask layers) noexcept																	{ m_callbackLayers = layers; }						// Sets the callback layers that this Collider2D will use
+		const LayerMask& GetContactCaptureLayers() const noexcept															{ return m_contactCaptureLayers; }					// Returns the contact capture layers that this Collider2D will use
+		void SetContactCaptureLayers(LayerMask layers) noexcept																{ m_contactCaptureLayers = layers; }				// Sets the contact capture layers that this Collider2D will use
+		const LayerMask& GetExcludeLayers() const noexcept																	{ return m_excludeLayers; }							// Returns the exclude layers that this Collider2D will use
+		void SetExcludeLayers(LayerMask layers) noexcept																	{ m_excludeLayers = layers; }						// Sets the exclude layers that this Collider2D will use
+		const LayerMask& GetForceReceiveLayers() const noexcept																{ return m_forceReceiveLayers; }					// Returns the force receive layers that this Collider2D will use
+		void SetForceReceiveLayers(LayerMask layers) noexcept																{ m_forceReceiveLayers = layers; }					// Sets the force receive layers that this Collider2D will use
+		const LayerMask& GetForceSendLayers() const noexcept																{ return m_forceSendLayers; }						// Returns the force send layers that this Collider2D will use
+		void SetForceSendLayers(LayerMask layers) noexcept																	{ m_forceSendLayers = layers; }						// Sets the force send layers that this Collider2D will use
+		const LayerMask& GetIncludeLayers() const noexcept																	{ return m_includeLayers; }							// Returns the include layers that this Collider2D will use
+		void SetIncludeLayers(LayerMask layers) noexcept																	{ m_includeLayers = layers; }						// Sets the include layers that this Collider2D will use
+		const LayerMask& GetContactMask() const noexcept																	{ return m_contactMask; }							// Returns the effective contact mask that this Collider2D will use
+		void SetContactMask(LayerMask mask) noexcept																		{ m_contactMask = mask; }							// Sets the effective contact mask that this Collider2D will use
 
-		CompositeCollider2D* GetComposite() const noexcept																	{ return m_pComposite; }
-		void SetComposite(CompositeCollider2D* pComposite) noexcept															{ m_pComposite = pComposite; }
-		bool IsCompositeCapabale() const noexcept																			{ return m_compositeCapable; }
-		void SetCompositeCapabale(bool capabale) noexcept																	{ m_compositeCapable = capabale; }
-		CompositeOperation GetCompositeOperation() const noexcept															{ return m_compositeOperation; }
-		void SetCompositeOperation(CompositeOperation operation) noexcept													{ m_compositeOperation = operation; }
-		int GetCompositeOrder() const noexcept																				{ return m_compositeOrder; }
-		void SetCompositeOrder(int order) noexcept																			{ m_compositeOrder = order; }
+		CompositeCollider2D* GetComposite() const noexcept																	{ return m_pComposite; }							// Returns the composite collider of this Collider2D
+		void SetComposite(CompositeCollider2D* pComposite) noexcept															{ m_pComposite = pComposite; }						// Sets the composite collider of this Collider2D
+		bool IsCompositeCapabale() const noexcept																			{ return m_compositeCapable; }						// Returns whether this Collider2D is capabale of being composited
+		void SetCompositeCapabale(bool capabale) noexcept																	{ m_compositeCapable = capabale; }					// Sets whether this Collider2D is capabale of being composited
+		CompositeOperation GetCompositeOperation() const noexcept															{ return m_compositeOperation; }					// Returns the composite operation of this Collider2D
+		void SetCompositeOperation(CompositeOperation operation) noexcept													{ m_compositeOperation = operation; }				// Sets the composite operation of this Collider2D
+		int GetCompositeOrder() const noexcept																				{ return m_compositeOrder; }						// Returns the composite order of this Collider2D
+		void SetCompositeOrder(int order) noexcept																			{ m_compositeOrder = order; }						// Sets the composite order of this Collider2D
 		
-		ColliderErrorState2D GetErrorState() const noexcept																	{ return m_errorState; }
-		int GetLayerOverridePriority() const noexcept																		{ return m_layerOverridePriority; }
-		void SetLayerOverridePriority(int priority) noexcept																{ m_layerOverridePriority = priority; }
-		int GetShapeCount() const noexcept																					{ return m_shapeCount; }
-		const AABB2D& GetBounds() const noexcept																			{ return m_bounds; }
+		ColliderErrorState2D GetErrorState() const noexcept																	{ return m_errorState; }							// Returns the shape creation error state of this Collider2D
+		int GetLayerOverridePriority() const noexcept																		{ return m_layerOverridePriority; }					// Returns the layer override priority of this Collider2D
+		void SetLayerOverridePriority(int priority) noexcept																{ m_layerOverridePriority = priority; }				// Sets the layer override priority of this Collider2D
+		int GetShapeCount() const noexcept																					{ return m_shapeCount; }							// Returns the number of active shapes of this Collider2D
+		const AABB2D& GetBounds() const noexcept																			{ return m_bounds; }								// Returns the world-space bounds of this Collider2D
 
-		void RefreshBounds();																								//
-		virtual int GetShapes(PhysicsShapeGroup2D& physicsSHapeGroup) const;												//
-		std::uint32_t GetShapesHash() const;																				//
-		AABB2D GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const;						//
+		void RefreshBounds();																								// Refreshes the bounding area of this collider
+		virtual int GetShapes(PhysicsShapeGroup2D& physicsSHapeGroup) const;												// Populates the shape group with physics shapes
+		std::uint32_t GetShapesHash() const;																				// Generates a hash representing the current shapes
+		AABB2D GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const;						// Returns bounds for all constituent shapes
 
-		int Cast(const Vector2f& direction, const ContactFilter2D& contactFilter,											//
+		int Cast(const Vector2f& direction, const ContactFilter2D& contactFilter,											// 
 			std::span<ColliderHit2D> results, float distance = Math::Infinity,
 			bool ignoreSiblingColliders = true) const;
 
-		int Overlap(const Vector2f& position, float angle,																	//
+		int Overlap(const Vector2f& position, float angle,																	// 
 			const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		int Raycast(const Vector2f& direction, std::span<ColliderHit2D> results,											//
+		int Raycast(const Vector2f& direction, std::span<ColliderHit2D> results,											// 
 			float distance = Math::Infinity, LayerMask layerMask = LayerMask{ -1 },
 			float minDepth = -Math::Infinity, float maxDepth = Math::Infinity) const;
 
-		int GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;					//
-		int GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const;			//
+		int GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;					// Retrieves contact points involving this Collider2D
+		int GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const;			// Retrieves colliders currently in contact with this Collider2D
 
 		// Methods to add
 		//------------------------
-		// Mesh CreateMesh(bool useBodyPos, bool useBodyRot, bool useDelaunay = true);											//
+		// Mesh CreateMesh(bool useBodyPos, bool useBodyRot, bool useDelaunay = true);											// Creates a renderable mesh representation of the collider shape
 	};
 }

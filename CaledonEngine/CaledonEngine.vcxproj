@@ -54,6 +54,8 @@
     <ClInclude Include="Systems\Physics\LayerRegistry.h" />
     <ClInclude Include="Systems\Physics\Materials\PhysicsMaterial2D.h" />
     <ClInclude Include="Systems\Physics\Materials\PhysicsMaterialCombine2D.h" />
+    <ClInclude Include="Systems\Physics\Physics2DSettings.h" />
+    <ClInclude Include="Systems\Physics\PhysicsScene2D.h" />
     <ClInclude Include="Systems\Physics\Queries\ColliderHit2D.h" />
     <ClInclude Include="Systems\Physics\Queries\ContactFilter2D.h" />
     <ClInclude Include="Systems\Physics\Shapes\PhysicsShape2D.h" />
@@ -71,6 +73,7 @@
     <ClInclude Include="Systems\Physics\Types\ForceMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\GenerationType.h" />
     <ClInclude Include="Systems\Physics\Types\GeometryType.h" />
+    <ClInclude Include="Systems\Physics\Types\SimulationMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\SlideConfig2D.h" />
     <ClInclude Include="Systems\Physics\Types\SlideResults2D.h" />
     <ClInclude Include="Systems\Physics\Physics2DSubsystem.h" />
@@ -99,6 +102,7 @@
     <ClInclude Include="Utilities\Geometry\AABB2D.h" />
     <ClInclude Include="Utilities\Geometry\Rect.h" />
     <ClInclude Include="Utilities\Math\Constants.h" />
+    <ClInclude Include="Utilities\Math\Ray2D.h" />
     <ClInclude Include="Utilities\Math\Vector2.h" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +133,7 @@
     <ClCompile Include="Systems\Physics\LayerRegistry.cpp" />
     <ClCompile Include="Systems\Physics\Materials\PhysicsMaterial2D.cpp" />
     <ClCompile Include="Systems\Physics\Physics2DSubsystem.cpp" />
+    <ClCompile Include="Systems\Physics\PhysicsScene2D.cpp" />
     <ClCompile Include="Systems\Physics\Queries\ColliderHit2D.cpp" />
     <ClCompile Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />

@@ -16,7 +16,7 @@ namespace CaledonEngine
 {
 	class ComponentRegistry;
 	class EngineContext;
-	class InputManager;
+	class InputSubsystem;
 
 	class ModuleSubsystem : public ISubsystem
 	{
@@ -27,7 +27,7 @@ namespace CaledonEngine
 		ModuleInterface::UnregisterFunc m_pUnregister;
 		EngineContext* m_pContext;
 		ComponentRegistry* m_pRegistry;
-		InputManager* m_pInput;
+		InputSubsystem* m_pInput;
 		std::vector<std::string> m_registeredComponents;
 		bool m_hasInputActions;
 

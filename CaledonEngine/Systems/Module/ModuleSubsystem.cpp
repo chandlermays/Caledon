@@ -42,7 +42,7 @@ bool CaledonEngine::ModuleSubsystem::Initialize(EngineContext& context)
 {
     m_pContext = &context;
     m_pRegistry = context.Get<ComponentRegistry>();
-    m_pInput = context.Get<InputManager>();
+    m_pInput = context.Get<InputSubsystem>();
 
     if (!m_pRegistry || !m_pInput)
     {
