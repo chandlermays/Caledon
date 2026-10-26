@@ -13,6 +13,7 @@
 namespace CaledonEngine
 {
 	class EngineContext;
+	class Physics2DSubsystem;
 	class Scene;
 
 	class SceneSubsystem final : public ISubsystem, public IUpdatable
@@ -20,6 +21,10 @@ namespace CaledonEngine
 	private:
 		std::vector<std::unique_ptr<Scene>> m_pScenes;								//
 		Scene* m_pCurrentScene;														//
+		EngineContext* m_pContext;													//
+		Physics2DSubsystem* m_pPhysics2D;											//
+
+		bool InitializeScene(Scene& scene);											//
 
 	public:
 		static constexpr std::string_view kName = "Scene";							//
@@ -38,7 +43,7 @@ namespace CaledonEngine
 
 		void UnloadAllScenes();														//
 
-		void AddScene(std::unique_ptr<Scene> pScene);								//
+		bool AddScene(std::unique_ptr<Scene> pScene);								//
 		void RemoveScene(Scene* pScene);											//
 
 		Scene* GetCurrentScene() const;												//

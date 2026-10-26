@@ -6,11 +6,12 @@
 
 #include "CaledonEngine/Systems/Engine/EngineManager.h"
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
-#include "CaledonEngine/Systems/Window/WindowSubsystem.h"
 #include "CaledonEngine/Systems/Input/InputManager.h"
 #include "CaledonEngine/Systems/Module/ComponentRegistry.h"
 #include "CaledonEngine/Systems/Module/ModuleSubsystem.h"
+#include "CaledonEngine/Systems/Physics/Physics2DSubsystem.h"
 #include "CaledonEngine/Systems/Rendering/RenderingSubsystem.h"
+#include "CaledonEngine/Systems/Window/WindowSubsystem.h"
 #include "CaledonEngine/Systems/Scene/SceneSubsystem.h"
 
 #include "Sandbox.h"
@@ -43,8 +44,9 @@ bool Game::Application::Initialize()
 	// Registration order IS initialization order (shutdown runs in reverse).
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::LoggingSubsystem>()))						return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::WindowSubsystem>()))						return false;
-	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputSubsystem>()))							return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::InputSubsystem>()))						return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::RenderingSubsystem>()))					return false;
+	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::Physics2DSubsystem>()))					return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::ComponentRegistry>()))						return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::ModuleSubsystem>("PacManModule.dll")))		return false;
 	if (!m_pEngineManager->RegisterSubsystem(std::make_unique<CaledonEngine::SceneSubsystem>()))						return false;

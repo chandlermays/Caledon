@@ -4,6 +4,10 @@
 ------------------------------*/
 #include "Collider2D.h"
 
+#include "Systems/Physics/Components/RigidBody2D.h"
+#include "Systems/Physics/PhysicsScene2D.h"
+#include "Systems/Scene/Scene.h"
+
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
@@ -12,6 +16,7 @@
 ---------------------------------------------------------------------*/
 CaledonEngine::Collider2D::Collider2D()
 	: m_pAttachedRigidBody{ nullptr }
+	, m_pPhysicsScene2D{ nullptr }
 	, m_bounceCombine{ PhysicsMaterialCombine2D::Maximum }
 	, m_bounciness{ 0.0f }
 	, m_bounds{ }
@@ -35,8 +40,38 @@ CaledonEngine::Collider2D::Collider2D()
 	, m_errorState{ ColliderErrorState2D::None }
 	, m_layerOverridePriority{ 0 }
 	, m_shapeCount{ 0 }
-
 {}
+
+/*-------------------------------------------------------
+| --- Destructor: Cleans up any allocated resources --- |
+-------------------------------------------------------*/
+CaledonEngine::Collider2D::~Collider2D()
+{
+	if (m_pPhysicsScene2D != nullptr)
+	{
+		m_pAttachedRigidBody->DetachCollider(this);
+		m_pPhysicsScene2D->RemoveCollider(this);
+	}
+}
+
+/*------------------------------------------------------
+| --- Initialize: Prepares this Collider2D for use --- |
+------------------------------------------------------*/
+bool CaledonEngine::Collider2D::Initialize()
+{
+	if (m_pPhysicsScene2D != nullptr)
+		return true;
+
+	const Scene* pScene = (m_pOwner != nullptr) ? m_pOwner->GetScene() : nullptr;
+	m_pPhysicsScene2D = (pScene != nullptr) ? pScene->GetPhysicsScene2D() : nullptr;
+	if (m_pPhysicsScene2D == nullptr)
+		return false;
+
+	if (!m_pPhysicsScene2D->AddCollider(this))
+		return false;
+
+	return true;
+}
 
 /*--------------------------------------------------------------
 | --- GetTypeName: Returns the type name of this Component --- |

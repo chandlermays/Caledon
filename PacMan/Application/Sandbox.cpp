@@ -4,9 +4,10 @@
 ------------------------------*/
 #include "Sandbox.h"
 
-#include "CaledonEngine/Components/SpriteComponent.h"
 #include "CaledonEngine/Systems/Engine/EngineContext.h"
 #include "CaledonEngine/Systems/Engine/LoggingSubsystem.h"
+#include "CaledonEngine/Systems/Module/ComponentRegistry.h"
+#include "CaledonEngine/Systems/Rendering/Components/SpriteComponent.h"
 #include "CaledonEngine/Systems/Rendering/Resources/Sprite.h"
 #include "CaledonEngine/Systems/Rendering/Shapes/Circle.h"
 #include "CaledonEngine/Systems/Scene/Component.h"
@@ -14,7 +15,6 @@
 #include "CaledonEngine/Systems/Scene/Scene.h"
 #include "CaledonEngine/Systems/Scene/SceneSubsystem.h"
 #include "CaledonEngine/Systems/Scene/Transform.h"
-#include "CaledonEngine/Systems/Module/ComponentRegistry.h"
 #include "CaledonEngine/Systems/Window/Window.h"
 #include "CaledonEngine/Systems/Window/WindowSubsystem.h"
 
@@ -74,13 +74,11 @@ bool Game::Sandbox::Initialize(CaledonEngine::EngineContext& context)
 	pScene->SetName("Sandbox");
 	pScene->AddGameObject(std::move(pGameObject));
 
-	if (!pScene->Initialize())
+	if (!pScenes->AddScene(std::move(pScene)))
 	{
 		CE_LOG(context, LogLevel::Error, "SceneSandbox", "The test scene failed to initialize");
 		return false;
 	}
-
-	pScenes->AddScene(std::move(pScene));
 
 	CE_LOG(context, LogLevel::Display, "SceneSandbox", "Test scene ready (Player)");
 	return true;

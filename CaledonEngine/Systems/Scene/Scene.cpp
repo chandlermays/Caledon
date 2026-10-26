@@ -20,6 +20,7 @@ CaledonEngine::Scene::Scene()
 	, m_isDirty{ false }
 	, m_isLoaded{ false }
 	, m_filePath{ "" }
+	, m_pPhysicsScene2D{ nullptr }
 { }
 
 /*-------------------------------------------------------
@@ -35,6 +36,9 @@ CaledonEngine::Scene::~Scene()
 ----------------------------------------------------------------*/
 bool CaledonEngine::Scene::Initialize()
 {
+	if (m_isLoaded)
+		return true;
+
 	bool success = true;
 	for (const auto& pObject : m_gameObjects)
 	{
@@ -43,7 +47,7 @@ bool CaledonEngine::Scene::Initialize()
 			success = false;
 		}
 	}
-	m_isLoaded = true;
+	m_isLoaded = success;
 	return success;
 }
 
@@ -139,6 +143,22 @@ const std::string& CaledonEngine::Scene::GetFilePath() const
 void CaledonEngine::Scene::SetFilePath(const std::string& filePath)
 {
 	m_filePath = filePath;
+}
+
+/*------------------------------------------------------------------------
+| --- GetPhysicsScene2D:
+------------------------------------------------------------------------*/
+CaledonEngine::PhysicsScene2D* CaledonEngine::Scene::GetPhysicsScene2D() const noexcept
+{
+	return m_pPhysicsScene2D;
+}
+
+/*------------------------------------------------------------------------
+| --- SetPhysicsScene2D:
+------------------------------------------------------------------------*/
+void CaledonEngine::Scene::SetPhysicsScene2D(PhysicsScene2D* pPhysicsScene)
+{
+	m_pPhysicsScene2D = pPhysicsScene;
 }
 
 /*--------------------------------------------------------

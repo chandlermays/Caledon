@@ -40,12 +40,14 @@ namespace CaledonEngine
 	struct ColliderHit2D;
 	struct ContactFilter2D;
 	struct ContactPoint2D;
+	class PhysicsScene2D;
 	class PhysicsShapeGroup2D;
 
 	class Collider2D : public Component
 	{
 	private:
 		RigidBody2D* m_pAttachedRigidBody;																					// The RigidBody2D attached to this Collider2D
+		PhysicsScene2D* m_pPhysicsScene2D;																					// The PhysicsScene2D this Collider2D is registered with
 		PhysicsMaterialCombine2D m_bounceCombine;																			// The bounciness combine mode used by this Collider2D
 		float m_bounciness;																									// The bounciness used by this Collider2D
 		AABB2D m_bounds;																									// The world-space bounding area of this Collider2D
@@ -79,12 +81,13 @@ namespace CaledonEngine
 
 	public:
 		Collider2D();																										// Constructor
-		~Collider2D() override = default;																					// Destructor
+		~Collider2D() override;																								// Destructor
 		Collider2D(const Collider2D&) = delete;																				// Prevent copy-construction
 		Collider2D& operator=(const Collider2D&) = delete;																	// Prevent copy-assignment
 		Collider2D(Collider2D&&) = delete;																					// Prevent move-construction
 		Collider2D& operator=(Collider2D&&) = delete;																		// Prevent move-assignment
 
+		bool Initialize() override;																							// Prepares this Collider2D for use
 		const std::string& GetTypeName() const override;																	// Returns the type name of this Component
 
 		bool CanContact(const Collider2D* pCollider) const;																	// Determines if both Collider2D can ever come into contact
@@ -105,6 +108,8 @@ namespace CaledonEngine
 		
 		RigidBody2D* GetAttachedRigidBody() const noexcept																	{ return m_pAttachedRigidBody; }					// Returns the RigidBody2D attached to this Collider2D
 		void SetAttachedRigidBody(RigidBody2D* pBody) noexcept																{ m_pAttachedRigidBody = pBody; }					// Sets the RigidBody2D attached to this Collider2D
+
+		PhysicsScene2D* GetPhysicsScene() const noexcept																	{ return m_pPhysicsScene2D; }						// Returns the PhysicsScene2D this Collider2D is registered with
 
 		PhysicsMaterialCombine2D GetBounceCombine() const noexcept															{ return m_bounceCombine; }							// Returns the bounciness combine mode of this Collider2D
 		void SetBounceCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_bounceCombine = combine; }						// Sets the bounciness combine mode of this Collider2D

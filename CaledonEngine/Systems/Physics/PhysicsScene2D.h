@@ -46,7 +46,7 @@ namespace CaledonEngine
 		float GetSubStepLostTime() const noexcept				{ return m_subStepLostTime; }												// Returns the amount of simulation time lost during sub-stepping
 
 		int GetColliderCount() const noexcept					{ return static_cast<int>(m_registeredColliders.size()); }					// Returns the total number of registered Collider2D in this PhysicsScene2D
-		int GetBodyCount() const noexcept						{ return static_cast<int>(m_registeredBodies.size()); }						// Returns the total number of registerd RigidBody2D in this PhysicsScene2D
+		int GetBodyCount() const noexcept						{ return static_cast<int>(m_registeredBodies.size()); }						// Returns the total number of registered RigidBody2D in this PhysicsScene2D
 
 		bool IsEmpty() const noexcept							{ return m_registeredColliders.empty() && m_registeredBodies.empty(); }		// Checks whether this PhysicsScene2D contains any Collider2D or RigidBody2D
 		bool IsValid() const noexcept							{ return m_isValid; }														// Checks whether this PhysicsScene2D is valid and active
@@ -57,65 +57,87 @@ namespace CaledonEngine
 		bool AddRigidBody2D(RigidBody2D* pRigidBody2D);																						// Adds a RigidBody2D to this PhysicsScene2D
 		bool RemoveRigidBody2D(RigidBody2D* pRigidBody2D);																					// Removes a RigidBody2D from this PhysicsScene2D
 
-		std::vector<ColliderHit2D> BoxCast(const Vector2f& origin, const Vector2f& size, float angle,										// Returns all intersections of a casted Box against the Colliders in this PhysicsScene2D
-			const Vector2f& direction, float distance, const ContactFilter2D& contactFilter) const;
+		/*---------------------------------------------------------------------------------------------------------
+		| --- BoxCast: Returns all intersections of a casted Box against the Colliders in this PhysicsScene2D --- |
+		---------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction,
+			const ContactFilter2D& contactFilter, float distance) const;
 		int BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction,
-			float distance, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const;
+			const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const;
 
-		std::vector<ColliderHit2D> CapsuleCast(const Vector2f& origin, const Vector2f& size,												// Returns all intersections of a casted Capsule against the Colliders in this PhysicsScene2D
-			CapsuleDirection2D capsuleDirection, float angle, const Vector2f& direction,
-			float distance, const ContactFilter2D& contactFilter) const;
-		int CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection,
-			float angle, const Vector2f& direction, float distance, ContactFilter2D& contactFilter,
-			std::span<ColliderHit2D> results) const;
+		/*-----------------------------------------------------------------------------------------------------------------
+		| --- CapsuleCast: Returns all intersections of a casted Capsule against the Colliders in this PhysicsScene2D --- |
+		-----------------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle,
+			const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const;
+		int CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle,
+			const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const;
 
-		std::vector<ColliderHit2D> CircleCast(const Vector2f& origin, float radius, const Vector2f& direction,								// Returns all intersections of a casted Circle against the Colliders in this PhysicsScene2D
-			float distance, const ContactFilter2D& contactFilter) const;
-		int CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, float distance,
-			const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const;
+		/*---------------------------------------------------------------------------------------------------------------
+		| --- CircleCast: Returns all intersections of a casted Circle against the Colliders in this PhysicsScene2D --- |
+		---------------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> CircleCast(const Vector2f& origin, float radius, const Vector2f& direction,
+			const ContactFilter2D& contactFilter, float distance) const;
+		int CircleCast(const Vector2f& origin, float radius, const Vector2f& direction,
+			const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const;
 
-		std::vector<ColliderHit2D> Raycast(const Vector2f& origin, const Vector2f& direction, float distance,								// Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D
-			const ContactFilter2D& contactFilter) const;
-		int Raycast(const Vector2f& origin, const Vector2f& direction, float distance,
-			const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const;
+		/*---------------------------------------------------------------------------------------------------------
+		| --- Raycast: Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D --- |
+		---------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> Raycast(const Vector2f& origin, const Vector2f& direction,
+			const ContactFilter2D& contactFilter, float distance) const;
+		int Raycast(const Vector2f& origin, const Vector2f& direction,
+			const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const;
 
-		std::vector<ColliderHit2D> Linecast(const Vector2f& start, const Vector2f& end,														// Returns all intersections of a casted Line segment against the Colliders in this PhysicsScene2D
-			const ContactFilter2D& contactFilter) const;
-		int Linecast(const Vector2f& start, const Vector2f& end, const ContactFilter2D& contactFilter,
-			std::span<ColliderHit2D> results) const;
+		/*-------------------------------------------------------------------------------------------------------------------
+		| --- Linecast: Returns all intersections of a casted Line segment against the Colliders in this PhysicsScene2D --- |
+		-------------------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> Linecast(const Vector2f& start, const Vector2f& end, const ContactFilter2D& contactFilter) const;
+		int Linecast(const Vector2f& start, const Vector2f& end, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const;
 
-		std::vector<ColliderHit2D> GetRayIntersection(const Ray2D& ray, float distance,														// Returns all intersections of a Ray2D against the Colliders in this PhysicsScene2D
-			int layerMask = Physics2DConstants::kDefaultRaycastLayers) const;
-		int GetRayIntersection(const Ray2D& ray, float distance, int layerMask,
-			std::span<ColliderHit2D> results) const;
+		/*---------------------------------------------------------------------------------------------------------------
+		| --- GetRayIntersection: Returns all intersections of a Ray2D against the Colliders in this PhysicsScene2D --- |
+		---------------------------------------------------------------------------------------------------------------*/
+		std::vector<ColliderHit2D> GetRayIntersection(const Ray2D& ray, float distance, int layerMask = Physics2DConstants::kDefaultRaycastLayers) const;
+		int GetRayIntersection(const Ray2D& ray, float distance, int layerMask, std::span<ColliderHit2D> results) const;
 
-		std::vector<Collider2D*> OverlapArea(const Vector2f& pointA, const Vector2f& pointB,												// Returns all intersections of an overlapping Area against the Colliders in this PhysicsScene2D
-			const ContactFilter2D& contactFilter) const;
-		int OverlapArea(const Vector2f& pointA, const Vector2f& pointB, const ContactFilter2D& contactFilter,
-			std::vector<Collider2D*>& results) const;
+		/*--------------------------------------------------------------------------------------------------------------------
+		| --- OverlapArea: Returns all intersections of an overlapping Area against the Colliders in this PhysicsScene2D --- |
+		--------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapArea(const Vector2f& pointA, const Vector2f& pointB, const ContactFilter2D& contactFilter) const;
+		int OverlapArea(const Vector2f& pointA, const Vector2f& pointB, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		std::vector<Collider2D*> OverlapBox(const Vector2f& point, const Vector2f& size, float angle,										// Returns all intersections of an overlapping Box against the Colliders in this PhysicsScene2D
-			const ContactFilter2D& contactFilter) const;
-		int OverlapBox(const Vector2f& point, const Vector2f& size, float angle,
-			const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
+		/*------------------------------------------------------------------------------------------------------------------
+		| --- OverlapBox: Returns all intersections of an overlapping Box against the Colliders in this PhysicsScene2D --- |
+		------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapBox(const Vector2f& point, const Vector2f& size, float angle, const ContactFilter2D& contactFilter) const;
+		int OverlapBox(const Vector2f& point, const Vector2f& size, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		std::vector<Collider2D*> OverlapCapsule(const Vector2f& point, const Vector2f& size,												// Returns all intersections of an overlapping Capsule against the Colliders in this PhysicsScene2D
-			CapsuleDirection2D capsuleDirection, float angle, const ContactFilter2D& contactFilter) const;
+		/*--------------------------------------------------------------------------------------------------------------------------
+		| --- OverlapCapsule: Returns all intersections of an overlapping Capsule against the Colliders in this PhysicsScene2D --- |
+		--------------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapCapsule(const Vector2f& point, const Vector2f& size, CapsuleDirection2D capsuleDirection,
+			float angle, const ContactFilter2D& contactFilter) const;
 		int OverlapCapsule(const Vector2f& point, const Vector2f& size, CapsuleDirection2D capsuleDirection,
 			float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		std::vector<Collider2D*> OverlapCircle(const Vector2f& point, float radius,															// Returns all intersections of an overlapping Circle against the Colliders in this PhysicsScene2D
-			const ContactFilter2D& contactFilter) const;
-		int OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter,
-			std::vector<Collider2D*>& results) const;
+		/*------------------------------------------------------------------------------------------------------------------------
+		| --- OverlapCircle: Returns all intersections of an overlapping Circle against the Colliders in this PhysicsScene2D --- |
+		------------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter) const;
+		int OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		std::vector<Collider2D*> OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;					// Returns all intersections of an overlapping Collider2D against the Colliders in this PhysicsScene2D
-		int OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter,
-			std::vector<Collider2D*>& results) const;
+		/*----------------------------------------------------------------------------------------------------------------------------
+		| --- OverlapCollider: Returns all intersections of an overlapping Collider against the Colliders in this PhysicsScene2D --- |
+		----------------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;
+		int OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		std::vector<Collider2D*> OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter) const;							// Returns all intersections of an overlapping Point against the Colliders in this PhysicsScene2D
-		int OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter,
-			std::vector<Collider2D*>& results) const;
+		/*----------------------------------------------------------------------------------------------------------------------
+		| --- OverlapPoint: Returns all intersections of an overlapping Point against the Colliders in this PhysicsScene2D --- |
+		----------------------------------------------------------------------------------------------------------------------*/
+		std::vector<Collider2D*> OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter) const;
+		int OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
 		void SyncTransforms();																												// Pushes the Transform poses of all registered bodies into the physics bodies
 		bool Simulate(float deltaTime, int simulationLayers = Physics2DConstants::kAllLayers);												// Simulate physics associated with this PhysicsScene2D.

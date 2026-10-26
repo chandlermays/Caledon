@@ -10,6 +10,7 @@
 namespace CaledonEngine
 {
 	class GameObject;
+	class PhysicsScene2D;
 
 	class Scene
 	{
@@ -20,6 +21,7 @@ namespace CaledonEngine
 		bool m_isDirty;																// Whether this Scene has unsaved changes (needs to be saved)
 		bool m_isLoaded;															// Whether this Scene has completed loading and objects have been initialized/enabled
 		std::string m_filePath;														// The file path this Scene was loaded from
+		PhysicsScene2D* m_pPhysicsScene2D;											// The PhyicsScene2D this Scene's physics components registers with
 
 	public:
 		Scene();																	// Constructor
@@ -45,6 +47,9 @@ namespace CaledonEngine
 
 		const std::string& GetFilePath() const;										//
 		void SetFilePath(const std::string& filePath);								// 
+
+		PhysicsScene2D* GetPhysicsScene2D() const noexcept;							//
+		void SetPhysicsScene2D(PhysicsScene2D* pPhysicsScene);						//
 
 		void AddGameObject(std::unique_ptr<GameObject> pGameObject);				// Adds a GameObject to this Scene
 		void RemoveGameObject(GameObject* pGameObject);								// Removes a GameObject from this Scene

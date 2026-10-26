@@ -16,7 +16,7 @@ namespace CaledonEngine
 		Vector2f m_origin;													// The starting point of the ray in world space
 
 		Ray2D()																// Constructor
-			: m_origin(Vector2f::Zero()),
+			: m_origin(Vector2f::Zero())
 			, m_direction(Vector2f::Up())
 		{ }
 

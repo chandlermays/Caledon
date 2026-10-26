@@ -5,12 +5,19 @@
 #include "RigidBody2D.h"
 
 #include "Systems/Physics/Components/Collider2D.h"
+#include "Systems/Physics/PhysicsScene2D.h"
+#include "Systems/Scene/Scene.h"
+#include "Systems/Scene/Transform.h"
 
 /*---------------------------------------------------------------------------------------
 | --- WakeIfNeeded:
 ---------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
 {
+	if (!m_isAwake && m_bodyType != BodyType2D::Static)
+	{
+		m_isAwake = true;
+	}
 }
 
 /*-----------------------------------
@@ -20,14 +27,73 @@ void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
 | --- Constructor: Constructs this RigidBody2D with default values --- |
 ----------------------------------------------------------------------*/
 CaledonEngine::RigidBody2D::RigidBody2D()
-{}
+	: m_bodyType{ BodyType2D::Dynamic }
+	, m_simulated{ true }
+	, m_constraints{ BodyConstraints2D::None }
+	, m_collisionDetectionMode{ CollisionDetectionMode2D::Discrete }
+	, m_interpolation{ BodyInterpolation2D::None }
+	, m_useFullKinematicContacts{ false }
+	, m_sleepMode{ BodySleepMode2D::StartAwake }
+	, m_isAwake{ true }
+	, m_position{ 0.0f, 0.0f }
+	, m_rotation{ 0.0f }
+	, m_linearVelocity{ 0.0f, 0.0f }
+	, m_angularVelocity{ 0.0f }
+	, m_linearDamping{ 0.0f }
+	, m_angularDamping{ 0.05f }
+	, m_gravityScale{ 1.0f }
+	, m_totalForce{ 0.0f, 0.0f }
+	, m_totalTorque{ 0.0f }
+	, m_useAutoMass{ false }
+	, m_mass{ 1.0f }
+	, m_centerOfMass{ 0.0f, 0.0f }
+	, m_inertia{ 1.0f }
+	, m_pAttachedColliders{ }
+	, m_sharedMaterial{ }
+	, m_includeLayers{ 0 }
+	, m_excludeLayers{ 0 }
+{ }
+
+/*-------------------------------------------------------
+| --- Destructor: Cleans up any allocated resources --- |
+-------------------------------------------------------*/
+CaledonEngine::RigidBody2D::~RigidBody2D()
+{
+	for (Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider != nullptr && pCollider->GetAttachedRigidBody() == this)
+		{
+			pCollider->SetAttachedRigidBody(nullptr);
+		}
+	}
+	m_pAttachedColliders.clear();
+
+	if (m_pPhysicsScene != nullptr)
+	{
+		m_pPhysicsScene->RemoveRigidBody2D(this);
+	}
+}
 
 /*-------------------------------------------------------
 | --- Initialize: Prepares this RigidBody2D for use --- |
 -------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::Initialize()
 {
-	return false;
+	if (m_pPhysicsScene != nullptr)
+		return true;
+
+	const Scene* pScene = (m_pOwner != nullptr) ? m_pOwner->GetScene() : nullptr;
+	m_pPhysicsScene = (pScene != nullptr) ? pScene->GetPhysicsScene2D() : nullptr;
+	if (m_pPhysicsScene == nullptr)
+		return false;
+
+	if (!m_pPhysicsScene->AddRigidBody2D(this))
+		return false;
+
+	RefreshAttachedColliders();
+	SyncFromTransform();
+	m_isAwake = (m_sleepMode != BodySleepMode2D::StartAsleep);
+	return true;
 }
 
 /*--------------------------------------------------------------
@@ -44,6 +110,25 @@ const std::string& CaledonEngine::RigidBody2D::GetTypeName() const
 -------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetBodyType(BodyType2D type) noexcept
 {
+	if (m_bodyType == type)
+		return;
+
+	m_bodyType = type;
+
+	if (type != BodyType2D::Dynamic)
+	{
+		ClearForces();
+	}
+
+	if (type == BodyType2D::Static)
+	{
+		m_linearVelocity = Vector2f{ 0.0f, 0.0f };
+		m_angularVelocity = 0.0f;
+	}
+	else
+	{
+		WakeIfNeeded();
+	}
 }
 
 /*---------------------------------------------------------------------------------
@@ -51,6 +136,15 @@ void CaledonEngine::RigidBody2D::SetBodyType(BodyType2D type) noexcept
 ---------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetFreezeRotation(bool freeze) noexcept
 {
+	if (freeze)
+	{
+		m_constraints |= BodyConstraints2D::FreezeRotation;
+		m_angularVelocity = 0.0f;
+	}
+	else
+	{
+		m_constraints &= ~BodyConstraints2D::FreezeRotation;
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -58,6 +152,13 @@ void CaledonEngine::RigidBody2D::SetFreezeRotation(bool freeze) noexcept
 ------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::Sleep()
 {
+	if (m_sleepMode == BodySleepMode2D::NeverSleep)
+		return;
+
+	m_isAwake = false;
+	m_linearVelocity = Vector2f{ 0.0f, 0.0f };
+	m_angularVelocity = 0.0f;
+	ClearForces();
 }
 
 /*-------------------------------------------------------------------------------
@@ -65,6 +166,8 @@ void CaledonEngine::RigidBody2D::Sleep()
 -------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetRotation(float angle)
 {
+	m_rotation = angle;
+	WakeIfNeeded();
 }
 
 /*--------------------------------------------------------------------
@@ -72,6 +175,10 @@ void CaledonEngine::RigidBody2D::SetRotation(float angle)
 --------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::MovePosition(const Vector2f& position)
 {
+	if (m_bodyType == BodyType2D::Static)
+		return;
+
+	//...
 }
 
 /*--------------------------------------------------------------------------------------------------
@@ -79,6 +186,8 @@ void CaledonEngine::RigidBody2D::MovePosition(const Vector2f& position)
 --------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::MovePositionAndRotation(const Vector2f& position, float angle)
 {
+	MovePosition(position);
+	MoveRotation(angle);
 }
 
 /*--------------------------------------------------------------------------
@@ -86,6 +195,11 @@ void CaledonEngine::RigidBody2D::MovePositionAndRotation(const Vector2f& positio
 --------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::MoveRotation(float angle)
 {
+	if (m_bodyType == BodyType2D::Static || GetFreezeRotation())
+		return;
+
+	m_rotation = angle;
+	WakeIfNeeded();
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
@@ -93,7 +207,7 @@ void CaledonEngine::RigidBody2D::MoveRotation(float angle)
 --------------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::SlideResults2D CaledonEngine::RigidBody2D::Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig)
 {
-	return SlideResults2D();
+	//...
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -101,6 +215,12 @@ CaledonEngine::SlideResults2D CaledonEngine::RigidBody2D::Slide(const Vector2f& 
 ----------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SyncFromTransform()
 {
+	if (m_pOwner == nullptr)
+		return;
+
+	const Transform& transform = m_pOwner->GetTransform();
+	m_position = transform.GetPosition();
+	m_rotation = transform.GetRotation();
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------
@@ -108,6 +228,12 @@ void CaledonEngine::RigidBody2D::SyncFromTransform()
 -----------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::ApplyToTransform() const
 {
+	if (m_pOwner == nullptr)
+		return;
+
+	Transform& transform = m_pOwner->GetTransform();
+	transform.SetPosition(m_position);
+	transform.SetRotation(m_rotation);
 }
 
 /*-------------------------------------------------------------------------
@@ -115,6 +241,10 @@ void CaledonEngine::RigidBody2D::ApplyToTransform() const
 -------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetLinearVelocity(const Vector2f& velocity) noexcept
 {
+	if (m_bodyType == BodyType2D::Static)
+		return;
+
+	//...
 }
 
 /*---------------------------------------------------------------------------
@@ -122,6 +252,14 @@ void CaledonEngine::RigidBody2D::SetLinearVelocity(const Vector2f& velocity) noe
 ---------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetAngularVelocity(float velocity) noexcept
 {
+	if (m_bodyType == BodyType2D::Static)
+		return;
+
+	m_angularVelocity = GetFreezeRotation() ? 0.0f : velocity;
+	if (m_angularVelocity != 0.0f)
+	{
+		WakeIfNeeded();
+	}
 }
 
 /*-----------------------------------------------------
@@ -129,6 +267,19 @@ void CaledonEngine::RigidBody2D::SetAngularVelocity(float velocity) noexcept
 -----------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddForce(const Vector2f& force, ForceMode2D mode)
 {
+	if (!CanReceiveForces())
+		return;
+
+	WakeIfNeeded();
+
+	if (mode == ForceMode2D::Impulse)			// An impulse changes the velocity immediately
+	{
+		//...
+	}
+	else
+	{
+		m_totalForce += force;					// A force is accumulated and consumed by the next step
+	}
 }
 
 /*------------------------------------------------------------------------------
@@ -136,6 +287,11 @@ void CaledonEngine::RigidBody2D::AddForce(const Vector2f& force, ForceMode2D mod
 ------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddForceAtPosition(const Vector2f& force, const Vector2f& position, ForceMode2D mode)
 {
+	if (!CanReceiveForces())
+		return;
+
+	AddForce(force, mode);
+	AddTorque(Vector2f::Cross(position - GetWorldCenterOfMass(), force), mode);
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------
@@ -143,6 +299,7 @@ void CaledonEngine::RigidBody2D::AddForceAtPosition(const Vector2f& force, const
 -------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddForceX(float force, ForceMode2D mode)
 {
+	AddForce(Vector2f{ force, 0.0f }, mode);
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------
@@ -150,6 +307,7 @@ void CaledonEngine::RigidBody2D::AddForceX(float force, ForceMode2D mode)
 -------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddForceY(float force, ForceMode2D mode)
 {
+	AddForce(Vector2f{ 0.0f, force }, mode);
 }
 
 /*---------------------------------------------------------------------------
@@ -157,6 +315,7 @@ void CaledonEngine::RigidBody2D::AddForceY(float force, ForceMode2D mode)
 ---------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddRelativeForce(const Vector2f& relativeForce, ForceMode2D mode)
 {
+	AddForce(GetRelativePoint(relativeForce), mode);
 }
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------
@@ -164,6 +323,7 @@ void CaledonEngine::RigidBody2D::AddRelativeForce(const Vector2f& relativeForce,
 ---------------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddRelativeForceX(float force, ForceMode2D mode)
 {
+	AddRelativeForce(Vector2f{ force, 0.0f }, mode);
 }
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------
@@ -171,6 +331,7 @@ void CaledonEngine::RigidBody2D::AddRelativeForceX(float force, ForceMode2D mode
 ---------------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddRelativeForceY(float force, ForceMode2D mode)
 {
+	AddRelativeForce(Vector2f{ 0.0f, force }, mode);
 }
 
 /*------------------------------------------------------------------------
@@ -178,6 +339,22 @@ void CaledonEngine::RigidBody2D::AddRelativeForceY(float force, ForceMode2D mode
 ------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::AddTorque(float torque, ForceMode2D mode)
 {
+	if (!CanReceiveForces() || GetFreezeRotation())
+		return;
+
+	WakeIfNeeded();
+
+	if (mode == ForceMode2D::Impulse)
+	{
+		if (m_inertia > 0.0f)
+		{
+			m_angularVelocity += (torque / m_inertia) * Math::Rad2Deg;
+		}
+	}
+	else
+	{
+		m_totalTorque += torque;
+	}
 }
 
 /*-----------------------------------------------------------------------------------------------
@@ -185,6 +362,11 @@ void CaledonEngine::RigidBody2D::AddTorque(float torque, ForceMode2D mode)
 -----------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetUseAutoMass(bool useAutoMass)
 {
+	m_useAutoMass = useAutoMass;
+	if (m_useAutoMass)
+	{
+		UpdateMassData();
+	}
 }
 
 /*----------------------------------------------------
@@ -192,6 +374,7 @@ void CaledonEngine::RigidBody2D::SetUseAutoMass(bool useAutoMass)
 ----------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetMass(float mass) noexcept
 {
+	//...
 }
 
 /*-------------------------------------------------------------------------------------------
@@ -199,7 +382,7 @@ void CaledonEngine::RigidBody2D::SetMass(float mass) noexcept
 -------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetWorldCenterOfMass() const noexcept
 {
-	return Vector2f();
+	return GetRelativePoint(m_centerOfMass);
 }
 
 /*------------------------------------------------------------------------------------------------------------------------------
@@ -207,6 +390,7 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetWorldCenterOfMass() const
 ------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::UpdateMassData()
 {
+	//...
 }
 
 /*-----------------------------------------------------------------------------------------
@@ -214,7 +398,7 @@ void CaledonEngine::RigidBody2D::UpdateMassData()
 -----------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetPoint(const Vector2f& point) const
 {
-	return Vector2f();
+	return (point - m_position).Rotate(-m_rotation);
 }
 
 /*--------------------------------------------------------------------------------------------

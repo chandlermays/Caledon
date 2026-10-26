@@ -208,9 +208,6 @@
     <ClInclude Include="Systems\Physics\Physics2DSubsystem.h">
       <Filter>Source Files\Systems\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Components\SpriteComponent.h">
-      <Filter>Source Files\Systems\Rendering\Components</Filter>
-    </ClInclude>
     <ClInclude Include="Systems\Rendering\Components\SpriteComponent.h">
       <Filter>Source Files\Systems\Rendering\Components</Filter>
     </ClInclude>
@@ -282,9 +279,6 @@
     </ClInclude>
     <ClInclude Include="Systems\Physics\Queries\ContactFilter2D.h">
       <Filter>Source Files\Systems\Physics\Queries</Filter>
-    </ClInclude>
-    <ClInclude Include="Systems\Scene\LayerMask.h">
-      <Filter>Source Files\Systems\Scene</Filter>
     </ClInclude>
     <ClInclude Include="Systems\Physics\LayerMask.h">
       <Filter>Source Files\Systems\Physics</Filter>
@@ -428,9 +422,6 @@
     </ClCompile>
     <ClCompile Include="Systems\Module\ModuleSubsystem.cpp">
       <Filter>Source Files\Systems\Module</Filter>
-    </ClCompile>
-    <ClCompile Include="Components\SpriteComponent.cpp">
-      <Filter>Source Files\Systems\Rendering\Components</Filter>
     </ClCompile>
     <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp">
       <Filter>Source Files\Systems\Rendering\Components</Filter>

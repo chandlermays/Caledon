@@ -102,6 +102,10 @@ CaledonEngine::Scene* CaledonEngine::GameObject::GetScene() const
 void CaledonEngine::GameObject::SetScene(Scene* pScene)
 {
 	m_pScene = pScene;
+	for (const auto& pChild : m_children)
+	{
+		pChild->SetScene(pScene);
+	}
 }
 
 /*------------------------------------------------------------------
@@ -136,6 +140,7 @@ void CaledonEngine::GameObject::AddChild(std::unique_ptr<GameObject> pChild)
 	if (pChild != nullptr)
 	{
 		pChild->SetParent(this);
+		pChild->SetScene(m_pScene);
 		m_children.emplace_back(std::move(pChild));
 	}
 }

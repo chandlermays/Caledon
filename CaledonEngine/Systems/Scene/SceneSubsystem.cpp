@@ -15,6 +15,8 @@
 ------------------------------------------------------------------------*/
 CaledonEngine::SceneSubsystem::SceneSubsystem()
 	: m_pCurrentScene{ nullptr }
+	, m_pContext{ nullptr }
+	, m_pPhysics2D{ nullptr }
 { }
 
 /*-------------------------------------------------------
@@ -38,12 +40,14 @@ std::string_view CaledonEngine::SceneSubsystem::Name() const noexcept
 ------------------------------------------------------------------------*/
 bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
-	if (m_pCurrentScene != nullptr && !m_pCurrentScene->Initialize())
-	{
-		CE_LOG(context, LogLevel::Error, "Scene", std::format("Scene '{}' failed to initialize", m_pCurrentScene->GetName()));
-		return false;
-	}
+	m_pContext = &context;
+	m_pPhysics2D = context.Get<Physics2DSubsystem>();
 
+	for (const auto& pScene : m_pScenes)
+	{
+		if (!InitializeScene(*pScene))
+			return false;
+	}
 	return true;
 }
 
@@ -53,6 +57,8 @@ bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& c
 void CaledonEngine::SceneSubsystem::Shutdown() noexcept
 {
 	UnloadAllScenes();
+	m_pContext = nullptr;
+	m_pPhysics2D = nullptr;
 }
 
 /*------------------------------------------------------------------------
@@ -78,17 +84,19 @@ void CaledonEngine::SceneSubsystem::UnloadAllScenes()
 /*------------------------------------------------------------------------
 | --- AddScene:
 ------------------------------------------------------------------------*/
-void CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
+bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 {
 	if (!pScene)
 		return;
 
+	if (m_pContext != nullptr && !InitializeScene(*pScene))
+		return false;
+
 	if (m_pCurrentScene == nullptr)
-	{
 		m_pCurrentScene = pScene.get();
-	}
 
 	m_pScenes.emplace_back(std::move(pScene));
+	return true;
 }
 
 /*------------------------------------------------------------------------
@@ -140,4 +148,24 @@ int CaledonEngine::SceneSubsystem::GetSceneIndex(Scene* pScene) const
 	}
 
 	return -1;
+}
+
+
+
+/*------------------------------------
+| --- Private Method Definitions --- |
+------------------------------------*/
+/*------------------------------------------------------------------------
+| --- InitializeScene:
+------------------------------------------------------------------------*/
+bool CaledonEngine::SceneSubsystem::InitializeScene(Scene& scene)
+{
+//	scene.SetPhysicsScene2D(m_pPhysics2D ? &m_pPhysics2D->GetDefaultPhysicsScene() : nullptr);
+
+	if (!scene.Initialize())
+	{
+		CE_LOG(*m_pContext, LogLevel::Error, "Scene", std::format("Scene '{}' failed to initialize", scene.GetName()));
+		return false;
+	}
+	return true;
 }

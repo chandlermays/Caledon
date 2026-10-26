@@ -24,7 +24,6 @@
     <ClInclude Include="API\SDL\SDLRenderer.h" />
     <ClInclude Include="API\SDL\SDLTexture.h" />
     <ClInclude Include="API\SDL\SDLWindow.h" />
-    <ClInclude Include="Components\SpriteComponent.h" />
     <ClInclude Include="Systems\Engine\EngineConfig.h" />
     <ClInclude Include="Systems\Engine\EngineContext.h" />
     <ClInclude Include="Systems\Engine\EngineManager.h" />
@@ -93,7 +92,6 @@
     <ClInclude Include="Systems\Rendering\Shapes\Triangle.h" />
     <ClInclude Include="Systems\Scene\Component.h" />
     <ClInclude Include="Systems\Scene\GameObject.h" />
-    <ClInclude Include="Systems\Scene\LayerMask.h" />
     <ClInclude Include="Systems\Scene\Scene.h" />
     <ClInclude Include="Systems\Scene\SceneSubsystem.h" />
     <ClInclude Include="Systems\Scene\Transform.h" />
@@ -111,7 +109,6 @@
     <ClCompile Include="API\SDL\SDLRenderer.cpp" />
     <ClCompile Include="API\SDL\SDLTexture.cpp" />
     <ClCompile Include="API\SDL\SDLWindow.cpp" />
-    <ClCompile Include="Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Engine\EngineContext.cpp" />
     <ClCompile Include="Systems\Engine\EngineManager.cpp" />
     <ClCompile Include="Systems\Engine\LoggingSubsystem.cpp" />

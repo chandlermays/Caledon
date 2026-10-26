@@ -55,7 +55,7 @@ bool CaledonEngine::PhysicsScene2D::RemoveRigidBody2D(RigidBody2D* pRigidBody2D)
 /*---------------------------------------------------------------------------------------------------------
 | --- BoxCast: Returns all intersections of a casted Box against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------*/
-std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter) const
+std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
 	return std::vector<ColliderHit2D>();
 }
@@ -63,7 +63,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::BoxCast
 /*---------------------------------------------------------------------------------------------------------
 | --- BoxCast: Returns all intersections of a casted Box against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------*/
-int CaledonEngine::PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2f& sie, float angle, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const
+int CaledonEngine::PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
 	return 0;
 }
@@ -71,7 +71,7 @@ int CaledonEngine::PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2
 /*-----------------------------------------------------------------------------------------------------------------
 | --- CapsuleCast: Returns all intersections of a casted Capsule against the Colliders in this PhysicsScene2D --- |
 -----------------------------------------------------------------------------------------------------------------*/
-std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter) const
+std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
 	return std::vector<ColliderHit2D>();
 }
@@ -79,7 +79,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Capsule
 /*-----------------------------------------------------------------------------------------------------------------
 | --- CapsuleCast: Returns all intersections of a casted Capsule against the Colliders in this PhysicsScene2D --- |
 -----------------------------------------------------------------------------------------------------------------*/
-int CaledonEngine::PhysicsScene2D::CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle, const Vector2f& direction, float distance, ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const
+int CaledonEngine::PhysicsScene2D::CapsuleCast(const Vector2f& origin, const Vector2f& size, CapsuleDirection2D capsuleDirection, float angle, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
 	return 0;
 }
@@ -87,7 +87,7 @@ int CaledonEngine::PhysicsScene2D::CapsuleCast(const Vector2f& origin, const Vec
 /*---------------------------------------------------------------------------------------------------------------
 | --- CircleCast: Returns all intersections of a casted Circle against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------------*/
-std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter) const
+std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
 	return std::vector<ColliderHit2D>();
 }
@@ -95,23 +95,23 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CircleC
 /*---------------------------------------------------------------------------------------------------------------
 | --- CircleCast: Returns all intersections of a casted Circle against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------------*/
-int CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const
+int CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
 	return 0;
 }
 
 /*---------------------------------------------------------------------------------------------------------
-| --- RayCast: Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D --- |
+| --- Raycast: Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------*/
-std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter) const
+std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
 	return std::vector<ColliderHit2D>();
 }
 
 /*---------------------------------------------------------------------------------------------------------
-| --- RayCast: Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D --- |
+| --- Raycast: Returns all intersections of a casted Ray against the Colliders in this PhysicsScene2D --- |
 ---------------------------------------------------------------------------------------------------------*/
-int CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, float distance, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const
+int CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
 	return 0;
 }
@@ -244,9 +244,9 @@ int CaledonEngine::PhysicsScene2D::OverlapPoint(const Vector2f& point, const Con
 	return 0;
 }
 
-/*----------------------------------------------------------------------------------------------------
-| --- SyncTransform: Pushes the Transform poses of all registered bodies into the physics bodies --- |
-----------------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------------
+| --- SyncTransforms: Pushes the Transform poses of all registered bodies into the physics bodies --- |
+-----------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsScene2D::SyncTransforms()
 {
 }
