@@ -15,13 +15,13 @@ namespace CaledonEngine
 {
 	struct PhysicsShape2D
 	{
-		Vector2f adjacentStart{};				// Defines the position of a virtual point adjacent to the start vertex of an edge shape
-		Vector2f adjacentEnd{};					// Defines the position of a virtual point adjacent to the end vertex of an edge shape
-		float radius = 0.0f;					// The radius of the shape
-		int vertexCount = 0;					// The total number of vertices used to represent the shape type
-		int vertexStartIndex = 0;				// The start index for the geometry of this shape within the PhysicsShapeGroup2D
-		PhysicsShapeType2D shapeType;			// The shape type determines how the vertices and radius are used by this PhysicsShape2D
-		bool useAdjacentStart;					// Whether the shape uses the adjacentStart feature
-		bool useAdjacentEnd;					// Whether the shape uses the adjacentEnd feaure
+		Vector2f adjacentStart{};												// Defines the position of a virtual point adjacent to the start vertex of an edge shape
+		Vector2f adjacentEnd{};													// Defines the position of a virtual point adjacent to the end vertex of an edge shape
+		float radius = 0.0f;													// The radius of the shape
+		int vertexCount = 0;													// The total number of vertices used to represent the shape type
+		int vertexStartIndex = 0;												// The start index for the geometry of this shape within the PhysicsShapeGroup2D
+		PhysicsShapeType2D shapeType = PhysicsShapeType2D::Circle;				// The shape type determines how the vertices and radius are used by this PhysicsShape2D
+		bool useAdjacentStart = false;											// Whether the shape uses the adjacentStart feature
+		bool useAdjacentEnd = false;											// Whether the shape uses the adjacentEnd feaure
 	};
 }

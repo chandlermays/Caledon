@@ -9,14 +9,30 @@
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
-/*---------------------------------------------------------------------------------------
-| --- WakeIfNeeded:
----------------------------------------------------------------------------------------*/
-void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
+
+namespace
 {
-	if (!m_isAwake && m_bodyType != BodyType2D::Static)
+	using namespace CaledonEngine;
+
+	constexpr float kMinMass = 0.0001f;
+	constexpr float kMinInertia = 0.0001f;
+
+	/*--------------------------------------------------------------------------------------------------------
+	| --- ApplyLinearConstraints: Zeroes the components of a linear velocity that the constraints freeze --- |
+	--------------------------------------------------------------------------------------------------------*/
+	Vector2f ApplyLinearConstraints(const Vector2f& velocity, BodyConstraints2D constraints) noexcept
 	{
-		m_isAwake = true;
+		return Vector2f{ HasFlag(constraints, BodyConstraints2D::FreezePositionX) ? 0.0f : velocity.x,
+						 HasFlag(constraints, BodyConstraints2D::FreezePositionY) ? 0.0f : velocity.y };
+	}
+
+	/*-----------------------------------------------------------------------------------------------------
+	| --- ApplyPositionConstraints: Locks target position components to current coordinates if frozen --- |
+	-----------------------------------------------------------------------------------------------------*/
+	Vector2f ApplyPositionConstraints(const Vector2f& current, const Vector2f& target, BodyConstraints2D constraints) noexcept
+	{
+		return Vector2f{ HasFlag(constraints, BodyConstraints2D::FreezePositionX) ? current.x : target.x,
+						 HasFlag(constraints, BodyConstraints2D::FreezePositionY) ? current.y : target.y };
 	}
 }
 
@@ -27,7 +43,8 @@ void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
 | --- Constructor: Constructs this RigidBody2D with default values --- |
 ----------------------------------------------------------------------*/
 CaledonEngine::RigidBody2D::RigidBody2D()
-	: m_bodyType{ BodyType2D::Dynamic }
+	: m_pPhysicsScene{ nullptr }
+	, m_bodyType{ BodyType2D::Dynamic }
 	, m_simulated{ true }
 	, m_constraints{ BodyConstraints2D::None }
 	, m_collisionDetectionMode{ CollisionDetectionMode2D::Discrete }
@@ -178,7 +195,8 @@ void CaledonEngine::RigidBody2D::MovePosition(const Vector2f& position)
 	if (m_bodyType == BodyType2D::Static)
 		return;
 
-	//...
+	m_position = ApplyPositionConstraints(m_position, position, m_constraints);
+	WakeIfNeeded();
 }
 
 /*--------------------------------------------------------------------------------------------------
@@ -244,7 +262,11 @@ void CaledonEngine::RigidBody2D::SetLinearVelocity(const Vector2f& velocity) noe
 	if (m_bodyType == BodyType2D::Static)
 		return;
 
-	//...
+	m_linearVelocity = ApplyLinearConstraints(velocity, m_constraints);
+	if (m_linearVelocity != Vector2f::Zero())
+	{
+		WakeIfNeeded();
+	}
 }
 
 /*---------------------------------------------------------------------------
@@ -274,7 +296,10 @@ void CaledonEngine::RigidBody2D::AddForce(const Vector2f& force, ForceMode2D mod
 
 	if (mode == ForceMode2D::Impulse)			// An impulse changes the velocity immediately
 	{
-		//...
+		if (m_mass > 0.0f)
+		{
+			m_linearVelocity = ApplyLinearConstraints(m_linearVelocity + force / m_mass, m_constraints);
+		}
 	}
 	else
 	{
@@ -374,7 +399,7 @@ void CaledonEngine::RigidBody2D::SetUseAutoMass(bool useAutoMass)
 ----------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetMass(float mass) noexcept
 {
-	//...
+	m_mass = std::max(mass, kMinMass);
 }
 
 /*-------------------------------------------------------------------------------------------
@@ -390,6 +415,9 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetWorldCenterOfMass() const
 ------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::UpdateMassData()
 {
+	if (!m_useAutoMass)
+		return;
+
 	//...
 }
 
@@ -406,7 +434,7 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetPoint(const Vector2f& poi
 --------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetVector(const Vector2f& vector) const
 {
-	return Vector2f();
+	return vector.Rotate(-m_rotation);
 }
 
 /*---------------------------------------------------------------------------------------------------------------
@@ -414,7 +442,7 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetVector(const Vector2f& ve
 ---------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativePoint(const Vector2f& relativePoint) const
 {
-	return Vector2f();
+	return relativePoint.Rotate(m_rotation) + m_position;
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
@@ -422,7 +450,7 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativePoint(const Vecto
 -------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativeVector(const Vector2f& relativeVector) const
 {
-	return Vector2f();
+	return relativeVector.Rotate(m_rotation);
 }
 
 /*-------------------------------------------------------------------------------------
@@ -430,7 +458,8 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativeVector(const Vect
 -------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetPointVelocity(const Vector2f& point) const
 {
-	return Vector2f();
+	const Vector2f offset = point - GetWorldCenterOfMass();
+	return m_linearVelocity + offset.Perpendicular() * (m_angularVelocity * Math::Deg2Rad);
 }
 
 /*-------------------------------------------------------------------------------------------------
@@ -438,7 +467,7 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetPointVelocity(const Vecto
 -------------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativePointVelocity(const Vector2f& relativePoint) const
 {
-	return Vector2f();
+	return GetPointVelocity(GetRelativePoint(relativePoint));
 }
 
 /*--------------------------------------------------------------------------------------------
@@ -446,7 +475,15 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetRelativePointVelocity(con
 --------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::GetAttachedColliders(std::vector<Collider2D*>& results, bool findTriggers) const
 {
-	return 0;
+	results.clear();
+	for (Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider != nullptr && (findTriggers || !pCollider->IsTrigger()))
+		{
+			results.push_back(pCollider);
+		}
+	}
+	return static_cast<int>(results.size());
 }
 
 /*------------------------------------------------------------------------------------------------
@@ -454,6 +491,19 @@ int CaledonEngine::RigidBody2D::GetAttachedColliders(std::vector<Collider2D*>& r
 ------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::RefreshAttachedColliders()
 {
+	const std::vector<Collider2D*> previous = m_pAttachedColliders;
+	for (Collider2D* pCollider : previous)
+	{
+		DetachCollider(pCollider);
+	}
+
+	if (m_pOwner == nullptr)
+		return;
+
+	for (Collider2D* pCollider : m_pOwner->GetComponents<Collider2D>())
+	{
+		AttachCollider(pCollider);
+	}
 }
 
 /*---------------------------------------------------------------------------
@@ -461,7 +511,21 @@ void CaledonEngine::RigidBody2D::RefreshAttachedColliders()
 ---------------------------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::AttachCollider(Collider2D* pCollider)
 {
-	return false;
+	if (pCollider == nullptr)
+		return false;
+
+	// Collider is already attached
+	if (std::find(m_pAttachedColliders.begin(), m_pAttachedColliders.end(), pCollider) != m_pAttachedColliders.end())
+		return false;
+
+	// Collider belongs to another body; needs to be detached first
+	if (pCollider->GetAttachedRigidBody() != nullptr && pCollider->GetAttachedRigidBody() != this)
+		return false;
+
+	m_pAttachedColliders.push_back(pCollider);
+	pCollider->SetAttachedRigidBody(this);
+	UpdateMassData();
+	return true;
 }
 
 /*---------------------------------------------------------------------------
@@ -469,7 +533,21 @@ bool CaledonEngine::RigidBody2D::AttachCollider(Collider2D* pCollider)
 ---------------------------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::DetachCollider(Collider2D* pCollider)
 {
-	return false;
+	const auto it = std::find(m_pAttachedColliders.begin(), m_pAttachedColliders.end(), pCollider);
+
+	if (pCollider == nullptr || it == m_pAttachedColliders.end())
+		return false;
+
+	m_pAttachedColliders.erase(it);
+
+	if (pCollider->GetAttachedRigidBody() == this)
+	{
+		pCollider->SetAttachedRigidBody(nullptr);
+	}
+
+	UpdateMassData();
+	return true;
+
 }
 
 /*-----------------------------------------------------------------------------
@@ -477,6 +555,15 @@ bool CaledonEngine::RigidBody2D::DetachCollider(Collider2D* pCollider)
 -----------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetSharedMaterial(const PhysicsMaterial2D& material)
 {
+	m_sharedMaterial = material;
+
+	for (Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider != nullptr)
+		{
+			pCollider->SetSharedMaterial(material);
+		}
+	}
 }
 
 /*------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -484,7 +571,23 @@ void CaledonEngine::RigidBody2D::SetSharedMaterial(const PhysicsMaterial2D& mate
 ------------------------------------------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::RigidBody2D::ClosestPoint(const Vector2f& position) const
 {
-	return Vector2f();
+	Vector2f best = position;
+	float bestSqrDistance = Math::Infinity;
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider == nullptr || !pCollider->IsActive())
+			continue;
+
+		const Vector2f point = pCollider->ClosestPoint(position);
+		const float sqrDistance = Vector2f::SqrDistance(point, position);
+		if (sqrDistance < bestSqrDistance)
+		{
+			bestSqrDistance = sqrDistance;
+			best = point;
+		}
+	}
+	return best;
+
 }
 
 /*------------------------------------------------------------------------------------------------------
@@ -492,7 +595,13 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::ClosestPoint(const Vector2f&
 ------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::OverlapPoint(const Vector2f& point) const
 {
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider != nullptr && pCollider->IsActive() && pCollider->OverlapPoint(point))
+			return true;
+	}
 	return false;
+
 }
 
 /*-------------------------------------------------------------------------------------------------------
@@ -500,7 +609,16 @@ bool CaledonEngine::RigidBody2D::OverlapPoint(const Vector2f& point) const
 -------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
-	return 0;
+	int count = 0;
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider != nullptr && pCollider->IsActive())
+		{
+			count += pCollider->GetShapes(physicsShapeGroup);
+		}
+	}
+	return count;
+
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -508,7 +626,24 @@ int CaledonEngine::RigidBody2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup
 ------------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::ColliderDistance2D CaledonEngine::RigidBody2D::Distance(const Collider2D* pCollider) const
 {
-	return ColliderDistance2D();
+	ColliderDistance2D best;
+	if (pCollider == nullptr)
+		return best;
+
+	for (const Collider2D* pAttached : m_pAttachedColliders)
+	{
+		if (pAttached == nullptr || !pAttached->IsActive())
+			continue;
+
+		const ColliderDistance2D candidate = pAttached->Distance(pCollider);
+
+		if (candidate.isValid && (!best.isValid || candidate.distance < best.distance))
+		{
+			best = candidate;
+		}
+	}
+	return best;
+
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -516,7 +651,13 @@ CaledonEngine::ColliderDistance2D CaledonEngine::RigidBody2D::Distance(const Col
 ------------------------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::IsTouching(const Collider2D* pCollider) const
 {
+	for (const Collider2D* pAttached : m_pAttachedColliders)
+	{
+		if (pAttached != nullptr && pAttached->IsActive() && pAttached->IsTouching(pCollider))
+			return true;
+	}
 	return false;
+
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -524,7 +665,13 @@ bool CaledonEngine::RigidBody2D::IsTouching(const Collider2D* pCollider) const
 -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::RigidBody2D::IsTouchingLayers(LayerMask layerMask) const
 {
+	for (const Collider2D* pAttached : m_pAttachedColliders)
+	{
+		if (pAttached != nullptr && pAttached->IsActive() && pAttached->IsTouchingLayers(layerMask))
+			return true;
+	}
 	return false;
+
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -532,7 +679,20 @@ bool CaledonEngine::RigidBody2D::IsTouchingLayers(LayerMask layerMask) const
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::Cast(const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
-	return 0;
+	size_t count = 0;
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (count >= results.size())
+			break;
+
+		if (pCollider != nullptr && pCollider->IsActive())
+		{
+			// Each collider fills the space the previous ones left
+			count += static_cast<size_t>(pCollider->Cast(direction, contactFilter, results.subspan(count), distance));
+		}
+	}
+	return static_cast<int>(count);
+
 }
 
 /*----------------------------------------------------------------------------------------------------------
@@ -540,7 +700,25 @@ int CaledonEngine::RigidBody2D::Cast(const Vector2f& direction, const ContactFil
 ----------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::Overlap(const Vector2f& position, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	results.clear();
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider == nullptr || !pCollider->IsActive())
+			continue;
+
+		std::vector<Collider2D*> hits;
+		pCollider->Overlap(position, angle, contactFilter, hits);
+
+		for (Collider2D* pHit : hits)
+		{
+			const bool isOwnCollider = (pHit != nullptr && pHit->GetAttachedRigidBody() == this);
+
+			if (pHit != nullptr && !isOwnCollider && std::find(results.begin(), results.end(), pHit) == results.end())
+				results.push_back(pHit);
+		}
+	}
+	return static_cast<int>(results.size());
+
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -548,7 +726,19 @@ int CaledonEngine::RigidBody2D::Overlap(const Vector2f& position, float angle, c
 ---------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
-	return 0;
+	size_t count = 0;
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (count >= contacts.size())
+			break;
+
+		if (pCollider != nullptr && pCollider->IsActive())
+		{
+			count += static_cast<size_t>(pCollider->GetContacts(contactFilter, contacts.subspan(count)));
+		}
+	}
+	return static_cast<int>(count);
+
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------
@@ -556,5 +746,39 @@ int CaledonEngine::RigidBody2D::GetContacts(const ContactFilter2D& contactFilter
 -------------------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::RigidBody2D::GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const
 {
-	return 0;
+	colliders.clear();
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		if (pCollider == nullptr || !pCollider->IsActive())
+			continue;
+
+		std::vector<Collider2D*> touching;
+		pCollider->GetContactColliders(contactFilter, touching);
+
+		for (Collider2D* pTouching : touching)
+		{
+			if (pTouching != nullptr && std::find(colliders.begin(), colliders.end(), pTouching) == colliders.end())
+			{
+				colliders.push_back(pTouching);
+			}
+		}
+	}
+	return static_cast<int>(colliders.size());
+
+}
+
+
+
+/*------------------------------------
+| --- Private Method Definitions --- |
+------------------------------------*/
+/*------------------------------------------------------------------------
+| --- WakeIfNeeded: Forces and velocity changes wake a sleeping body --- |
+------------------------------------------------------------------------*/
+void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
+{
+	if (!m_isAwake && m_bodyType != BodyType2D::Static)
+	{
+		m_isAwake = true;
+	}
 }
