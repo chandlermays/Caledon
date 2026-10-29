@@ -4,8 +4,8 @@
 ------------------------------*/
 #include "EngineManager.h"
 
-#include "../Engine/FixedTimestep.h"
-#include "../Engine/LoggingSubsystem.h"
+#include "Systems/Engine/FixedTimestep.h"
+#include "Systems/Engine/LoggingSubsystem.h"
 
 #include <algorithm>
 #include <chrono>

@@ -4,7 +4,7 @@
 ------------------------------*/
 #pragma once
 
-#include "Systems/Scene/Component.h"
+#include "Systems/Physics/LayerMask.h"
 #include "Systems/Physics/Materials/PhysicsMaterial2D.h"
 #include "Systems/Physics/Types/BodyConstraints2D.h"
 #include "Systems/Physics/Types/BodyInterpolation2D.h"
@@ -13,9 +13,9 @@
 #include "Systems/Physics/Types/ColliderDistance2D.h"
 #include "Systems/Physics/Types/CollisionDetectionMode2D.h"
 #include "Systems/Physics/Types/ForceMode2D.h"
-#include "Systems/Physics/Types/SlideResults2D.h"
 #include "Systems/Physics/Types/SlideConfig2D.h"
-#include "Systems/Physics/LayerMask.h"
+#include "Systems/Physics/Types/SlideResults2D.h"
+#include "Systems/Scene/Component.h"
 #include "Utilities/Math/Vector2.h"
 
 #include <span>

@@ -10,10 +10,10 @@
 #include <vector>
 #include <span>
 
-// Represents a group of PhysicsSHape2D and their geometry
+// Represents a group of PhysicsShape2D and their geometry
 // 
 // A shape group represents multiple PhysicsShape2D of the same or mixed PhysicsShapeType2D along with their geometry. It is comprised of a single list of vertices (GetShapeVertices)
-// along with a list of PhysicsSHape2D which refer to specific ranges of those vertices i.e. they index into the list of vertices
+// along with a list of PhysicsShape2D which refer to specific ranges of those vertices i.e. they index into the list of vertices
 // Some shape types use a fixed number of vertices and some use a variable number of vertices therefore this sinle vertices list is a compact
 // and efficient representation for multiple PhysicsShape2D in a group
 //

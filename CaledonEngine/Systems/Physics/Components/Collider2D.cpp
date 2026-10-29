@@ -7,6 +7,7 @@
 #include "Systems/Physics/Components/RigidBody2D.h"
 #include "Systems/Physics/PhysicsScene2D.h"
 #include "Systems/Scene/Scene.h"
+#include "Systems/Scene/GameObject.h"
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -47,11 +48,16 @@ CaledonEngine::Collider2D::Collider2D()
 -------------------------------------------------------*/
 CaledonEngine::Collider2D::~Collider2D()
 {
-	if (m_pPhysicsScene2D != nullptr)
+	if (m_pAttachedRigidBody != nullptr)
 	{
 		m_pAttachedRigidBody->DetachCollider(this);
+	}
+
+	if (m_pPhysicsScene2D != nullptr)
+	{
 		m_pPhysicsScene2D->RemoveCollider(this);
 	}
+
 }
 
 /*------------------------------------------------------
@@ -63,14 +69,28 @@ bool CaledonEngine::Collider2D::Initialize()
 		return true;
 
 	const Scene* pScene = (m_pOwner != nullptr) ? m_pOwner->GetScene() : nullptr;
-	m_pPhysicsScene2D = (pScene != nullptr) ? pScene->GetPhysicsScene2D() : nullptr;
-	if (m_pPhysicsScene2D == nullptr)
+	PhysicsScene2D* pPhysicsScene = (pScene != nullptr) ? pScene->GetPhysicsScene2D() : nullptr;
+	if (pPhysicsScene == nullptr)
 		return false;
 
-	if (!m_pPhysicsScene2D->AddCollider(this))
+	// Only keep the scene once registration succeeded, so a failed Initialize leaves nothing behind
+	if (!pPhysicsScene->AddCollider(this))
 		return false;
 
+	m_pPhysicsScene2D = pPhysicsScene;
+
+	// Whichever of the two components initializes first, the collider ends up attached to the owner's RigidBody2D
+	if (m_pAttachedRigidBody == nullptr && m_pOwner != nullptr)
+	{
+		if (RigidBody2D* pBody = m_pOwner->GetComponent<RigidBody2D>())
+		{
+			pBody->AttachCollider(this);
+		}
+	}
+
+	RefreshBounds();
 	return true;
+
 }
 
 /*--------------------------------------------------------------
@@ -87,7 +107,53 @@ const std::string& CaledonEngine::Collider2D::GetTypeName() const
 ------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 {
-    return false;
+	if (pCollider == nullptr || pCollider == this)
+		return false;
+
+	// both must be registered with the same PhysicsScene2D
+	if (m_pPhysicsScene2D == nullptr || pCollider->m_pPhysicsScene2D != m_pPhysicsScene2D)
+		return false;
+
+	//...
+	if (m_pOwner == nullptr || pCollider->m_pOwner == nullptr)
+		return false;
+
+	//...
+	if (!IsActive() || !pCollider->IsActive() || !m_pOwner->IsActive() || !pCollider->m_pOwner->IsActive())
+		return false;
+
+	//...
+	if (m_pOwner == pCollider->m_pOwner)
+		return false;
+
+	//...
+	if (m_pAttachedRigidBody != nullptr && m_pAttachedRigidBody == pCollider->m_pAttachedRigidBody)
+		return false;
+
+	// explicit per-pair ignore (Physics2D.IgnoreCollision)
+	if (m_pPhysicsScene2D->GetIgnoreCollision(this, pCollider))
+		return false;
+
+	// Each collider decides whether it accepts the other's layer:
+	// effective mask = (layer matrix row for its own layer | includeLayers) & ~excludeLayers
+	const auto& matrix = m_pPhysicsScene2D->GetSettings().layerCollisionMatrix;
+	const int layerA = m_pOwner->GetLayer();
+	const int layerB = pCollider->m_pOwner->GetLayer();
+
+	const uint32_t maskA = (static_cast<uint32_t>(matrix[layerA]) | static_cast<uint32_t>(m_includeLayers.value)) & ~static_cast<uint32_t>(m_excludeLayers.value);
+	const uint32_t maskB = (static_cast<uint32_t>(matrix[layerB]) | static_cast<uint32_t>(pCollider->m_includeLayers.value)) & ~static_cast<uint32_t>(pCollider->m_excludeLayers.value);
+
+	const bool aAcceptsB = (maskA & (1u << layerB)) != 0;
+	const bool bAcceptsA = (maskB & (1u << layerA)) != 0;
+
+	if (aAcceptsB == bAcceptsA)
+		return aAcceptsB;
+
+	// Conflicting decisions: the higher layerOverridePriority wins. On a tie, the contact is refused (exclude beats include).
+	if (m_layerOverridePriority != pCollider->m_layerOverridePriority)
+		return (m_layerOverridePriority > pCollider->m_layerOverridePriority) ? aAcceptsB : bAcceptsA;
+
+	return false;
 }
 
 /*-----------------------------------------------------------------------------------------------------------------
@@ -95,7 +161,10 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 -----------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::Vector2f CaledonEngine::Collider2D::ClosestPoint(const Vector2f& position) const
 {
-    return Vector2f();
+	if (m_pPhysicsScene2D == nullptr)
+		return position;
+
+	return m_pPhysicsScene2D->ClosestPoint(position, this);
 }
 
 /*---------------------------------------------------------------------------------------------------
@@ -103,7 +172,10 @@ CaledonEngine::Vector2f CaledonEngine::Collider2D::ClosestPoint(const Vector2f& 
 ---------------------------------------------------------------------------------------------------*/
 CaledonEngine::ColliderDistance2D CaledonEngine::Collider2D::Distance(const Collider2D* pCollider) const
 {
-    return ColliderDistance2D();
+	if (m_pPhysicsScene2D == nullptr || pCollider == nullptr)
+		return ColliderDistance2D{};
+
+	return m_pPhysicsScene2D->Distance(this, pCollider);
 }
 
 /*-------------------------------------------------------------------------------------
@@ -111,7 +183,10 @@ CaledonEngine::ColliderDistance2D CaledonEngine::Collider2D::Distance(const Coll
 -------------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider) const
 {
-    return false;
+	if (m_pPhysicsScene2D == nullptr || pCollider == nullptr)
+		return false;
+
+	return m_pPhysicsScene2D->IsTouching(this, pCollider);
 }
 
 /*-------------------------------------------------------------------------------------
@@ -119,7 +194,12 @@ bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider) const
 -------------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const
 {
-    return false;
+	if (m_pPhysicsScene2D == nullptr || pCollider == nullptr)
+		return false;
+
+	// If your PhysicsScene2D supports a filtered IsTouching overload, call it here. 
+	// Otherwise, you can evaluate the contact filter against the result.
+	return m_pPhysicsScene2D->IsTouching(this, pCollider);
 }
 
 /*-------------------------------------------------------------------------------------
@@ -127,15 +207,30 @@ bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider, const Co
 -------------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::IsTouching(const ContactFilter2D& contactFilter) const
 {
-    return false;
+	if (m_pPhysicsScene2D == nullptr)
+		return false;
+
+	// Overlap or check contacts involving this collider filtered by the contactFilter
+	std::vector<Collider2D*> overlappingColliders;
+	m_pPhysicsScene2D->OverlapCollider(this, contactFilter, overlappingColliders);
+	return !overlappingColliders.empty();
 }
 
 /*---------------------------------------------------------------------------------------------------------------------
 | --- IsTouchingLayers: Check whether this Collider2D is touching any colliders on the specified LayerMask or not --- |
 ---------------------------------------------------------------------------------------------------------------------*/
-bool CaledonEngine::Collider2D::IsTouchingLayers(LayerMask) const
+bool CaledonEngine::Collider2D::IsTouchingLayers(LayerMask layerMask) const
 {
-    return false;
+	if (m_pPhysicsScene2D == nullptr)
+		return false;
+
+	// Build a quick contact filter targeting the specified layer mask
+	ContactFilter2D filter = ContactFilter2D::NoFilter();
+	filter.SetLayerMask(layerMask);
+
+	std::vector<Collider2D*> overlappingColliders;
+	m_pPhysicsScene2D->OverlapCollider(this, filter, overlappingColliders);
+	return !overlappingColliders.empty();
 }
 
 /*-----------------------------------------------------------------------------------
@@ -143,7 +238,7 @@ bool CaledonEngine::Collider2D::IsTouchingLayers(LayerMask) const
 -----------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::OverlapPoint(const Vector2f& point) const
 {
-    return false;
+	return Vector2f::SqrDistance(point, ClosestPoint(point)) <= 0.0f;
 }
 
 /*------------------------------------------------------------------------------------------------------
@@ -151,6 +246,7 @@ bool CaledonEngine::Collider2D::OverlapPoint(const Vector2f& point) const
 ------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnCollisionEnter2D(const Collision2D& collision)
 {
+
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -158,6 +254,7 @@ void CaledonEngine::Collider2D::OnCollisionEnter2D(const Collision2D& collision)
 ---------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnCollisionExit2D(const Collision2D& collision)
 {
+
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -165,6 +262,7 @@ void CaledonEngine::Collider2D::OnCollisionExit2D(const Collision2D& collision)
 ------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnCollisionStay2D(const Collision2D& collision)
 {
+
 }
 
 /*------------------------------------------------------------------------------------------------------
@@ -172,6 +270,7 @@ void CaledonEngine::Collider2D::OnCollisionStay2D(const Collision2D& collision)
 ------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnTriggerEnter2D(const Collision2D& collision)
 {
+
 }
 
 /*-----------------------------------------------------------------------------------------------------
@@ -179,6 +278,7 @@ void CaledonEngine::Collider2D::OnTriggerEnter2D(const Collision2D& collision)
 -----------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnTriggerExit2D(const Collision2D& collision)
 {
+
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -186,6 +286,7 @@ void CaledonEngine::Collider2D::OnTriggerExit2D(const Collision2D& collision)
 --------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::OnTriggerStay2D(const Collision2D& collision)
 {
+
 }
 
 /*--------------------------------------------------------------------------------
@@ -193,6 +294,7 @@ void CaledonEngine::Collider2D::OnTriggerStay2D(const Collision2D& collision)
 --------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::SetSharedMaterial(const PhysicsMaterial2D& material)
 {
+	m_sharedMaterial = material;
 }
 
 /*-----------------------------------------------------------------------
@@ -200,12 +302,13 @@ void CaledonEngine::Collider2D::SetSharedMaterial(const PhysicsMaterial2D& mater
 -----------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::RefreshBounds()
 {
+
 }
 
 /*------------------------------------------------------------------
 | --- GetShapes: Populates the shape group with physics shapes --- |
 ------------------------------------------------------------------*/
-int CaledonEngine::Collider2D::GetShapes(PhysicsShapeGroup2D& physicsSHapeGroup) const
+int CaledonEngine::Collider2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
     return 0;
 }
@@ -231,7 +334,11 @@ CaledonEngine::AABB2D CaledonEngine::Collider2D::GetShapeBounds(std::vector<AABB
 -------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Cast(const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance, bool ignoreSiblingColliders) const
 {
-    return 0;
+    /*
+	
+	
+	
+	*/
 }
 
 /*----------------------------------------------------------------------------------------
@@ -239,7 +346,18 @@ int CaledonEngine::Collider2D::Cast(const Vector2f& direction, const ContactFilt
 ----------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-    return 0;
+    /*
+	
+	if (m_pAttachedRigidBody)
+	return PhysicsScene2D.OverlapCollider(...)
+		-> ContactFilter2D contactFilter = ContactFilter2D.CreateLegacyFilter(int layerMask, float minDepth, float maxDepth)
+			-> ContactFilter2D result = default(ContactFilter2D);
+			   result.useTriggers = Physics2D.queriesHitTrigger;
+			   result.SetLayerMask(layerMask);
+			   result.SetDepth(minDepth, maxDepth);
+			   return result;
+
+	*/
 }
 
 /*---------------------------------------------------------------------------------------
@@ -255,7 +373,7 @@ int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<Coll
 -------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
-    return 0;
+    // return Physics2D.GetContacts(this, contactFilter, contacts);
 }
 
 /*--------------------------------------------------------------------------------------------
@@ -263,5 +381,5 @@ int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter,
 --------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const
 {
-    return 0;
+    // return Physics2D.GetContactColliders(this, contactFilter, colliders);
 }

@@ -4,7 +4,7 @@
 ------------------------------*/
 #pragma once
 #include "Systems/Rendering/Color.h"
-#include "Utilities/Math/Rect.h"
+#include "Utilities/Geometry/Rect.h"
 
 namespace CaledonEngine
 {

@@ -21,6 +21,7 @@ CaledonEngine::GameObject::GameObject()
 	, m_pParent{ nullptr }
 	, m_name{ "GameObject" }
 	, m_tag{ "Untagged" }
+	, m_layer{ 0 }
 	, m_isActive{ true }
 	, m_pTransform{ nullptr }
 {
@@ -190,6 +191,22 @@ const std::string& CaledonEngine::GameObject::GetTag() const
 void CaledonEngine::GameObject::SetTag(const std::string& tag)
 {
 	m_tag = tag;
+}
+
+/*----------------------------------------------------------------
+| --- GetLayer: Returns the physics layer of this GameObject --- |
+----------------------------------------------------------------*/
+int CaledonEngine::GameObject::GetLayer() const noexcept
+{
+	return m_layer;
+}
+
+/*--------------------------------------------------------------------
+| --- IsActive: Returns whether this GameObject is active or not --- |
+--------------------------------------------------------------------*/
+void CaledonEngine::GameObject::SetLayer(int layer) noexcept
+{
+	m_layer = std::clamp(layer, 0, 31);
 }
 
 /*--------------------------------------------------------------------

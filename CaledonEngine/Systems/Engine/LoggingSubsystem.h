@@ -1,6 +1,10 @@
+/*------------------------------
+| File: LoggingSubsystem.h
+| Author: Chandler Mays
+------------------------------*/
 #pragma once
-#include "../Engine/ISubsystem.h"
-#include "../Engine/EngineContext.h"
+#include "Systems/Engine/EngineContext.h"
+#include "Systems/Engine/ISubsystem.h"
 
 #include <format>
 #include <fstream>

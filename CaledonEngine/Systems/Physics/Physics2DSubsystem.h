@@ -130,6 +130,12 @@ namespace CaledonEngine
 		----------------------------------------------------------------------------------------------------------------------------*/
 		std::vector<Collider2D*> LinecastAll(const Vector2f& start, const Vector2f& end, int layerMask = DefaultRaycastLayers, float minDepth = -Math::Infinity, float maxDepth = Math::Infinity) const;
 
+		/*-----------------------------------------------------------------------------------------------------------------
+		| --- GetRayIntersection: Returns all intersections of a ray against the Colliders in this Physics2DSubsystem --- |
+		-----------------------------------------------------------------------------------------------------------------*/
+		ColliderHit2D GetRayIntersection(const Ray2D& ray, float distance = Math::Infinity, int layerMask = DefaultRaycastLayers) const;
+		std::vector<ColliderHit2D> GetRayIntersectionAll(const Ray2D& ray, float distance = Math::Infinity, int layerMask = DefaultRaycastLayers) const;
+
 		/*------------------------------------------------------------------------------------------------------------------------
 		| --- OverlapArea: Returns all intersections of an overlapping Area against the Colliders in this Physics2DSubsystem --- |
 		------------------------------------------------------------------------------------------------------------------------*/
@@ -192,19 +198,14 @@ namespace CaledonEngine
 		------------------------------------------------------------------------------------------------------------------------------*/
 		std::vector<Collider2D*> OverlapPointAll(const Vector2f& point, int layerMask = DefaultRaycastLayers, float minDepth = -Math::Infinity, float maxDepth = Math::Infinity) const;
 
-		/*-----------------------------------------------------------------------------------------------------------------
-		| --- GetRayIntersection: Returns all intersections of a ray against the Colliders in this Physics2DSubsystem --- |
-		-----------------------------------------------------------------------------------------------------------------*/
-		ColliderHit2D GetRayIntersection(const Ray2D& ray, float distance = Math::Infinity, int layerMask = DefaultRaycastLayers) const;
-		std::vector<ColliderHit2D> GetRayIntersectionAll(const Ray2D& ray, float distance = Math::Infinity, int layerMask = DefaultRaycastLayers) const;
-
 		Vector2f ClosestPoint(const Vector2f& position, const Collider2D* pCollider) const;												// Returns a point on the perimeter of the Collider that is closest to the specified position
 		ColliderDistance2D Distance(const Collider2D* pColliderA, const Collider2D* pColliderB) const;									// Calculates the minimum distance between two Colliders
 
-		int GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter,										// Retrieves all colliders in contact with this Collider, filtered by the contactFilter
-			std::vector<Collider2D*>& results) const;
 		int GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter,												// Retrieves all contact points for the Collider, filtered by the contactFilter
 			std::span<ContactPoint2D> contacts) const;
+
+		int GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter,										// Retrieves all colliders in contact with this Collider, filtered by the contactFilter
+			std::vector<Collider2D*>& results) const;
 
 		bool GetIgnoreCollision(const Collider2D* pCollider1, const Collider2D* pCollider2) const;										// Checks whether the collision detection system will ignore all collisions/triggers between collider1 and collider2
 		bool GetIgnoreLayerCollision(int layer1, int layer2) const;																		// Checks whether collisions between the specified layers are ignored or not
@@ -213,6 +214,8 @@ namespace CaledonEngine
 		void IgnoreCollision(Collider2D* pCollider1, Collider2D* pCollider2, bool ignore = true);										// Makes the collision detection system ignore all collisions/triggers between collider1 and collider2
 		void IgnoreLayerCollision(int layer1, int layer2, bool ignore);																	// Chooses whether to detect or ignore collisions between a specified pair of layers
 		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;												// Checks whether the passed Colliders are in contact or not
+		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;										// Check whether this Collider2D is touching the Collider2D or not
+		bool IsTouching(const ContactFilter2D& contactFilter) const;																	// Check whether this Collider2D is touching the Collider2D or not
 
 		bool IsTouchingLayers(const Collider2D* pCollider, LayerMask layerMask = AllLayers) const;										// Checks whether the Collider is touching any Colliders on the specified layerMask
 			

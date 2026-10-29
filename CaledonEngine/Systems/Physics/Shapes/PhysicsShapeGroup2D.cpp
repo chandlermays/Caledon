@@ -77,7 +77,7 @@ int CaledonEngine::PhysicsShapeGroup2D::AddBox(const Vector2f& center, const Vec
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddCapsule(const Vector2f& vertex0, const Vector2f& vertex1, float radius)
 {
-	if (!(radius > 0.0f))
+	if (radius <= 0.0f)
 		return -1;
 
 	const Vector2f ends[2] = { vertex0, vertex1 };
@@ -89,7 +89,7 @@ int CaledonEngine::PhysicsShapeGroup2D::AddCapsule(const Vector2f& vertex0, cons
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddCircle(const Vector2f& center, float radius)
 {
-	if (!(radius > 0.0f))
+	if (radius <= 0.0f)
 		return -1;
 
 	return AddShape(PhysicsShapeType2D::Circle, std::span<const Vector2f>(&center, 1), radius);
@@ -100,7 +100,7 @@ int CaledonEngine::PhysicsShapeGroup2D::AddCircle(const Vector2f& center, float 
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddEdges(std::span<const Vector2f> vertices, float edgeRadius)
 {
-	if (vertices.size() < 2 || !(edgeRadius >= 0.0f))
+	if (vertices.size() < 2 || (edgeRadius <= 0.0f))
 		return -1;
 
 	return AddShape(PhysicsShapeType2D::Edges, vertices, edgeRadius);
@@ -111,7 +111,8 @@ int CaledonEngine::PhysicsShapeGroup2D::AddEdges(std::span<const Vector2f> verti
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddPolygon(std::span<const Vector2f> vertices)
 {
-	// safety check
+	if (vertices.size() < 3)
+		return -1;
 
 	return AddShape(PhysicsShapeType2D::Polygon, vertices, 0.0f);
 }

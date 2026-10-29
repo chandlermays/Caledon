@@ -3,7 +3,9 @@
 | Author: Chandler Mays
 ------------------------------*/
 #include "CompositeCollider2D.h"
+
 #include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
+
 #include <algorithm>
 #include <cmath>
 

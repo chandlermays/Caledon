@@ -23,6 +23,7 @@ namespace CaledonEngine
 
 		std::string m_name;																					// The name of this GameObject
 		std::string m_tag;																					// The tag of this GameObject
+		int m_layer;																						// The physics layer of this GameObject
 		bool m_isActive;																					// Whether this GameObject is active or not
 
 		Transform* m_pTransform;																			// Pointer to this GameObject's Transform component
@@ -54,6 +55,9 @@ namespace CaledonEngine
 
 		const std::string& GetTag() const;																	// Returns the tag of this GameObject
 		void SetTag(const std::string& tag);																// Sets the tag of this GameObject
+
+		int GetLayer() const noexcept;																		// Returns the physics layer of this GameObject
+		void SetLayer(int layer) noexcept;																	// Sets the physics layer of this GameObject
 
 		bool IsActive() const;																				// Returns whether this GameObject is active or not
 		void SetActive(bool isActive);																		// Sets whether this GameObject is active or not

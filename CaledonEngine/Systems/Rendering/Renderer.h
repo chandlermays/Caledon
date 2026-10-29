@@ -4,7 +4,7 @@
 ------------------------------*/
 #pragma once
 #include "Systems/Rendering/Color.h"
-#include "Utilities/Math/Rect.h"
+#include "Utilities/Geometry/Rect.h"
 #include "Utilities/Math/Vector2.h"
 
 #include <memory>

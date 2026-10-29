@@ -15,6 +15,7 @@
 #include "Utilities/Math/Vector2.h"
 
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <vector>
 
@@ -45,6 +46,9 @@ namespace CaledonEngine
 
 	class Collider2D : public Component
 	{
+	public:
+		using CollisionCallback = std::function<void(Collider2D*)>;															// Type alias for a collision callback function that takes a pointer to another Collider2D as an argument
+
 	private:
 		RigidBody2D* m_pAttachedRigidBody;																					// The RigidBody2D attached to this Collider2D
 		PhysicsScene2D* m_pPhysicsScene2D;																					// The PhysicsScene2D this Collider2D is registered with
@@ -57,6 +61,10 @@ namespace CaledonEngine
 		bool m_isTrigger;																									// Is this collider configured as a trigger?
 		Vector2f m_offset;																									// The local offset of the collider geometry
 		PhysicsMaterial2D m_sharedMaterial;																					// The PhysicsMaterial2D that is applied to this Collider2D
+
+		std::vector<CollisionCallback> m_onEnterCallbacks;																	// Callbacks to invoke when a collision starts
+		std::vector<CollisionCallback> m_onUpdateCallbacks;																	// Callbacks to invoke when a collision is ongoing
+		std::vector<CollisionCallback> m_onExitCallbacks;																	// Callbacks to invoke when a collision ends
 
 		LayerMask m_callbackLayers;																							// The Layers that this Collider2D will report collision or trigger callbacks for during a contact with another Collider2D
 		LayerMask m_contactCaptureLayers;																					// The layers of other Collider2D involved in contacts with this Collider2D that will be captured
@@ -114,7 +122,7 @@ namespace CaledonEngine
 		PhysicsMaterialCombine2D GetBounceCombine() const noexcept															{ return m_bounceCombine; }							// Returns the bounciness combine mode of this Collider2D
 		void SetBounceCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_bounceCombine = combine; }						// Sets the bounciness combine mode of this Collider2D
 		float GetBounciness() const noexcept																				{ return m_bounciness; }							// Returns the bounciness value of this Collider2D
-		void SetBouniness(float bounciness) noexcept																		{ m_bounciness = bounciness; }						// Sets the bounciness value of this Collider2D
+		void SetBounciness(float bounciness) noexcept																		{ m_bounciness = bounciness; }						// Sets the bounciness value of this Collider2D
 		
 		float GetDensity() const noexcept																					{ return m_density; }								// Returns the density value of this Collider2D
 		void SetDensity(float density) noexcept																				{ m_density = density; }							// Sets the density value of this Collider2D

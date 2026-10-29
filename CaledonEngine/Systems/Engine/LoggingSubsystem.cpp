@@ -1,4 +1,9 @@
+/*------------------------------
+| File: LoggingSubsystem.cpp
+| Author: Chandler Mays
+------------------------------*/
 #include "LoggingSubsystem.h"
+
 #include <iostream>
 
 /*---------------------------------------------------------------------------------------

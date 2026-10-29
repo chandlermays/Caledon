@@ -9,7 +9,6 @@
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
-
 namespace
 {
 	using namespace CaledonEngine;
@@ -225,7 +224,24 @@ void CaledonEngine::RigidBody2D::MoveRotation(float angle)
 --------------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::SlideResults2D CaledonEngine::RigidBody2D::Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig)
 {
-	//...
+	/*
+	
+	// throw excp if deltaTime is negative
+	
+	if (Math::Approximately(deltaTime, 0f))
+	{
+		return new SlideResults
+		{
+			position = (slideConfig.useStartPosition ? slideConfig.startPosition : position),
+			remainingVelocity = velocity;
+		}
+	}
+
+	// throw excp -> using simulation move when body type is Static
+	// throw excp -> maxIterations must be greater than zero
+	// throw excp -> selected collider must be attached to the slide RigidBody2D
+
+	*/
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
