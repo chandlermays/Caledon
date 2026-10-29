@@ -331,6 +331,9 @@
     <ClInclude Include="Systems\Physics\Components\CapsuleCollider2D.h">
       <Filter>Source Files\Systems\Physics\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\ShapeMass2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -476,6 +479,9 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\Components\CapsuleCollider2D.cpp">
       <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\ShapeMass2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

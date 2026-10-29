@@ -110,7 +110,8 @@ CaledonEngine::Collider2D::Collider2D()
 	, m_errorState{ ColliderErrorState2D::None }
 	, m_layerOverridePriority{ 0 }
 	, m_shapeCount{ 0 }
-{}
+{
+}
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -167,8 +168,8 @@ bool CaledonEngine::Collider2D::Initialize()
 --------------------------------------------------------------*/
 const std::string& CaledonEngine::Collider2D::GetTypeName() const
 {
-    static const std::string typeName = "Collider2D";
-    return typeName;
+	static const std::string typeName = "Collider2D";
+	return typeName;
 }
 
 /*------------------------------------------------------------------------------
@@ -199,12 +200,10 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	if (m_pAttachedRigidBody != nullptr && m_pAttachedRigidBody == pCollider->m_pAttachedRigidBody)
 		return false;
 
-	// explicit per-pair ignore (Physics2D.IgnoreCollision)
+	//...
 	if (m_pPhysicsScene2D->GetIgnoreCollision(this, pCollider))
 		return false;
 
-	// Each collider decides whether it accepts the other's layer:
-	// effective mask = (layer matrix row for its own layer | includeLayers) & ~excludeLayers
 	const auto& matrix = m_pPhysicsScene2D->GetSettings().layerCollisionMatrix;
 	const int layerA = m_pOwner->GetLayer();
 	const int layerB = pCollider->m_pOwner->GetLayer();
@@ -218,7 +217,6 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	if (aAcceptsB == bAcceptsA)
 		return aAcceptsB;
 
-	// Conflicting decisions: the higher layerOverridePriority wins. On a tie, the contact is refused (exclude beats include).
 	if (m_layerOverridePriority != pCollider->m_layerOverridePriority)
 		return (m_layerOverridePriority > pCollider->m_layerOverridePriority) ? aAcceptsB : bAcceptsA;
 
@@ -358,6 +356,32 @@ void CaledonEngine::Collider2D::OnTriggerStay2D(const Collision2D& collision)
 
 }
 
+/*---------------------------------------------------------------
+| --- SetDensity: Sets the density value of this Collider2D --- |
+---------------------------------------------------------------*/
+void CaledonEngine::Collider2D::SetDensity(float density)
+{
+	m_density = density;
+
+	if (m_pAttachedRigidBody != nullptr)
+	{
+		m_pAttachedRigidBody->UpdateMassData();
+	}
+}
+
+/*------------------------------------------------------------------------
+| --- SetIsTrigger: Sets whether this Collider2D is a trigger or not --- |
+------------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::SetIsTrigger(bool isTrigger)
+{
+	m_isTrigger = isTrigger;
+
+	if (m_pAttachedRigidBody != nullptr)
+	{
+		m_pAttachedRigidBody->UpdateMassData();
+	}
+}
+
 /*--------------------------------------------------------------------------------
 | --- SetSharedMaterial: Sets the shared physics material of this Collider2D --- |
 --------------------------------------------------------------------------------*/
@@ -375,6 +399,11 @@ void CaledonEngine::Collider2D::RefreshBounds()
 	m_shapeCount = BuildShapes(shapeGroup, true);
 	m_errorState = (m_shapeCount > 0) ? ColliderErrorState2D::None : ColliderErrorState2D::NoShapes;
 	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);
+
+	if (m_pAttachedRigidBody != nullptr)
+	{
+		m_pAttachedRigidBody->UpdateMassData();
+	}
 }
 
 /*------------------------------------------------------------------
@@ -431,19 +460,19 @@ CaledonEngine::AABB2D CaledonEngine::Collider2D::GetShapeBounds(std::vector<AABB
 }
 
 /*-------------------------------------------------------------------------------------
-| --- Cast: 
+| --- Cast:
 -------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Cast(const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance, bool ignoreSiblingColliders) const
 {
-    /*
-	
-	
-	
+	/*
+
+
+
 	*/
 }
 
 /*----------------------------------------------------------------------------------------
-| --- Overlap: 
+| --- Overlap:
 ----------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
@@ -474,7 +503,7 @@ int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, co
 }
 
 /*---------------------------------------------------------------------------------------
-| --- Raycast: 
+| --- Raycast:
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<ColliderHit2D> results, float distance, LayerMask layerMask, float minDepth, float maxDepth) const
 {
@@ -500,7 +529,7 @@ int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<Coll
 -------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
-    // return Physics2D.GetContacts(this, contactFilter, contacts);
+	// return Physics2D.GetContacts(this, contactFilter, contacts);
 }
 
 /*--------------------------------------------------------------------------------------------
@@ -521,7 +550,7 @@ int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contac
 | --- Protected Method Definitions --- |
 --------------------------------------*/
 /*---------------------------------------------------------------------------------------------------
-| --- AddLocalShapes: 
+| --- AddLocalShapes:
 ---------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::AddLocalShapes(PhysicsShapeGroup2D&) const
 {

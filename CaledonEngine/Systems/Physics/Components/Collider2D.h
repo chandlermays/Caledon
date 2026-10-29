@@ -132,7 +132,7 @@ namespace CaledonEngine
 		void SetBounciness(float bounciness) noexcept																		{ m_bounciness = bounciness; }						// Sets the bounciness value of this Collider2D
 		
 		float GetDensity() const noexcept																					{ return m_density; }								// Returns the density value of this Collider2D
-		void SetDensity(float density) noexcept																				{ m_density = density; }							// Sets the density value of this Collider2D
+		void SetDensity(float density);																																			// Sets the density value of this Collider2D
 		
 		float GetFriction() const noexcept																					{ return m_friction; }								// Returns the friction value of this Collider2D
 		void SetFriction(float friction) noexcept																			{ m_friction = friction; }							// Sets the friction value of this Collider2D
@@ -140,7 +140,7 @@ namespace CaledonEngine
 		void SetFrictionCombine(PhysicsMaterialCombine2D combine) noexcept													{ m_frictionCombine = combine; }					// Sets the friction combine mode of this Collider2D
 		
 		bool IsTrigger() const noexcept																						{ return m_isTrigger; }								// Returns whether this Collider2D is a trigger or not
-		void SetIsTrigger(bool isTrigger) noexcept																			{ m_isTrigger = isTrigger; }						// Sets whether this Collider2D is a trigger or not
+		void SetIsTrigger(bool isTrigger);																																		// Sets whether this Collider2D is a trigger or not
 		
 		const Vector2f& GetOffset() const noexcept																			{ return m_offset; }								// Returns the local offset of this Collider2D's geometry
 		void SetOffset(const Vector2f& offset) noexcept																		{ m_offset = offset; RefreshBounds(); }				// Sets the local offset of this Collider2D's geometry

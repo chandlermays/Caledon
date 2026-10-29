@@ -508,6 +508,22 @@ int CaledonEngine::PhysicsScene2D::OverlapCollider(const Collider2D* pCollider, 
 	return QueryOverlaps(queryShapes, contactFilter, pCollider, results);
 }
 
+/*--------------------------------------------------------------------------------------------------------------------------------
+| --- OverlapShapes: Returns all intersections of a group of world-space shapes against the Colliders in this PhysicsScene2D --- |
+--------------------------------------------------------------------------------------------------------------------------------*/
+int CaledonEngine::PhysicsScene2D::OverlapShapes(const PhysicsShapeGroup2D& shapes, const Collider2D* pSource, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
+{
+	std::vector<ShapeView2D> queryShapes;
+	queryShapes.reserve(static_cast<std::size_t>(shapes.GetShapeCount()));
+
+	for (int i = 0; i < shapes.GetShapeCount(); ++i)
+	{
+		queryShapes.push_back(ShapeQueries2D::MakeView(shapes, i));
+	}
+
+	return QueryOverlaps(queryShapes, contactFilter, pSource, results);
+}
+
 /*----------------------------------------------------------------------------------------------------------------------
 | --- OverlapPoint: Returns all intersections of an overlapping Point against the Colliders in this PhysicsScene2D --- |
 ----------------------------------------------------------------------------------------------------------------------*/

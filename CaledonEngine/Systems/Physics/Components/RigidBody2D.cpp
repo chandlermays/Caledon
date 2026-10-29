@@ -6,6 +6,8 @@
 
 #include "Systems/Physics/Components/Collider2D.h"
 #include "Systems/Physics/PhysicsScene2D.h"
+#include "Systems/Physics/Shapes/ShapeMass2D.h"
+#include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
@@ -434,7 +436,50 @@ void CaledonEngine::RigidBody2D::UpdateMassData()
 	if (!m_useAutoMass)
 		return;
 
-	//...
+	float totalMass = 0.0f;
+	Vector2f weightedCentroid{ 0.0f, 0.0f };
+	float inertiaAboutOrigin = 0.0f;
+
+	PhysicsShapeGroup2D shapes;
+	std::vector<Vector2f> localVertices;
+	for (const Collider2D* pCollider : m_pAttachedColliders)
+	{
+		const float density = pCollider->GetDensity();
+		if (pCollider->IsTrigger() || !pCollider->IsActive() || !(density > 0.0f))
+			continue;
+
+		shapes.Clear();
+		pCollider->GetShapes(shapes);
+		for (int i = 0; i < shapes.GetShapeCount(); ++i)
+		{
+			const ShapeView2D worldView = ShapeQueries2D::MakeView(shapes, i);
+
+			localVertices.clear();
+			for (const Vector2f& vertex : worldView.vertices)
+				localVertices.push_back(GetPoint(vertex));
+
+			ShapeView2D localView = worldView;
+			localView.vertices = localVertices;
+
+			ShapeMassData2D shapeMass;
+			if (!ShapeMass2D::Compute(localView, shapeMass))
+				continue;
+
+			const float mass = density * shapeMass.area;
+			totalMass += mass;
+			weightedCentroid += shapeMass.centroid * mass;
+			inertiaAboutOrigin += density * shapeMass.inertia;
+		}
+	}
+
+	if (!(totalMass > 0.0f))
+		return;
+
+	const Vector2f centerOfMass = weightedCentroid / totalMass;
+
+	m_mass = std::max(totalMass, kMinMass);
+	m_centerOfMass = centerOfMass;
+	m_inertia = std::max(inertiaAboutOrigin - totalMass * (centerOfMass.x * centerOfMass.x + centerOfMass.y * centerOfMass.y), 0.0f);
 }
 
 /*-----------------------------------------------------------------------------------------
