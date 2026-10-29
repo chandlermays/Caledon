@@ -11,6 +11,11 @@
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+
 namespace
 {
 	constexpr std::uint32_t kFnvOffsetBasis = 2166136261u;		// FNV-1a 32-bit

@@ -60,6 +60,7 @@
     <ClInclude Include="Systems\Physics\Shapes\PhysicsShape2D.h" />
     <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.h" />
     <ClInclude Include="Systems\Physics\Shapes\PhysicsShapeType2D.h" />
+    <ClInclude Include="Systems\Physics\Shapes\ShapeQueries2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodyConstraints2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodyInterpolation2D.h" />
     <ClInclude Include="Systems\Physics\Types\BodySleepMode2D.h" />
@@ -133,6 +134,7 @@
     <ClCompile Include="Systems\Physics\PhysicsScene2D.cpp" />
     <ClCompile Include="Systems\Physics\Queries\ColliderHit2D.cpp" />
     <ClCompile Include="Systems\Physics\Shapes\PhysicsShapeGroup2D.cpp" />
+    <ClCompile Include="Systems\Physics\Shapes\ShapeQueries2D.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
     <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />

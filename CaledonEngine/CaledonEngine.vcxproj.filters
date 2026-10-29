@@ -325,6 +325,9 @@
     <ClInclude Include="Systems\Physics\Physics2DSettings.h">
       <Filter>Source Files\Systems\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\ShapeQueries2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -464,6 +467,9 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\PhysicsScene2D.cpp">
       <Filter>Source Files\Systems\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\ShapeQueries2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

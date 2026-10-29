@@ -26,6 +26,6 @@ namespace CaledonEngine
 		const std::string& GetTypeName() const override;											// Returns the type name of this Component
 
 		float GetRadius() const noexcept { return m_radius; }										// Returns the radius of this CircleCollider2D
-		void SetRadius(float eadius);																// Sets the radius of this CircleCollider2D
+		void SetRadius(float radius);																// Sets the radius of this CircleCollider2D
 	};
 }

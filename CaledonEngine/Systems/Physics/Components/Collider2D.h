@@ -143,7 +143,7 @@ namespace CaledonEngine
 		void SetIsTrigger(bool isTrigger) noexcept																			{ m_isTrigger = isTrigger; }						// Sets whether this Collider2D is a trigger or not
 		
 		const Vector2f& GetOffset() const noexcept																			{ return m_offset; }								// Returns the local offset of this Collider2D's geometry
-		void SetOffset(const Vector2f& offset) noexcept																		{ m_offset = offset; }								// Sets the local offset of this Collider2D's geometry
+		void SetOffset(const Vector2f& offset) noexcept																		{ m_offset = offset; RefreshBounds(); }				// Sets the local offset of this Collider2D's geometry
 
 		const PhysicsMaterial2D& GetSharedMaterial() const noexcept															{ return m_sharedMaterial; }						// Returns the shared physics material of this Collider2D
 		void SetSharedMaterial(const PhysicsMaterial2D& material);																												// Sets the shared physics material of this Collider2D
