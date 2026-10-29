@@ -17,6 +17,9 @@ namespace CaledonEngine
 		float m_edgeRadius;																		// Controls the radius of all edges created by the collider
 		Vector2f m_size;																		// The width and height of the rectangle
 
+	protected:
+		int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const override;				//
+
 	public:
 		BoxCollider2D();																		// Constructor
 		~BoxCollider2D() override = default;													// Destructor
@@ -26,5 +29,11 @@ namespace CaledonEngine
 		BoxCollider2D& operator=(BoxCollider2D&&) = delete;										// Prevent move-assignment
 
 		const std::string& GetTypeName() const override;										// Returns the type name of this Component
+
+		float GetEdgeRadius() const noexcept { return m_edgeRadius; }							// Returns the edge radius of this BoxCollider2D
+		void SetEdgeRadius(float edgeRadius);													// Sets the edge radius of this BoxCollider2D
+
+		const Vector2f& GetSize() const noexcept { return m_size; }								// Returns the size of this BoxCollider2D
+		void SetSize(const Vector2f& size);														// Sets the size of this BoxCollider2D
 	};
 }

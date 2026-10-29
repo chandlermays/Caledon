@@ -49,6 +49,9 @@ namespace CaledonEngine
 	public:
 		using CollisionCallback = std::function<void(Collider2D*)>;															// Type alias for a collision callback function that takes a pointer to another Collider2D as an argument
 
+	protected:
+		virtual int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const;											//
+
 	private:
 		RigidBody2D* m_pAttachedRigidBody;																					// The RigidBody2D attached to this Collider2D
 		PhysicsScene2D* m_pPhysicsScene2D;																					// The PhysicsScene2D this Collider2D is registered with
@@ -86,6 +89,10 @@ namespace CaledonEngine
 		// Properties to add
 		//------------------------
 		// Matrix4x4 m_localToWorldMatrix;																					// The transformation matrix used to transform the Collider physics shapes to world-space
+
+	private:
+		int BuildShapes(PhysicsShapeGroup2D& physicsShapeGroup, bool worldSpace) const;										//
+		void GetWorldPose(Vector2f& position, float& rotation, Vector2f& scale) const;										//
 
 	public:
 		Collider2D();																										// Constructor

@@ -3,6 +3,7 @@
 #include "Systems/Scene/Scene.h"
 #include "Systems/Engine/EngineContext.h"
 #include "Systems/Engine/LoggingSubsystem.h"
+#include "Systems/Physics/Physics2DSubsystem.h"
 
 #include <algorithm>
 #include <format>
@@ -93,8 +94,10 @@ bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 		return false;
 
 	if (m_pCurrentScene == nullptr)
+	{
 		m_pCurrentScene = pScene.get();
-
+	}
+		
 	m_pScenes.emplace_back(std::move(pScene));
 	return true;
 }
@@ -108,7 +111,9 @@ void CaledonEngine::SceneSubsystem::RemoveScene(Scene* pScene)
 		return;
 
 	if (m_pCurrentScene == pScene)
+	{
 		m_pCurrentScene = nullptr;
+	}
 
 	m_pScenes.erase(std::remove_if(m_pScenes.begin(), m_pScenes.end(),
 		[pScene](const std::unique_ptr<Scene>& p) { return p.get() == pScene; }), m_pScenes.end());
@@ -160,7 +165,7 @@ int CaledonEngine::SceneSubsystem::GetSceneIndex(Scene* pScene) const
 ------------------------------------------------------------------------*/
 bool CaledonEngine::SceneSubsystem::InitializeScene(Scene& scene)
 {
-//	scene.SetPhysicsScene2D(m_pPhysics2D ? &m_pPhysics2D->GetDefaultPhysicsScene() : nullptr);
+	scene.SetPhysicsScene2D(m_pPhysics2D ? &m_pPhysics2D->GetDefaultPhysicsScene() : nullptr);
 
 	if (!scene.Initialize())
 	{

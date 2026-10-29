@@ -6,8 +6,72 @@
 
 #include "Systems/Physics/Components/RigidBody2D.h"
 #include "Systems/Physics/PhysicsScene2D.h"
-#include "Systems/Scene/Scene.h"
+#include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
 #include "Systems/Scene/GameObject.h"
+#include "Systems/Scene/Scene.h"
+#include "Systems/Scene/Transform.h"
+
+namespace
+{
+	constexpr std::uint32_t kFnvOffsetBasis = 2166136261u;		// FNV-1a 32-bit
+	constexpr std::uint32_t kFnvPrime = 16777619u;
+
+	/*---------------------------------------------------------------------------------------
+	| --- HashValue:
+	---------------------------------------------------------------------------------------*/
+	void HashValue(std::uint32_t& hash, std::uint32_t value)
+	{
+		for (int byte = 0; byte < 4; ++byte)
+		{
+			hash ^= (value >> (byte * 8)) & 0xFFu;
+			hash *= kFnvPrime;
+		}
+	}
+
+	/*---------------------------------------------------------------------------------------
+	| --- HashFloat:
+	---------------------------------------------------------------------------------------*/
+	void HashFloat(std::uint32_t& hash, float value)
+	{
+		if (value == 0.0f)
+		{
+			value = 0.0f;
+		}
+
+		std::uint32_t bits;
+		std::memcpy(&bits, &value, sizeof(bits));
+		HashValue(hash, bits);
+	}
+
+	/*---------------------------------------------------------------------------------------
+	| --- ComputeShapeBounds:
+	---------------------------------------------------------------------------------------*/
+	CaledonEngine::AABB2D ComputeShapeBounds(const CaledonEngine::PhysicsShapeGroup2D& shapeGroup, std::vector<CaledonEngine::AABB2D>* pPerShape, bool useRadii)
+	{
+		CaledonEngine::AABB2D total;
+		for (int i = 0; i < shapeGroup.GetShapeCount(); ++i)
+		{
+			CaledonEngine::AABB2D box;
+			for (const CaledonEngine::Vector2f& vertex : shapeGroup.GetShapeVertices(i))
+			{
+				box.Encapsulate(vertex);
+			}
+
+			if (useRadii)
+			{
+				const float radius = shapeGroup.GetShape(i)->radius;
+				box.ExpandBy(CaledonEngine::Vector2f{ radius, radius });
+			}
+
+			if (pPerShape != nullptr)
+			{
+				pPerShape->push_back(box);
+			}
+			total.Encapsulate(box);
+		}
+		return total;
+	}
+}
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -302,7 +366,10 @@ void CaledonEngine::Collider2D::SetSharedMaterial(const PhysicsMaterial2D& mater
 -----------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::RefreshBounds()
 {
-
+	PhysicsShapeGroup2D shapeGroup;
+	m_shapeCount = BuildShapes(shapeGroup, true);
+	m_errorState = (m_shapeCount > 0) ? ColliderErrorState2D::None : ColliderErrorState2D::NoShapes;
+	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);		// Stays invalid (empty) when there are no shapes
 }
 
 /*------------------------------------------------------------------
@@ -310,7 +377,7 @@ void CaledonEngine::Collider2D::RefreshBounds()
 ------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
-    return 0;
+	return BuildShapes(physicsShapeGroup, true);
 }
 
 /*-------------------------------------------------------------------------
@@ -318,7 +385,32 @@ int CaledonEngine::Collider2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup)
 -------------------------------------------------------------------------*/
 std::uint32_t CaledonEngine::Collider2D::GetShapesHash() const
 {
-    return std::uint32_t();
+	PhysicsShapeGroup2D shapeGroup;
+	BuildShapes(shapeGroup, false);
+
+	std::uint32_t hash = kFnvOffsetBasis;
+	for (int i = 0; i < shapeGroup.GetShapeCount(); ++i)
+	{
+		const PhysicsShape2D* pShape = shapeGroup.GetShape(i);
+		HashValue(hash, static_cast<std::uint32_t>(pShape->shapeType));
+		HashValue(hash, static_cast<std::uint32_t>(pShape->vertexCount));
+		HashFloat(hash, pShape->radius);
+
+		for (const Vector2f& vertex : shapeGroup.GetShapeVertices(i))
+		{
+			HashFloat(hash, vertex.x);
+			HashFloat(hash, vertex.y);
+		}
+	}
+
+	if (m_pOwner != nullptr)
+	{
+		const Vector2f& scale = m_pOwner->GetTransform().GetScale();
+		HashFloat(hash, scale.x);
+		HashFloat(hash, scale.y);
+	}
+
+	return hash;
 }
 
 /*-------------------------------------------------------------------
@@ -326,7 +418,11 @@ std::uint32_t CaledonEngine::Collider2D::GetShapesHash() const
 -------------------------------------------------------------------*/
 CaledonEngine::AABB2D CaledonEngine::Collider2D::GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const
 {
-    return AABB2D();
+	PhysicsShapeGroup2D shapeGroup;
+	BuildShapes(shapeGroup, useWorldSpace);
+
+	bounds.clear();
+	return ComputeShapeBounds(shapeGroup, &bounds, useRadii);
 }
 
 /*-------------------------------------------------------------------------------------
@@ -382,4 +478,100 @@ int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter,
 int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const
 {
     // return Physics2D.GetContactColliders(this, contactFilter, colliders);
+}
+
+
+/*--------------------------------------
+| --- Protected Method Definitions --- |
+--------------------------------------*/
+/*---------------------------------------------------------------------------------------------------
+| --- AddLocalShapes: 
+---------------------------------------------------------------------------------------------------*/
+int CaledonEngine::Collider2D::AddLocalShapes(PhysicsShapeGroup2D&) const
+{
+	return 0;
+}
+
+
+/*------------------------------------
+| --- Private Method Definitions --- |
+------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------
+| --- BuildShapes:
+------------------------------------------------------------------------------------------------------------------*/
+int CaledonEngine::Collider2D::BuildShapes(PhysicsShapeGroup2D& physicsShapeGroup, bool worldSpace) const
+{
+	const int firstShape = physicsShapeGroup.GetShapeCount();
+	AddLocalShapes(physicsShapeGroup);
+	const int lastShape = physicsShapeGroup.GetShapeCount();
+
+	if (!worldSpace)
+		return lastShape - firstShape;
+
+	Vector2f position;
+	float rotation;
+	Vector2f scale;
+	GetWorldPose(position, rotation, scale);
+
+	const auto toWorld = [&](const Vector2f& point)
+		{ return position + (point * scale).Rotate(rotation); };
+
+	const float radiusScale = std::max(std::abs(scale.x), std::abs(scale.y));
+	const bool mirrored = (scale.x * scale.y) < 0.0f;
+
+	std::vector<Vector2f> vertices;
+	for (int i = firstShape; i < lastShape; ++i)
+	{
+		const PhysicsShape2D shape = *physicsShapeGroup.GetShape(i);
+
+		const std::span<const Vector2f> local = physicsShapeGroup.GetShapeVertices(i);
+		vertices.assign(local.begin(), local.end());
+		for (Vector2f& vertex : vertices)
+		{
+			vertex = toWorld(vertex);
+		}
+
+		if (mirrored && shape.shapeType == PhysicsShapeType2D::Polygon)
+		{
+			std::reverse(vertices.begin(), vertices.end());
+		}
+
+		for (int j = 0; j < static_cast<int>(vertices.size()); ++j)
+		{
+			physicsShapeGroup.SetShapeVertex(i, j, vertices[static_cast<std::size_t>(j)]);
+		}
+
+		physicsShapeGroup.SetShapeRadius(i, shape.radius * radiusScale);
+
+		if (shape.useAdjacentStart || shape.useAdjacentEnd)
+		{
+			physicsShapeGroup.SetShapeAdjacentVertices(i, shape.useAdjacentStart, shape.useAdjacentEnd, toWorld(shape.adjacentStart), toWorld(shape.adjacentEnd));
+		}
+	}
+
+	return lastShape - firstShape;
+}
+
+/*-----------------------------------------------------------------------------------------------------
+| --- GetWorldPose:
+-----------------------------------------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::GetWorldPose(Vector2f& position, float& rotation, Vector2f& scale) const
+{
+	position = Vector2f{ 0.0f, 0.0f };
+	rotation = 0.0f;
+	scale = Vector2f{ 1.0f, 1.0f };
+
+	if (m_pOwner != nullptr)
+	{
+		const Transform& transform = m_pOwner->GetTransform();
+		position = transform.GetPosition();
+		rotation = transform.GetRotation();
+		scale = transform.GetScale();
+	}
+
+	if (m_pAttachedRigidBody != nullptr)
+	{
+		position = m_pAttachedRigidBody->GetPosition();
+		rotation = m_pAttachedRigidBody->GetRotation();
+	}
 }
