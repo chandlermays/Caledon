@@ -43,6 +43,7 @@
     <ClInclude Include="Systems\Module\ModuleInterface.h" />
     <ClInclude Include="Systems\Module\ModuleSubsystem.h" />
     <ClInclude Include="Systems\Physics\Components\BoxCollider2D.h" />
+    <ClInclude Include="Systems\Physics\Components\CapsuleCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\CircleCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\Collider2D.h" />
     <ClInclude Include="Systems\Physics\Components\CompositeCollider2D.h" />
@@ -122,6 +123,7 @@
     <ClCompile Include="Systems\Module\DynamicLibrary.cpp" />
     <ClCompile Include="Systems\Module\ModuleSubsystem.cpp" />
     <ClCompile Include="Systems\Physics\Components\BoxCollider2D.cpp" />
+    <ClCompile Include="Systems\Physics\Components\CapsuleCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\CircleCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\Collider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\CompositeCollider2D.cpp" />

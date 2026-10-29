@@ -374,7 +374,7 @@ void CaledonEngine::Collider2D::RefreshBounds()
 	PhysicsShapeGroup2D shapeGroup;
 	m_shapeCount = BuildShapes(shapeGroup, true);
 	m_errorState = (m_shapeCount > 0) ? ColliderErrorState2D::None : ColliderErrorState2D::NoShapes;
-	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);		// Stays invalid (empty) when there are no shapes
+	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);
 }
 
 /*------------------------------------------------------------------
@@ -447,18 +447,30 @@ int CaledonEngine::Collider2D::Cast(const Vector2f& direction, const ContactFilt
 ----------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-    /*
-	
-	if (m_pAttachedRigidBody)
-	return PhysicsScene2D.OverlapCollider(...)
-		-> ContactFilter2D contactFilter = ContactFilter2D.CreateLegacyFilter(int layerMask, float minDepth, float maxDepth)
-			-> ContactFilter2D result = default(ContactFilter2D);
-			   result.useTriggers = Physics2D.queriesHitTrigger;
-			   result.SetLayerMask(layerMask);
-			   result.SetDepth(minDepth, maxDepth);
-			   return result;
+	results.clear();
+	if (m_pPhysicsScene2D == nullptr)
+		return 0;
 
-	*/
+	PhysicsShapeGroup2D shapes;
+	GetShapes(shapes);
+
+	Vector2f currentPosition;
+	float currentRotation;
+	Vector2f currentScale;
+	GetWorldPose(currentPosition, currentRotation, currentScale);
+
+	const float turn = angle - currentRotation;
+	for (int i = 0; i < shapes.GetShapeCount(); ++i)
+	{
+		const int vertexCount = static_cast<int>(shapes.GetShapeVertices(i).size());
+		for (int j = 0; j < vertexCount; ++j)
+		{
+			const Vector2f vertex = shapes.GetShapeVertices(i)[static_cast<std::size_t>(j)];
+			shapes.SetShapeVertex(i, j, position + (vertex - currentPosition).Rotate(turn));
+		}
+	}
+
+	return m_pPhysicsScene2D->OverlapShapes(shapes, this, contactFilter, results);
 }
 
 /*---------------------------------------------------------------------------------------
@@ -466,7 +478,21 @@ int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, co
 ---------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<ColliderHit2D> results, float distance, LayerMask layerMask, float minDepth, float maxDepth) const
 {
-    return 0;
+	if (m_pPhysicsScene2D == nullptr)
+		return 0;
+
+	Vector2f origin;
+	float rotation;
+	Vector2f scale;
+	GetWorldPose(origin, rotation, scale);
+
+	const ContactFilter2D filter = ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pPhysicsScene2D->GetSettings().queriesHitTriggers);
+	std::vector<ColliderHit2D> hits = m_pPhysicsScene2D->Raycast(origin, direction, filter, distance);
+	hits.erase(std::remove_if(hits.begin(), hits.end(), [this](const ColliderHit2D& hit) { return hit.pCollider == this; }), hits.end());
+
+	const std::size_t count = std::min(hits.size(), results.size());
+	std::copy_n(hits.begin(), count, results.begin());
+	return static_cast<int>(count);
 }
 
 /*-------------------------------------------------------------------------
@@ -482,9 +508,14 @@ int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter,
 --------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const
 {
-    // return Physics2D.GetContactColliders(this, contactFilter, colliders);
-}
+	if (m_pPhysicsScene2D == nullptr)
+	{
+		colliders.clear();
+		return 0;
+	}
 
+	return m_pPhysicsScene2D->OverlapCollider(this, contactFilter, colliders);
+}
 
 /*--------------------------------------
 | --- Protected Method Definitions --- |

@@ -379,7 +379,8 @@ bool CaledonEngine::ShapeQueries2D::Raycast(const ShapeView2D& shape, const Vect
 		return true;
 	}
 
-	float bestT = std::numeric_limits<float>::max();
+	constexpr float kNoHit = std::numeric_limits<float>::max();
+	float bestT = kNoHit;
 	Vector2f bestNormal{ };
 	const float radius = shape.radius;
 
@@ -421,7 +422,7 @@ bool CaledonEngine::ShapeQueries2D::Raycast(const ShapeView2D& shape, const Vect
 		}
 	}
 
-	if (bestT > maxDistance)
+	if (bestT == kNoHit || bestT > maxDistance)
 		return false;
 
 	hit.distance = bestT;

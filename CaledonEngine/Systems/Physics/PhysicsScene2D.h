@@ -7,6 +7,7 @@
 #include "Systems/Physics/Physics2DSettings.h"
 #include "Systems/Physics/Queries/ColliderHit2D.h"
 #include "Systems/Physics/Queries/ContactFilter2D.h"
+#include "Systems/Physics/Shapes/ShapeQueries2D.h"
 #include "Systems/Physics/Types/CapsuleDirection2D.h"
 #include "Systems/Physics/Types/ColliderDistance2D.h"
 #include "Utilities/Math/Ray2D.h"
@@ -35,6 +36,12 @@ namespace CaledonEngine
 		int m_subStepCount;																													// The number of simulation sub-steps that occurred during the last physics step
 		float m_subStepLostTime;																											// The amount of simulation time lost due to hitting the max allowed sub-steps
 		bool m_isValid;																														// Indicates whether this PhysicsScene2D is valid and operational
+
+		int QueryOverlaps(std::span<const ShapeView2D> queryShapes, const ContactFilter2D& contactFilter,									//
+			const Collider2D* pSource, std::vector<Collider2D*>& results) const;
+
+		void QueryRay(const Vector2f& origin, const Vector2f& direction, float distance, float castRadius,
+			const ContactFilter2D& contactFilter, std::vector<ColliderHit2D>& hits) const;													//
 
 	public:
 		explicit PhysicsScene2D(const Physics2DSettings& settings);																			// Constructor
@@ -185,6 +192,11 @@ namespace CaledonEngine
 		----------------------------------------------------------------------------------------------------------------------------*/
 		std::vector<Collider2D*> OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;
 		int OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
+
+		/*--------------------------------------------------------------------------------------------------------------------------------
+		| --- OverlapShapes: Returns all intersections of a group of world-space shapes against the Colliders in this PhysicsScene2D --- |
+		--------------------------------------------------------------------------------------------------------------------------------*/
+		int OverlapShapes(const PhysicsShapeGroup2D& shapes, const Collider2D* pSource, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
 		/*----------------------------------------------------------------------------------------------------------------------
 		| --- OverlapPoint: Returns all intersections of an overlapping Point against the Colliders in this PhysicsScene2D --- |

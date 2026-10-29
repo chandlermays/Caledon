@@ -50,6 +50,23 @@ namespace CaledonEngine
 		}
 
 		/*---------------------------------------------------------------------------------------
+		| --- CreateLegacyFilter:
+		---------------------------------------------------------------------------------------*/
+		static ContactFilter2D CreateLegacyFilter(int layerMask, float minDepth, float maxDepth, bool useTriggers = true) noexcept
+		{
+			ContactFilter2D contactFilter;
+			contactFilter.SetLayerMask(LayerMask{ layerMask });
+
+			if (minDepth != -Math::Infinity || maxDepth != Math::Infinity)
+			{
+				contactFilter.SetDepth(minDepth, maxDepth);
+			}
+
+			contactFilter.useTriggers = useTriggers;
+			return contactFilter;
+		}
+
+		/*---------------------------------------------------------------------------------------
 		| --- IsFiltering:
 		---------------------------------------------------------------------------------------*/
 		bool IsFiltering() const noexcept

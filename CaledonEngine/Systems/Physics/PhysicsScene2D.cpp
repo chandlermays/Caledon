@@ -4,9 +4,72 @@
 ------------------------------*/
 #include "PhysicsScene2D.h"
 
+#include "Systems/Physics/Components/Collider2D.h"
 #include "Systems/Physics/Components/RigidBody2D.h"
+#include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
+#include "Systems/Scene/GameObject.h"
 
 #include <algorithm>
+#include <cmath>
+
+namespace
+{
+	/*----------------------------------------------------------------------------
+	| --- PassesFilter:
+	----------------------------------------------------------------------------*/
+	bool PassesFilter(const CaledonEngine::Collider2D& collider, const CaledonEngine::ContactFilter2D& contactFilter)
+	{
+		const CaledonEngine::GameObject* pOwner = collider.GetOwner();
+		if (!collider.IsActive() || pOwner == nullptr || !pOwner->IsActive())
+			return false;
+
+		if (contactFilter.IsFilteringTrigger(collider.IsTrigger()))
+			return false;
+
+		if (contactFilter.IsFilteringLayerMask(pOwner->GetLayer()))
+			return false;
+
+		return !contactFilter.IsFilteringDepth(0.0f);
+	}
+
+	/*----------------------------------------------------------------------------
+	| --- CopyHits: 
+	----------------------------------------------------------------------------*/
+	int CopyHits(const std::vector<CaledonEngine::ColliderHit2D>& hits, std::span<CaledonEngine::ColliderHit2D> results)
+	{
+		const std::size_t count = std::min(hits.size(), results.size());
+		std::copy_n(hits.begin(), count, results.begin());
+		return static_cast<int>(count);
+	}
+
+	/*----------------------------------------------------------------------------
+	| --- CollidersOf:
+	----------------------------------------------------------------------------*/
+	std::vector<CaledonEngine::Collider2D*> CollidersOf(const std::vector<CaledonEngine::ColliderHit2D>& hits)
+	{
+		std::vector<CaledonEngine::Collider2D*> colliders;
+		colliders.reserve(hits.size());
+
+		for (const CaledonEngine::ColliderHit2D& hit : hits)
+		{
+			colliders.push_back(hit.pCollider);
+		}
+
+		return colliders;
+	}
+
+	/*----------------------------------------------------------------------------
+	| --- MakeCircleView:
+	----------------------------------------------------------------------------*/
+	CaledonEngine::ShapeView2D MakeCircleView(const CaledonEngine::Vector2f& center, float radius)
+	{
+		CaledonEngine::ShapeView2D view;
+		view.type = CaledonEngine::PhysicsShapeType2D::Circle;
+		view.vertices = std::span<const CaledonEngine::Vector2f>(&center, 1);
+		view.radius = radius;
+		return view;
+	}
+}
 
 /*-----------------------------------
 | --- Public Method Definitions --- |
@@ -190,7 +253,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::CapsuleCa
 ---------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
-	return std::vector<ColliderHit2D>();
+	std::vector<ColliderHit2D> hits;
+	QueryRay(origin, direction, distance, radius, contactFilter, hits);
+	return hits;
 }
 
 /*---------------------------------------------------------------------------------------------------------------
@@ -198,7 +263,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::CircleC
 ---------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radius, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
-	return 0;
+	return CopyHits(CircleCast(origin, radius, direction, contactFilter, distance), results);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -206,7 +271,7 @@ int CaledonEngine::PhysicsScene2D::CircleCast(const Vector2f& origin, float radi
 --------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::CircleCastAll(const Vector2f& origin, float radius, const Vector2f& direction, float distance, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return CollidersOf(CircleCast(origin, radius, direction, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers), distance));
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -214,7 +279,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::CircleCas
 ---------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
-	return std::vector<ColliderHit2D>();
+	std::vector<ColliderHit2D> hits;
+	QueryRay(origin, direction, distance, 0.0f, contactFilter, hits);
+	return hits;
 }
 
 /*---------------------------------------------------------------------------------------------------------
@@ -222,7 +289,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Raycast
 ---------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance) const
 {
-	return 0;
+	return CopyHits(Raycast(origin, direction, contactFilter, distance), results);
 }
 
 /*--------------------------------------------------------------------------------------------------------------
@@ -230,7 +297,7 @@ int CaledonEngine::PhysicsScene2D::Raycast(const Vector2f& origin, const Vector2
 --------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::RaycastAll(const Vector2f& origin, const Vector2f& direction, float distance, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return CollidersOf(Raycast(origin, direction, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers), distance));
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
@@ -238,7 +305,13 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::RaycastAl
 -------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Linecast(const Vector2f& start, const Vector2f& end, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<ColliderHit2D>();
+	const Vector2f line = end - start;
+	const float length = line.Magnitude();
+
+	if (!(length > 0.0f))
+		return std::vector<ColliderHit2D>();
+
+	return Raycast(start, line / length, contactFilter, length);
 }
 
 /*-------------------------------------------------------------------------------------------------------------------
@@ -246,7 +319,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::Linecas
 -------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::Linecast(const Vector2f& start, const Vector2f& end, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results) const
 {
-	return 0;
+	return CopyHits(Linecast(start, end, contactFilter), results);
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -254,7 +327,7 @@ int CaledonEngine::PhysicsScene2D::Linecast(const Vector2f& start, const Vector2
 ------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::LinecastAll(const Vector2f& start, const Vector2f& end, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return CollidersOf(Linecast(start, end, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers)));
 }
 
 /*---------------------------------------------------------------------------------------------------------------
@@ -262,7 +335,7 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::LinecastA
 ---------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::GetRayIntersection(const Ray2D& ray, float distance, int layerMask) const
 {
-	return std::vector<ColliderHit2D>();
+	return Raycast(ray.m_origin, ray.m_direction, ContactFilter2D::CreateLegacyFilter(layerMask, -Math::Infinity, Math::Infinity, m_pSettings->queriesHitTriggers), distance);
 }
 
 /*---------------------------------------------------------------------------------------------------------------
@@ -270,7 +343,7 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::GetRayI
 ---------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::GetRayIntersection(const Ray2D& ray, float distance, int layerMask, std::span<ColliderHit2D> results) const
 {
-	return 0;
+	return CopyHits(GetRayIntersection(ray, distance, layerMask), results);
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -278,7 +351,7 @@ int CaledonEngine::PhysicsScene2D::GetRayIntersection(const Ray2D& ray, float di
 ------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::GetRayIntersectionAll(const Ray2D& ray, float distance, int layerMask) const
 {
-	return std::vector<ColliderHit2D>();
+	return GetRayIntersection(ray, distance, layerMask);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -286,7 +359,9 @@ std::vector<CaledonEngine::ColliderHit2D> CaledonEngine::PhysicsScene2D::GetRayI
 --------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapArea(const Vector2f& pointA, const Vector2f& pointB, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<Collider2D*>();
+	std::vector<Collider2D*> results;
+	OverlapArea(pointA, pointB, contactFilter, results);
+	return results;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------
@@ -294,7 +369,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapAr
 --------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapArea(const Vector2f& pointA, const Vector2f& pointB, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	const Vector2f center = (pointA + pointB) * 0.5f;
+	const Vector2f size{ std::fabs(pointB.x - pointA.x), std::fabs(pointB.y - pointA.y) };
+	return OverlapBox(center, size, 0.0f, contactFilter, results);
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -302,7 +379,7 @@ int CaledonEngine::PhysicsScene2D::OverlapArea(const Vector2f& pointA, const Vec
 ------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapAreaAll(const Vector2f& pointA, const Vector2f& pointB, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return OverlapArea(pointA, pointB, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers));
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -310,7 +387,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapAr
 ------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapBox(const Vector2f& point, const Vector2f& size, float angle, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<Collider2D*>();
+	std::vector<Collider2D*> results;
+	OverlapBox(point, size, angle, contactFilter, results);
+	return results;
 }
 
 /*------------------------------------------------------------------------------------------------------------------
@@ -318,7 +397,15 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapBo
 ------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapBox(const Vector2f& point, const Vector2f& size, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	PhysicsShapeGroup2D boxGroup;
+	if (boxGroup.AddBox(point, size, angle) < 0)
+	{
+		results.clear();
+		return 0;
+	}
+
+	const ShapeView2D queryShape = ShapeQueries2D::MakeView(boxGroup, 0);
+	return QueryOverlaps(std::span<const ShapeView2D>(&queryShape, 1), contactFilter, nullptr, results);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -326,7 +413,7 @@ int CaledonEngine::PhysicsScene2D::OverlapBox(const Vector2f& point, const Vecto
 ----------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapBoxAll(const Vector2f& point, const Vector2f& size, float angle, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return OverlapBox(point, size, angle, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers));
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
@@ -358,7 +445,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCa
 ------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<Collider2D*>();
+	std::vector<Collider2D*> results;
+	OverlapCircle(point, radius, contactFilter, results);
+	return results;
 }
 
 /*------------------------------------------------------------------------------------------------------------------------
@@ -366,7 +455,14 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCi
 ------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	if (!(radius >= 0.0f))
+	{
+		results.clear();
+		return 0;
+	}
+
+	const ShapeView2D queryShape = MakeCircleView(point, radius);
+	return QueryOverlaps(std::span<const ShapeView2D>(&queryShape, 1), contactFilter, nullptr, results);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -374,7 +470,7 @@ int CaledonEngine::PhysicsScene2D::OverlapCircle(const Vector2f& point, float ra
 ----------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCircleAll(const Vector2f& point, float radius, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return OverlapCircle(point, radius, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers));
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -382,7 +478,9 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCi
 ----------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<Collider2D*>();
+	std::vector<Collider2D*> results;
+	OverlapCollider(pCollider, contactFilter, results);
+	return results;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -390,7 +488,24 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapCo
 ----------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapCollider(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	if (pCollider == nullptr)
+	{
+		results.clear();
+		return 0;
+	}
+
+	PhysicsShapeGroup2D colliderShapes;
+	pCollider->GetShapes(colliderShapes);
+
+	std::vector<ShapeView2D> queryShapes;
+	queryShapes.reserve(static_cast<std::size_t>(colliderShapes.GetShapeCount()));
+
+	for (int i = 0; i < colliderShapes.GetShapeCount(); ++i)
+	{
+		queryShapes.push_back(ShapeQueries2D::MakeView(colliderShapes, i));
+	}
+
+	return QueryOverlaps(queryShapes, contactFilter, pCollider, results);
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -398,7 +513,9 @@ int CaledonEngine::PhysicsScene2D::OverlapCollider(const Collider2D* pCollider, 
 ----------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter) const
 {
-	return std::vector<Collider2D*>();
+	std::vector<Collider2D*> results;
+	OverlapPoint(point, contactFilter, results);
+	return results;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------
@@ -406,7 +523,8 @@ std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapPo
 ----------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapPoint(const Vector2f& point, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return 0;
+	const ShapeView2D queryShape = MakeCircleView(point, 0.0f);
+	return QueryOverlaps(std::span<const ShapeView2D>(&queryShape, 1), contactFilter, nullptr, results);
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
@@ -414,7 +532,7 @@ int CaledonEngine::PhysicsScene2D::OverlapPoint(const Vector2f& point, const Con
 --------------------------------------------------------------------------------------------------------------------------*/
 std::vector<CaledonEngine::Collider2D*> CaledonEngine::PhysicsScene2D::OverlapPointAll(const Vector2f& point, int layerMask, float minDepth, float maxDepth) const
 {
-	return std::vector<Collider2D*>();
+	return OverlapPoint(point, ContactFilter2D::CreateLegacyFilter(layerMask, minDepth, maxDepth, m_pSettings->queriesHitTriggers));
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
@@ -425,8 +543,32 @@ CaledonEngine::Vector2f CaledonEngine::PhysicsScene2D::ClosestPoint(const Vector
 	if (pCollider == nullptr)
 		return position;
 
-	// TODO: Implement shape-to-point closest distance calculation against pCollider's geometry
-	return position;
+	PhysicsShapeGroup2D shapes;
+	pCollider->GetShapes(shapes);
+
+	bool found = false;
+	float bestSqrDistance = 0.0f;
+	Vector2f best = position;
+	for (int i = 0; i < shapes.GetShapeCount(); ++i)
+	{
+		const ShapeView2D view = ShapeQueries2D::MakeView(shapes, i);
+		if (ShapeQueries2D::OverlapPoint(view, position))
+			return position;
+
+		Vector2f candidate;
+		if (!ShapeQueries2D::ClosestPointOnPerimeter(view, position, candidate))
+			continue;
+
+		const float sqrDistance = Vector2f::SqrDistance(position, candidate);
+		if (!found || sqrDistance < bestSqrDistance)
+		{
+			best = candidate;
+			bestSqrDistance = sqrDistance;
+			found = true;
+		}
+	}
+
+	return best;
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
@@ -499,4 +641,131 @@ void CaledonEngine::PhysicsScene2D::SyncTransforms()
 bool CaledonEngine::PhysicsScene2D::Simulate(float deltaTime, int simulationLayers)
 {
 	return false;
+}
+
+
+
+/*------------------------------------
+| --- Private Method Definitions --- |
+------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------------------------------
+| --- QueryOverlaps:
+-------------------------------------------------------------------------------------------------------------------------------------*/
+int CaledonEngine::PhysicsScene2D::QueryOverlaps(std::span<const ShapeView2D> queryShapes, const ContactFilter2D& contactFilter, const Collider2D* pSource, std::vector<Collider2D*>& results) const
+{
+	results.clear();
+
+	PhysicsShapeGroup2D candidateShapes;
+	for (Collider2D* pCandidate : m_registeredColliders)
+	{
+		if (pCandidate == pSource)
+			continue;
+
+		if (pSource != nullptr && !pSource->CanContact(pCandidate))
+			continue;
+
+		if (!PassesFilter(*pCandidate, contactFilter))
+			continue;
+
+		candidateShapes.Clear();
+		pCandidate->GetShapes(candidateShapes);
+
+		bool overlaps = false;
+		for (int i = 0; i < candidateShapes.GetShapeCount() && !overlaps; ++i)
+		{
+			const ShapeView2D candidateView = ShapeQueries2D::MakeView(candidateShapes, i);
+			for (const ShapeView2D& queryShape : queryShapes)
+			{
+				if (ShapeQueries2D::Overlap(queryShape, candidateView))
+				{
+					overlaps = true;
+					break;
+				}
+			}
+		}
+
+		if (overlaps)
+		{
+			results.push_back(pCandidate);
+		}
+	}
+
+	return static_cast<int>(results.size());
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------
+| --- QueryRay: 
+-------------------------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::PhysicsScene2D::QueryRay(const Vector2f& origin, const Vector2f& direction, float distance, float castRadius, const ContactFilter2D& contactFilter, std::vector<ColliderHit2D>& hits) const
+{
+	hits.clear();
+
+	const Vector2f rayDirection = direction.Normalized();
+	if (!(rayDirection.SqrMagnitude() > 0.0f) || !(distance >= 0.0f) || !(castRadius >= 0.0f))
+		return;
+
+	PhysicsShapeGroup2D candidateShapes;
+	for (Collider2D* pCandidate : m_registeredColliders)
+	{
+		if (!PassesFilter(*pCandidate, contactFilter))
+			continue;
+
+		candidateShapes.Clear();
+		pCandidate->GetShapes(candidateShapes);
+
+		bool found = false;
+		ShapeRayHit2D nearest;
+		Vector2f nearestCentroid;
+		for (int i = 0; i < candidateShapes.GetShapeCount(); ++i)
+		{
+			const ShapeView2D shapeView = ShapeQueries2D::MakeView(candidateShapes, i);
+			ShapeView2D grownView = shapeView;
+			grownView.radius += castRadius;
+
+			ShapeRayHit2D shapeHit;
+			Vector2f centroid;
+			if (!ShapeQueries2D::Raycast(grownView, origin, rayDirection, distance, m_pSettings->queriesStartInColliders, shapeHit))
+				continue;
+
+			if (castRadius > 0.0f)
+			{
+				centroid = shapeHit.point;
+				if (shapeHit.distance > 0.0f)
+				{
+					shapeHit.point = shapeHit.point - shapeHit.normal * castRadius;
+				}
+				else if (!ShapeQueries2D::ClosestPointOnPerimeter(shapeView, origin, shapeHit.point))
+					continue;
+			}
+			else
+			{
+				centroid = shapeHit.point;
+			}
+
+			if (contactFilter.IsFilteringNormalAngle(shapeHit.normal))
+				continue;
+
+			if (!found || shapeHit.distance < nearest.distance)
+			{
+				nearest = shapeHit;
+				nearestCentroid = centroid;
+				found = true;
+			}
+		}
+
+		if (!found)
+			continue;
+
+		ColliderHit2D hit;
+		hit.centroid = nearestCentroid;
+		hit.pCollider = pCandidate;
+		hit.distance = nearest.distance;
+		hit.fraction = std::isfinite(distance) && distance > 0.0f ? nearest.distance / distance : 0.0f;
+		hit.normal = nearest.normal;
+		hit.point = nearest.point;
+		hit.pRigidBody = pCandidate->GetAttachedRigidBody();
+		hits.push_back(hit);
+	}
+
+	std::stable_sort(hits.begin(), hits.end(), [](const ColliderHit2D& a, const ColliderHit2D& b) { return a.distance < b.distance; });
 }
