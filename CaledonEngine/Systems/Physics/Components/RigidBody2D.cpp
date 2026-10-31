@@ -5,9 +5,11 @@
 #include "RigidBody2D.h"
 
 #include "Systems/Physics/Components/Collider2D.h"
+#include "Systems/Physics/Physics2DSettings.h"
 #include "Systems/Physics/PhysicsScene2D.h"
-#include "Systems/Physics/Shapes/ShapeMass2D.h"
 #include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
+#include "Systems/Physics/Shapes/ShapeMass2D.h"
+#include "Systems/Physics/Types/BodyIntegration2D.h"
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
@@ -53,6 +55,9 @@ CaledonEngine::RigidBody2D::RigidBody2D()
 	, m_useFullKinematicContacts{ false }
 	, m_sleepMode{ BodySleepMode2D::StartAwake }
 	, m_isAwake{ true }
+	, m_lastAppliedPosition{ 0.0f, 0.0f }
+	, m_lastAppliedRotation{ 0.0f }
+	, m_hasAppliedPose{ false }
 	, m_position{ 0.0f, 0.0f }
 	, m_rotation{ 0.0f }
 	, m_linearVelocity{ 0.0f, 0.0f }
@@ -227,9 +232,9 @@ void CaledonEngine::RigidBody2D::MoveRotation(float angle)
 CaledonEngine::SlideResults2D CaledonEngine::RigidBody2D::Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig)
 {
 	/*
-	
+
 	// throw excp if deltaTime is negative
-	
+
 	if (Math::Approximately(deltaTime, 0f))
 	{
 		return new SlideResults
@@ -255,6 +260,10 @@ void CaledonEngine::RigidBody2D::SyncFromTransform()
 		return;
 
 	const Transform& transform = m_pOwner->GetTransform();
+
+	if (m_hasAppliedPose && transform.GetPosition() == m_lastAppliedPosition && transform.GetRotation() == m_lastAppliedRotation)
+		return;
+
 	m_position = transform.GetPosition();
 	m_rotation = transform.GetRotation();
 }
@@ -262,7 +271,7 @@ void CaledonEngine::RigidBody2D::SyncFromTransform()
 /*-----------------------------------------------------------------------------------------------------------------------------
 | --- ApplyToTransform: Writes the body pose back to the owner's Transform (called by the physics subsystem after a step) --- |
 -----------------------------------------------------------------------------------------------------------------------------*/
-void CaledonEngine::RigidBody2D::ApplyToTransform() const
+void CaledonEngine::RigidBody2D::ApplyToTransform()
 {
 	if (m_pOwner == nullptr)
 		return;
@@ -270,6 +279,46 @@ void CaledonEngine::RigidBody2D::ApplyToTransform() const
 	Transform& transform = m_pOwner->GetTransform();
 	transform.SetPosition(m_position);
 	transform.SetRotation(m_rotation);
+
+	m_lastAppliedPosition = transform.GetPosition();
+	m_lastAppliedRotation = transform.GetRotation();
+	m_hasAppliedPose = true;
+}
+
+/*----------------------------------------------------------------------------------------------------------------------------------------------------------
+| --- Integrate:
+----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::RigidBody2D::Integrate(float deltaTime, const Physics2DSettings& settings)
+{
+	if (!m_simulated || !m_isAwake || m_bodyType == BodyType2D::Static)
+		return;
+
+	if (m_bodyType == BodyType2D::Dynamic)
+	{
+		BodyVelocityInput2D input;
+		input.linearVelocity = m_linearVelocity;
+		input.angularVelocity = m_angularVelocity;
+		input.acceleration = settings.gravity * m_gravityScale;
+		input.force = m_totalForce;
+		input.torque = m_totalTorque;
+		input.inverseMass = (m_mass > 0.0f) ? 1.0f / m_mass : 0.0f;
+		input.inverseInertia = (m_inertia > 0.0f && !GetFreezeRotation()) ? 1.0f / m_inertia : 0.0f;
+		input.linearDamping = m_linearDamping;
+		input.angularDamping = m_angularDamping;
+		input.maxTranslationSpeed = settings.maxTranslationSpeed;
+		input.maxRotationSpeed = settings.maxRotationSpeed;
+
+		BodyIntegration2D::IntegrateVelocity(input, deltaTime, m_linearVelocity, m_angularVelocity);
+	}
+
+	m_linearVelocity = ApplyLinearConstraints(m_linearVelocity, m_constraints);
+	if (GetFreezeRotation())
+		m_angularVelocity = 0.0f;
+
+	const Vector2f previousPosition = m_position;
+	const Vector2f centerOfMass = GetWorldCenterOfMass() + m_linearVelocity * deltaTime;
+	m_rotation += m_angularVelocity * deltaTime;
+	m_position = ApplyPositionConstraints(previousPosition, centerOfMass - GetRelativeVector(m_centerOfMass), m_constraints);
 }
 
 /*-------------------------------------------------------------------------
@@ -428,9 +477,9 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetWorldCenterOfMass() const
 	return GetRelativePoint(m_centerOfMass);
 }
 
-/*------------------------------------------------------------------------------------------------------------------------------
-| --- UpdateMassData: Computes the mass, center of mass, and inertia from the attached colliders (when useAutoMass = true) --- |
-------------------------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------
+| --- UpdateMassData: Computes the mass, center of mass, and inertia from the attached colliders --- |
+----------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::UpdateMassData()
 {
 	if (!m_useAutoMass)
@@ -611,9 +660,9 @@ bool CaledonEngine::RigidBody2D::DetachCollider(Collider2D* pCollider)
 
 }
 
-/*-----------------------------------------------------------------------------
-| --- SetSharedMaterial: Applies the material to every attached Collider2 --- |
------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+| --- SetSharedMaterial: Applies the material to every attached Collider2D --- |
+------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::SetSharedMaterial(const PhysicsMaterial2D& material)
 {
 	m_sharedMaterial = material;

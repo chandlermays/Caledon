@@ -200,10 +200,12 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	if (m_pAttachedRigidBody != nullptr && m_pAttachedRigidBody == pCollider->m_pAttachedRigidBody)
 		return false;
 
-	//...
+	// explicit per-pair ignore (Physics2D.IgnoreCollision)
 	if (m_pPhysicsScene2D->GetIgnoreCollision(this, pCollider))
 		return false;
 
+	// Each collider decides whether it accepts the other's layer:
+	// effective mask = (layer matrix row for its own layer | includeLayers) & ~excludeLayers
 	const auto& matrix = m_pPhysicsScene2D->GetSettings().layerCollisionMatrix;
 	const int layerA = m_pOwner->GetLayer();
 	const int layerB = pCollider->m_pOwner->GetLayer();
@@ -217,6 +219,7 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	if (aAcceptsB == bAcceptsA)
 		return aAcceptsB;
 
+	// Conflicting decisions: the higher layerOverridePriority wins. On a tie, the contact is refused (exclude beats include).
 	if (m_layerOverridePriority != pCollider->m_layerOverridePriority)
 		return (m_layerOverridePriority > pCollider->m_layerOverridePriority) ? aAcceptsB : bAcceptsA;
 
@@ -264,9 +267,9 @@ bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider, const Co
 	if (m_pPhysicsScene2D == nullptr || pCollider == nullptr)
 		return false;
 
-	// If your PhysicsScene2D supports a filtered IsTouching overload, call it here. 
-	// Otherwise, you can evaluate the contact filter against the result.
-	return m_pPhysicsScene2D->IsTouching(this, pCollider);
+	std::vector<Collider2D*> touching;
+	m_pPhysicsScene2D->GetContactColliders(this, contactFilter, touching);
+	return std::find(touching.begin(), touching.end(), pCollider) != touching.end();
 }
 
 /*-------------------------------------------------------------------------------------
@@ -274,13 +277,7 @@ bool CaledonEngine::Collider2D::IsTouching(const Collider2D* pCollider, const Co
 -------------------------------------------------------------------------------------*/
 bool CaledonEngine::Collider2D::IsTouching(const ContactFilter2D& contactFilter) const
 {
-	if (m_pPhysicsScene2D == nullptr)
-		return false;
-
-	// Overlap or check contacts involving this collider filtered by the contactFilter
-	std::vector<Collider2D*> overlappingColliders;
-	m_pPhysicsScene2D->OverlapCollider(this, contactFilter, overlappingColliders);
-	return !overlappingColliders.empty();
+	return m_pPhysicsScene2D != nullptr && m_pPhysicsScene2D->IsTouching(this, contactFilter);
 }
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -291,13 +288,9 @@ bool CaledonEngine::Collider2D::IsTouchingLayers(LayerMask layerMask) const
 	if (m_pPhysicsScene2D == nullptr)
 		return false;
 
-	// Build a quick contact filter targeting the specified layer mask
 	ContactFilter2D filter = ContactFilter2D::NoFilter();
 	filter.SetLayerMask(layerMask);
-
-	std::vector<Collider2D*> overlappingColliders;
-	m_pPhysicsScene2D->OverlapCollider(this, filter, overlappingColliders);
-	return !overlappingColliders.empty();
+	return m_pPhysicsScene2D->IsTouching(this, filter);
 }
 
 /*-----------------------------------------------------------------------------------
@@ -356,32 +349,6 @@ void CaledonEngine::Collider2D::OnTriggerStay2D(const Collision2D& collision)
 
 }
 
-/*---------------------------------------------------------------
-| --- SetDensity: Sets the density value of this Collider2D --- |
----------------------------------------------------------------*/
-void CaledonEngine::Collider2D::SetDensity(float density)
-{
-	m_density = density;
-
-	if (m_pAttachedRigidBody != nullptr)
-	{
-		m_pAttachedRigidBody->UpdateMassData();
-	}
-}
-
-/*------------------------------------------------------------------------
-| --- SetIsTrigger: Sets whether this Collider2D is a trigger or not --- |
-------------------------------------------------------------------------*/
-void CaledonEngine::Collider2D::SetIsTrigger(bool isTrigger)
-{
-	m_isTrigger = isTrigger;
-
-	if (m_pAttachedRigidBody != nullptr)
-	{
-		m_pAttachedRigidBody->UpdateMassData();
-	}
-}
-
 /*--------------------------------------------------------------------------------
 | --- SetSharedMaterial: Sets the shared physics material of this Collider2D --- |
 --------------------------------------------------------------------------------*/
@@ -401,9 +368,29 @@ void CaledonEngine::Collider2D::RefreshBounds()
 	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);
 
 	if (m_pAttachedRigidBody != nullptr)
-	{
+		m_pAttachedRigidBody->UpdateMassData();				// The shapes changed, so the mass of the body might have changed
+}
+
+/*------------------------------------------------------------------------------------------------------------------
+| --- SetDensity: Sets the density value of this Collider2D (and updates the mass of the attached RigidBody2D) --- |
+------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::SetDensity(float density)
+{
+	m_density = density;
+
+	if (m_pAttachedRigidBody != nullptr)
 		m_pAttachedRigidBody->UpdateMassData();
-	}
+}
+
+/*------------------------------------------------------------------------------------------------------------------------------------
+| --- SetIsTrigger: Sets whether this Collider2D is a trigger or not (triggers add no mass to the attached RigidBody2D) --- |
+------------------------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::SetIsTrigger(bool isTrigger)
+{
+	m_isTrigger = isTrigger;
+
+	if (m_pAttachedRigidBody != nullptr)
+		m_pAttachedRigidBody->UpdateMassData();
 }
 
 /*------------------------------------------------------------------
@@ -529,7 +516,7 @@ int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<Coll
 -------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
-	// return Physics2D.GetContacts(this, contactFilter, contacts);
+	return (m_pPhysicsScene2D != nullptr) ? m_pPhysicsScene2D->GetContacts(this, contactFilter, contacts) : 0;
 }
 
 /*--------------------------------------------------------------------------------------------
@@ -543,7 +530,7 @@ int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contac
 		return 0;
 	}
 
-	return m_pPhysicsScene2D->OverlapCollider(this, contactFilter, colliders);
+	return m_pPhysicsScene2D->GetContactColliders(this, contactFilter, colliders);
 }
 
 /*--------------------------------------

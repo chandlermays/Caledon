@@ -35,6 +35,7 @@ namespace CaledonEngine
 	struct ColliderHit2D;
 	struct ContactFilter2D;
 	struct ContactPoint2D;
+	struct Physics2DSettings;
 	class PhysicsShapeGroup2D;
 
 	class RigidBody2D : public Component
@@ -43,18 +44,22 @@ namespace CaledonEngine
 		PhysicsScene2D* m_pPhysicsScene;																															// The PhysicsScene2D this RigidBody2D is registered with
 		BodyType2D m_bodyType;																																		// The physical behavior type of this RigidBody2D
 		bool m_simulated;																																			// Indicates whether the RigidBody2D should be simulated or not by the physics system
-		BodyConstraints2D m_constraints;																															// Controls which degrees of freedom are allowed for the simulation of this RigidBody2D (freezeRotation is derived from this)
+		BodyConstraints2D m_constraints;																															// Controls which degrees of freedom are allowed for the simulation of this RigidBody2D
 		CollisionDetectionMode2D m_collisionDetectionMode;																											// The method used by the physics engine to check if two objects have collided
 		BodyInterpolation2D m_interpolation;																														// Physics interpolation used between updates
 		bool m_useFullKinematicContacts;																															// Should kinematic/kinematic and kinematic/static collisions be allowed?
 		BodySleepMode2D m_sleepMode;																																// The sleep state that the RigidBody2D will initially be in
-		bool m_isAwake;																																				// The current sleep state (true = awake)
+		bool m_isAwake;																																				// The current sleep state
+
+		Vector2f m_lastAppliedPosition;																																// The position last written to the Transform
+		float m_lastAppliedRotation;																																// The rotation last written to the Transform
+		bool m_hasAppliedPose;																																		// Whether a pose has ever been written to the Transform
 
 		Vector2f m_position;																																		// The position of the RigidBody2D
 		float m_rotation;																																			// The rotation of the RigidBody2D in degrees
 		// Matrix4x4 m_localToWorldMatrix;																															// The transformation matrix used to transform the RigidBody2D to world space
 
-		Vector2f m_linearVelocity;																																	// The linear velocity of the RigidBody2D in world-units per second (the X and Y components are derived from this)
+		Vector2f m_linearVelocity;																																	// The linear velocity of the RigidBody2D in world-units per second
 		float m_angularVelocity;																																	// Angular velocity in degrees per second
 		float m_linearDamping;																																		// The linear damping of the RigidBody2D linear velocity
 		float m_angularDamping;																																		// The angular damping of this RigidBody2D angular velocity
@@ -67,7 +72,7 @@ namespace CaledonEngine
 		Vector2f m_centerOfMass;																																	// The center of mass of this RigidBody2D in local space
 		float m_inertia;																																			// The RigidBody's resistance to changes in angular velocity (rotation)
 
-		std::vector<Collider2D*> m_pAttachedColliders;																												// The Collider2D attached to this RigidBody2D (non-owning; the count is the size)
+		std::vector<Collider2D*> m_pAttachedColliders;																												// The Collider2D attached to this RigidBody2D
 		PhysicsMaterial2D m_sharedMaterial;																															// The PhysicsMaterial2D that is applied to all Collider2D attached to this RigidBody2D
 		LayerMask m_includeLayers;																																	// The additional Layers that all Collider2D attached to this RigidBody2D should include when deciding if a contact with another Collider2D should happen or not
 		LayerMask m_excludeLayers;																																	// The additional Layers that all Collider2D attached to this RigidBody2D should exclude when deciding if a contact with another Collider2D should happen or not
@@ -106,7 +111,7 @@ namespace CaledonEngine
 		void SetSleepMode(BodySleepMode2D mode) noexcept							{ m_sleepMode = mode; }															// Sets the SleepMode configuration for this RigidBody2D
 		bool IsAwake() const noexcept												{ return m_isAwake; }															// Is this RigidBody2D 'Awake'?
 		bool IsSleeping() const noexcept											{ return !m_isAwake; }															// Is this RigidBody2D 'Sleeping'?
-		void Sleep();																																				// Make this RigidBody2D 'sleep' (ignored for NeverSleep bodies)
+		void Sleep();																																				// Make this RigidBody2D 'sleep'
 		void WakeUp() noexcept														{ m_isAwake = true; }															// Disables the 'sleeping' state of this RigidBody2D
 
 		const Vector2f& GetPosition() const noexcept								{ return m_position; }															// Returns the position of this RigidBody2D
@@ -117,8 +122,9 @@ namespace CaledonEngine
 		void MovePositionAndRotation(const Vector2f& position, float angle);																						// Moves this RigidBody2D to the given position and rotation angle
 		void MoveRotation(float angle);																																// Moves this RigidBody2D to the given rotation angle
 		SlideResults2D Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig);															// Slide this RigidBody2D using the given velocity integrated over deltaTime using the specified SlideConfig
-		void SyncFromTransform();																																	// Copies the owner's Transform pose into the body (called by the physics subsystem before a step)
-		void ApplyToTransform() const;																																// Writes the body pose back to the owner's Transform (called by the physics subsystem after a step)
+		void SyncFromTransform();																																	// Copies the owner's Transform pose into the body if the Transform was moved since the body last wrote it
+		void ApplyToTransform();																																	// Writes the body pose back to the owner's Transform
+		void Integrate(float deltaTime, const Physics2DSettings& settings);																							// Moves this RigidBody2D forward by deltaTime without any collisions: gravity, forces, damping, speed limits and constraints
 
 		const Vector2f& GetLinearVelocity() const noexcept							{ return m_linearVelocity; }													// Returns the linear velocity of this RigidBody2D
 		void SetLinearVelocity(const Vector2f& velocity) noexcept;																									// Sets the linear velocity of this RigidBody2D
@@ -157,7 +163,7 @@ namespace CaledonEngine
 		Vector2f GetWorldCenterOfMass() const noexcept;																												// Returns the world-space center of mass for this RigidBody2D
 		float GetInertia() const noexcept											{ return m_inertia; }															// Returns the rotational inertia of this RigidBody2D
 		void SetInertia(float inertia) noexcept										{ m_inertia = inertia; }														// Sets the rotational inertia of this RigidBody2D
-		void UpdateMassData();																																		// Computes the mass, center of mass, and inertia from the attached colliders (when useAutoMass = true)
+		void UpdateMassData();																																		// Computes the mass, center of mass, and inertia from the attached colliders
 
 		Vector2f GetPoint(const Vector2f& point) const;																												// Return a local space point given the point in rigidBody global space
 		Vector2f GetVector(const Vector2f& vector) const;																											// Return a local space vector given the vector in rigidBody global space
@@ -169,7 +175,7 @@ namespace CaledonEngine
 		int GetAttachedColliderCount() const noexcept								{ return static_cast<int>(m_pAttachedColliders.size()); }						// Returns the total number of colliders attached to this RigidBody2D
 		
 		int GetAttachedColliders(std::vector<Collider2D*>& results, bool findTriggers = true) const;																// Returns all Collider2D that are attached to this RigidBody2D
-		void RefreshAttachedColliders();																															// Re-scans the owning GameObject for Collider2D (children are not supported yet)
+		void RefreshAttachedColliders();																															// Re-scans the owning GameObject for Collider2D
 		bool AttachCollider(Collider2D* pCollider);																													// Attaches a Collider2D; returns false if it failed
 		bool DetachCollider(Collider2D* pCollider);																													// Detaches a Collider2D; returns false if it failed
 		const PhysicsMaterial2D& GetSharedMaterial() const noexcept					{ return m_sharedMaterial; }													// Returns the shared physical material applied to attached colliders

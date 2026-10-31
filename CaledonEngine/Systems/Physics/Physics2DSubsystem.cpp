@@ -7,7 +7,7 @@
 namespace
 {
 	/*----------------------------------------------------------------------------
-	| --- IsValidLayer: 
+	| --- IsValidLayer:
 	----------------------------------------------------------------------------*/
 	constexpr bool IsValidLayer(int layer) noexcept
 	{
@@ -24,10 +24,11 @@ namespace
 CaledonEngine::Physics2DSubsystem::Physics2DSubsystem()
 	: m_settings{ }
 	, m_defaultScene{ m_settings }
-{ }
+{
+}
 
 /*----------------------------------------------------------------------------
-| --- Name: 
+| --- Name:
 ----------------------------------------------------------------------------*/
 std::string_view CaledonEngine::Physics2DSubsystem::Name() const noexcept
 {
@@ -59,7 +60,7 @@ void CaledonEngine::Physics2DSubsystem::Update(float deltaTime)
 	if (m_settings.simulationMode == SimulationMode2D::Update)
 	{
 		// Step the simulation once per frame when the simulation mode is == Update
-		// StepScene(m_defaultScene, deltaTime, m_settings.simulationLayers) or similar?
+		m_defaultScene.Simulate(deltaTime, m_settings.simulationLayers);
 	}
 }
 
@@ -70,8 +71,8 @@ void CaledonEngine::Physics2DSubsystem::FixedUpdate(float fixedDeltaTime)
 {
 	if (m_settings.simulationMode == SimulationMode2D::FixedUpdate)
 	{
-		// Step the simulation once per frame when the simulation mode is == Update
-		// StepScene(m_defaultScene, fixedDeltaTime, m_settings.simulationLayers) or similar?
+		// Step the simulation once per fixed update when the simulation mode is == FixedUpdate
+		m_defaultScene.Simulate(fixedDeltaTime, m_settings.simulationLayers);
 	}
 }
 
@@ -422,7 +423,7 @@ CaledonEngine::ColliderDistance2D CaledonEngine::Physics2DSubsystem::Distance(co
 ----------------------------------------------------------------------------*/
 int CaledonEngine::Physics2DSubsystem::GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
-	// TODO: Implement -> If tracking contacts via the scene, forward here. Otherwise, remove the method.
+	return m_defaultScene.GetContacts(pCollider, contactFilter, contacts);
 }
 
 /*----------------------------------------------------------------------------
@@ -430,7 +431,7 @@ int CaledonEngine::Physics2DSubsystem::GetContacts(const Collider2D* pCollider, 
 ----------------------------------------------------------------------------*/
 int CaledonEngine::Physics2DSubsystem::GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	return m_defaultScene.OverlapCollider(pCollider, contactFilter, results);
+	return m_defaultScene.GetContactColliders(pCollider, contactFilter, results);
 }
 
 /*----------------------------------------------------------------------------

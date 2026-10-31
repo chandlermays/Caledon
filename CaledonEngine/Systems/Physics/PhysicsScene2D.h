@@ -4,6 +4,9 @@
 ------------------------------*/
 #pragma once
 
+#include "Systems/Physics/Events/Collision2D.h"
+#include "Systems/Physics/Events/Contact2D.h"
+#include "Systems/Physics/Events/ContactPoint2D.h"
 #include "Systems/Physics/Physics2DSettings.h"
 #include "Systems/Physics/Queries/ColliderHit2D.h"
 #include "Systems/Physics/Queries/ContactFilter2D.h"
@@ -13,6 +16,7 @@
 #include "Utilities/Math/Ray2D.h"
 #include "Utilities/Math/Vector2.h"
 
+#include <memory>
 #include <span>
 #include <vector>
 
@@ -30,6 +34,11 @@ namespace CaledonEngine
 		std::vector<Collider2D*> m_registeredColliders;																						// Collection of all active Collider2Ds registered to this PhysicsScene2D
 		std::vector<RigidBody2D*> m_registeredBodies;																						// Collection of all active RigidBody2Ds registered to this PhysicsScene2D
 
+		std::vector<Contact2D> m_contacts;																									// The contacts of the latest step (solid contacts and trigger overlaps), ordered by collider registration order
+		std::vector<Contact2D> m_endedContacts;																								// The contacts that existed in the step before but not in the latest one
+
+		std::unique_ptr<Collision2D> m_pCollisionScratch;																					// The one Collision2D that is reused for every callback when reuseCollisionCallbacks is on
+
 		std::vector<std::pair<Collider2D*, Collider2D*>> m_ignoredPairs;																	// Collider pairs whose collisions are to be ignored
 		const Physics2DSettings* m_pSettings;																								// The shared physics settings
 
@@ -39,6 +48,11 @@ namespace CaledonEngine
 
 		int QueryOverlaps(std::span<const ShapeView2D> queryShapes, const ContactFilter2D& contactFilter,									//
 			const Collider2D* pSource, std::vector<Collider2D*>& results) const;
+
+		void DispatchContactEvents();																										// Calls the collision and trigger callbacks (Enter, Stay, Exit) for the contacts of the latest step
+		bool IsRegistered(const Collider2D* pCollider) const;																				// Whether the Collider2D is (still) registered to this PhysicsScene2D
+
+		void UpdateContacts(int simulationLayers);																							// Finds which shapes touch (brute force) and compares them with the previous step: contacts begin, persist or end
 
 		void QueryRay(const Vector2f& origin, const Vector2f& direction, float distance, float castRadius,
 			const ContactFilter2D& contactFilter, std::vector<ColliderHit2D>& hits) const;													//
@@ -211,6 +225,10 @@ namespace CaledonEngine
 
 		Vector2f ClosestPoint(const Vector2f& position, const Collider2D* pCollider) const;													//
 		ColliderDistance2D Distance(const Collider2D* pColliderA, const Collider2D* pColliderB) const;										//
+		int GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;							// Retrieves the contact points of the latest step for the Collider, filtered by the contactFilter (as seen from that Collider)
+		int GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;					// Retrieves the Colliders that were in contact with the Collider in the latest step, filtered by the contactFilter
+		const std::vector<Contact2D>& GetContactList() const noexcept { return m_contacts; }																	// The contacts of the latest step
+		const std::vector<Contact2D>& GetEndedContacts() const noexcept { return m_endedContacts; }															// The contacts that ended in the latest step
 		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;													//
 		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;											// Check whether this Collider2D is touching the Collider2D or not
 		bool IsTouching(const ContactFilter2D& contactFilter) const;																		// Check whether this Collider2D is touching the Collider2D or not

@@ -8,6 +8,8 @@
 
 namespace CaledonEngine
 {
+	class Collider2D;
+	class Collision2D;
 	class GameObject;
 
 	class Component
@@ -27,6 +29,13 @@ namespace CaledonEngine
 
 		virtual bool Initialize() { return true; }											// Initializes the Component
 		virtual void Update(float) {};														// Updates the Component, if applicable
+
+		virtual void OnCollisionEnter2D(const Collision2D&) {}								//
+		virtual void OnCollisionStay2D(const Collision2D&) {}								//
+		virtual void OnCollisionExit2D(const Collision2D&) {}								//
+		virtual void OnTriggerEnter2D(Collider2D*) {}										//
+		virtual void OnTriggerStay2D(Collider2D*) {}										//
+		virtual void OnTriggerExit2D(Collider2D*) {}										//
 
 		virtual const std::string& GetTypeName() const = 0;									// Returns the type name of the Component
 

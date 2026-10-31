@@ -334,6 +334,15 @@
     <ClInclude Include="Systems\Physics\Shapes\ShapeMass2D.h">
       <Filter>Source Files\Systems\Physics\Shapes</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodyIntegration2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\ShapeManifold2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Events\Contact2D.h">
+      <Filter>Source Files\Systems\Physics\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -481,6 +490,12 @@
       <Filter>Source Files\Systems\Physics\Components</Filter>
     </ClCompile>
     <ClCompile Include="Systems\Physics\Shapes\ShapeMass2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Types\BodyIntegration2D.cpp">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\ShapeManifold2D.cpp">
       <Filter>Source Files\Systems\Physics\Shapes</Filter>
     </ClCompile>
   </ItemGroup>
