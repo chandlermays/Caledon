@@ -12,7 +12,7 @@ namespace CaledonEngine
 {
 	enum class CapsuleDirection2D : uint8_t
 	{
-		Horizontal,
-		Vertical
+		Horizontal,						// The capsule sides extend horizontally
+		Vertical						// The capsule sides extend vertically
 	};
 }

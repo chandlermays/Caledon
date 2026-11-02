@@ -17,8 +17,8 @@ namespace CaledonEngine
 		int iterationsUsed;								// The number of iterations used when performing a Slide
 		Vector2f position;								// The position that was calculated as a target position to move to when performing a Slide
 		Vector2f remainingVelocity;						// The remaining velocity that couldn't be used when performing a Slide
-		ColliderHit2D slideHit;							// when a slide along a surface occurs, the slide may hit a surface tangent to the movement
-		ColliderHit2D surfaceHit;						// if the movement anchors to a surface or if graviy causes a contact with the surface
+		ColliderHit2D slideHit;							// When a slide along a surface occurs, the slide may hit a surface tangent to the movement
+		ColliderHit2D surfaceHit;						// If the movement anchors to a surface or if graviy causes a contact with the surface
 
 		/*------------------------------------------------------------------------
 		| --- Constructor: Constructs the SlideResults2D with default values --- |

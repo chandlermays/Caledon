@@ -20,6 +20,8 @@ namespace CaledonEngine
 		inline constexpr int kIgnoreRaycastLayer = 1 << 2;									// Layer mask constant for the default layer that ignores raycasts
 		inline constexpr int kDefaultRaycastLayers = ~kIgnoreRaycastLayer;					// Layer mask constant that includes all layers participating in raycasts by default
 		inline constexpr int kLayerCount = 32;												// The number of layers
+		inline constexpr float kLinearSlop = 0.005f;										// The overlap the contact solver tolerates, so resting contacts don't flicker on and off (Box2D: b2_linearSlop)
+		inline constexpr float kWarmStartMatchDistance = 0.05f;								// A contact point within this distance of a point from the previous step is treated as the same point (its impulse is reused)
 	}
 
 	struct Physics2DSettings

@@ -55,6 +55,7 @@ CaledonEngine::RigidBody2D::RigidBody2D()
 	, m_useFullKinematicContacts{ false }
 	, m_sleepMode{ BodySleepMode2D::StartAwake }
 	, m_isAwake{ true }
+	, m_sleepTime{ 0.0f }
 	, m_lastAppliedPosition{ 0.0f, 0.0f }
 	, m_lastAppliedRotation{ 0.0f }
 	, m_hasAppliedPose{ false }
@@ -179,6 +180,7 @@ void CaledonEngine::RigidBody2D::Sleep()
 		return;
 
 	m_isAwake = false;
+	m_sleepTime = 0.0f;
 	m_linearVelocity = Vector2f{ 0.0f, 0.0f };
 	m_angularVelocity = 0.0f;
 	ClearForces();
@@ -266,6 +268,9 @@ void CaledonEngine::RigidBody2D::SyncFromTransform()
 
 	m_position = transform.GetPosition();
 	m_rotation = transform.GetRotation();
+
+	if (m_hasAppliedPose)
+		WakeIfNeeded();
 }
 
 /*-----------------------------------------------------------------------------------------------------------------------------
@@ -285,10 +290,19 @@ void CaledonEngine::RigidBody2D::ApplyToTransform()
 	m_hasAppliedPose = true;
 }
 
-/*----------------------------------------------------------------------------------------------------------------------------------------------------------
-| --- Integrate:
-----------------------------------------------------------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------
+| --- Integrate: Moves this RigidBody2D forward through combined velocity and position integration for the given deltaTime and settings config --- |
+--------------------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::Integrate(float deltaTime, const Physics2DSettings& settings)
+{
+	IntegrateVelocity(deltaTime, settings);
+	IntegratePosition(deltaTime);
+}
+
+/*-------------------------------------------------------------------------------------------------------------
+| --- IntegrateVelocity: Updates velocity components using forces, damping, acceleration, and constraints --- |
+-------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::RigidBody2D::IntegrateVelocity(float deltaTime, const Physics2DSettings& settings)
 {
 	if (!m_simulated || !m_isAwake || m_bodyType == BodyType2D::Static)
 		return;
@@ -314,11 +328,29 @@ void CaledonEngine::RigidBody2D::Integrate(float deltaTime, const Physics2DSetti
 	m_linearVelocity = ApplyLinearConstraints(m_linearVelocity, m_constraints);
 	if (GetFreezeRotation())
 		m_angularVelocity = 0.0f;
+}
+
+/*--------------------------------------------------------------------------------------
+| --- IntegratePosition: Updates position based on current velocity and delta time --- |
+--------------------------------------------------------------------------------------*/
+void CaledonEngine::RigidBody2D::IntegratePosition(float deltaTime)
+{
+	if (!m_simulated || !m_isAwake || m_bodyType == BodyType2D::Static)
+		return;
 
 	const Vector2f previousPosition = m_position;
 	const Vector2f centerOfMass = GetWorldCenterOfMass() + m_linearVelocity * deltaTime;
 	m_rotation += m_angularVelocity * deltaTime;
 	m_position = ApplyPositionConstraints(previousPosition, centerOfMass - GetRelativeVector(m_centerOfMass), m_constraints);
+}
+
+/*------------------------------------------------------------------------------------------------------
+| --- SetPoseFromCenterOfMass: Sets body pose given the center of mass position and rotation angle --- |
+------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::RigidBody2D::SetPoseFromCenterOfMass(const Vector2f& worldCenterOfMass, float rotationDegrees) noexcept
+{
+	m_rotation = rotationDegrees;
+	m_position = ApplyPositionConstraints(m_position, worldCenterOfMass - GetRelativeVector(m_centerOfMass), m_constraints);
 }
 
 /*-------------------------------------------------------------------------
@@ -890,5 +922,6 @@ void CaledonEngine::RigidBody2D::WakeIfNeeded() noexcept
 	if (!m_isAwake && m_bodyType != BodyType2D::Static)
 	{
 		m_isAwake = true;
+		m_sleepTime = 0.0f;
 	}
 }

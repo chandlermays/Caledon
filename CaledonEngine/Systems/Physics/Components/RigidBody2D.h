@@ -53,6 +53,7 @@ namespace CaledonEngine
 
 		Vector2f m_lastAppliedPosition;																																// The position last written to the Transform
 		float m_lastAppliedRotation;																																// The rotation last written to the Transform
+		float m_sleepTime;																																			// How long (seconds) this RigidBody2D has been nearly still. At timeToSleep, and with everything it touches also still, it goes to sleep
 		bool m_hasAppliedPose;																																		// Whether a pose has ever been written to the Transform
 
 		Vector2f m_position;																																		// The position of the RigidBody2D
@@ -112,7 +113,9 @@ namespace CaledonEngine
 		bool IsAwake() const noexcept												{ return m_isAwake; }															// Is this RigidBody2D 'Awake'?
 		bool IsSleeping() const noexcept											{ return !m_isAwake; }															// Is this RigidBody2D 'Sleeping'?
 		void Sleep();																																				// Make this RigidBody2D 'sleep'
-		void WakeUp() noexcept														{ m_isAwake = true; }															// Disables the 'sleeping' state of this RigidBody2D
+		float GetSleepTime() const noexcept											{ return m_sleepTime; }															// Returns how long this RigidBody2D has been nearly still (seconds)
+		void SetSleepTime(float time) noexcept										{ m_sleepTime = time; }															// Sets how long this RigidBody2D has been nearly still (the PhysicsScene2D does this every step)
+		void WakeUp() noexcept														{ m_isAwake = true; m_sleepTime = 0.0f; }															// Disables the 'sleeping' state of this RigidBody2D
 
 		const Vector2f& GetPosition() const noexcept								{ return m_position; }															// Returns the position of this RigidBody2D
 		void SetPosition(const Vector2f& position) noexcept							{ m_position = position; WakeIfNeeded(); }										// Sets the position of this RigidBody2D to the given position
@@ -124,7 +127,10 @@ namespace CaledonEngine
 		SlideResults2D Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig);															// Slide this RigidBody2D using the given velocity integrated over deltaTime using the specified SlideConfig
 		void SyncFromTransform();																																	// Copies the owner's Transform pose into the body if the Transform was moved since the body last wrote it
 		void ApplyToTransform();																																	// Writes the body pose back to the owner's Transform
-		void Integrate(float deltaTime, const Physics2DSettings& settings);																							// Moves this RigidBody2D forward by deltaTime without any collisions: gravity, forces, damping, speed limits and constraints
+		void IntegrateVelocity(float deltaTime, const Physics2DSettings& settings);																					// Updates velocity components using forces, damping, acceleration, and constraints
+		void IntegratePosition(float deltaTime);																													// Updates position based on current velocity and delta time
+		void SetPoseFromCenterOfMass(const Vector2f& worldCenterOfMass, float rotationDegrees) noexcept;															// Places the body so that its center of mass is at the given point (used by the contact solver)
+		void Integrate(float deltaTime, const Physics2DSettings& settings);																							// Moves this RigidBody2D forward through combined velocity and position integration for the given deltaTime and settings config
 
 		const Vector2f& GetLinearVelocity() const noexcept							{ return m_linearVelocity; }													// Returns the linear velocity of this RigidBody2D
 		void SetLinearVelocity(const Vector2f& velocity) noexcept;																									// Sets the linear velocity of this RigidBody2D

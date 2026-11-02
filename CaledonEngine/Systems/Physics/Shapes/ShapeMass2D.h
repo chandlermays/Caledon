@@ -17,7 +17,8 @@
 // Supported shapes
 // * Circle  : area = pi * r^2
 // * Polygon : a convex polygon in either winding order. The rounding radius is ignored: it is a thin collision skin, not extra body
-// Capsule and Edges shapes have no mass here yet (edges are massless by design, capsules arrive with capsule support)
+// * Capsule : a rectangle plus two half circles, the whole rounded area counts (unlike the skin of a polygon)
+// Edges shapes have no mass (they are massless by design)
 
 namespace CaledonEngine
 {

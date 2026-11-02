@@ -13,10 +13,11 @@ namespace CaledonEngine
 {
 	enum class ColliderErrorState2D : uint8_t
 	{
-		None,
-		NoShapes,
-		RemovedShapes,
-
+		None,								// No errors encountered; collider geometry and configuration are fully valid
+		NoShapes,							// The collider contains no shapes or failed to generate any valid shape data
+		RemovedShapes,						// One or more shapes were automatically filtered out or removed due to being invalid or degenerate
+	//  InsufficientVertices?
+	
 		// ..expand for Caledon's capabilities
 	};
 }

@@ -47,6 +47,7 @@
     <ClInclude Include="Systems\Physics\Components\CircleCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\Collider2D.h" />
     <ClInclude Include="Systems\Physics\Components\CompositeCollider2D.h" />
+    <ClInclude Include="Systems\Physics\Components\EdgeCollider2D.h" />
     <ClInclude Include="Systems\Physics\Components\RigidBody2D.h" />
     <ClInclude Include="Systems\Physics\Events\Collision2D.h" />
     <ClInclude Include="Systems\Physics\Events\Contact2D.h" />
@@ -75,6 +76,7 @@
     <ClInclude Include="Systems\Physics\Types\ColliderErrorState2D.h" />
     <ClInclude Include="Systems\Physics\Types\CollisionDetectionMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\CompositeOperation.h" />
+    <ClInclude Include="Systems\Physics\Types\ContactSolver2D.h" />
     <ClInclude Include="Systems\Physics\Types\ForceMode2D.h" />
     <ClInclude Include="Systems\Physics\Types\GenerationType.h" />
     <ClInclude Include="Systems\Physics\Types\GeometryType.h" />
@@ -131,6 +133,7 @@
     <ClCompile Include="Systems\Physics\Components\CircleCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\Collider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\CompositeCollider2D.cpp" />
+    <ClCompile Include="Systems\Physics\Components\EdgeCollider2D.cpp" />
     <ClCompile Include="Systems\Physics\Components\RigidBody2D.cpp" />
     <ClCompile Include="Systems\Physics\Events\Collision2D.cpp" />
     <ClCompile Include="Systems\Physics\LayerMask.cpp" />
@@ -144,6 +147,7 @@
     <ClCompile Include="Systems\Physics\Shapes\ShapeMass2D.cpp" />
     <ClCompile Include="Systems\Physics\Shapes\ShapeQueries2D.cpp" />
     <ClCompile Include="Systems\Physics\Types\BodyIntegration2D.cpp" />
+    <ClCompile Include="Systems\Physics\Types\ContactSolver2D.cpp" />
     <ClCompile Include="Systems\Rendering\Camera\Camera2D.cpp" />
     <ClCompile Include="Systems\Rendering\Components\SpriteComponent.cpp" />
     <ClCompile Include="Systems\Rendering\RenderingSubsystem.cpp" />

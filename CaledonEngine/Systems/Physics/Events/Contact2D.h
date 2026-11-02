@@ -64,6 +64,9 @@ namespace CaledonEngine
 		float friction = 0.0f;																						// The friction of the two materials, combined
 		float bounciness = 0.0f;																					// The bounciness of the two materials, combined
 
+		float normalImpulse[2]{ };																					// The impulse the solver applied along the normal at each manifold point (also used to warm start the next step)
+		float tangentImpulse[2]{ };																					// The friction impulse the solver applied along the surface at each manifold point
+
 		ContactKey2D GetKey() const noexcept { return ContactKey2D{ pColliderA, pColliderB, shapeIndexA, shapeIndexB }; }
 	};
 }

@@ -17,7 +17,10 @@
 // Supported shapes (everything else is reported as unsupported, see IsSupported):
 // * Circle  : one vertex (the center) plus a radius
 // * Polygon : three or more vertices forming a CONVEX, COUNTER-CLOCKWISE polygon. The radius rounds the corners (the polygon grows by the radius on every side)
-// Capsule and Edges shapes are not handled yet
+// * Capsule : two distinct vertices (the centers of the two end circles) plus a radius. It is handled as a rounded polygon that has only two
+//             corners: the "polygon" is the segment between the vertices, and the radius grows it into a capsule. Its two "edges" are the same
+//             segment seen from both sides (opposite normals), so every routine that walks the edges of a polygon works for it as well
+// Edges shapes are not handled yet
 //
 // Conventions
 // * A shape includes its boundary: touching counts as overlapping

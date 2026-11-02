@@ -21,9 +21,9 @@ namespace
 	constexpr std::uint32_t kFnvOffsetBasis = 2166136261u;		// FNV-1a 32-bit
 	constexpr std::uint32_t kFnvPrime = 16777619u;
 
-	/*---------------------------------------------------------------------------------------
-	| --- HashValue:
-	---------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------
+	| --- HashValue: Mixes a 32-bit integer into the given hash value using FNV-1a --- |
+	----------------------------------------------------------------------------------*/
 	void HashValue(std::uint32_t& hash, std::uint32_t value)
 	{
 		for (int byte = 0; byte < 4; ++byte)
@@ -33,9 +33,9 @@ namespace
 		}
 	}
 
-	/*---------------------------------------------------------------------------------------
-	| --- HashFloat:
-	---------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------
+	| --- HashFloat: Normalizes zero and bitcasts a floating-point value for FNV-1a hashing --- |
+	-------------------------------------------------------------------------------------------*/
 	void HashFloat(std::uint32_t& hash, float value)
 	{
 		if (value == 0.0f)
@@ -48,9 +48,9 @@ namespace
 		HashValue(hash, bits);
 	}
 
-	/*---------------------------------------------------------------------------------------
-	| --- ComputeShapeBounds:
-	---------------------------------------------------------------------------------------*/
+	/*-------------------------------------------------------------------------------------------
+	| --- ComputeShapeBounds: Calculates the combined AABB bounds for all shapes in a group --- |
+	-------------------------------------------------------------------------------------------*/
 	CaledonEngine::AABB2D ComputeShapeBounds(const CaledonEngine::PhysicsShapeGroup2D& shapeGroup, std::vector<CaledonEngine::AABB2D>* pPerShape, bool useRadii)
 	{
 		CaledonEngine::AABB2D total;
@@ -110,8 +110,7 @@ CaledonEngine::Collider2D::Collider2D()
 	, m_errorState{ ColliderErrorState2D::None }
 	, m_layerOverridePriority{ 0 }
 	, m_shapeCount{ 0 }
-{
-}
+{ }
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -382,9 +381,9 @@ void CaledonEngine::Collider2D::SetDensity(float density)
 		m_pAttachedRigidBody->UpdateMassData();
 }
 
-/*------------------------------------------------------------------------------------------------------------------------------------
-| --- SetIsTrigger: Sets whether this Collider2D is a trigger or not (triggers add no mass to the attached RigidBody2D) --- |
-------------------------------------------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------
+| --- SetIsTrigger: Sets whether this Collider2D is a trigger or not --- |
+------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::SetIsTrigger(bool isTrigger)
 {
 	m_isTrigger = isTrigger;

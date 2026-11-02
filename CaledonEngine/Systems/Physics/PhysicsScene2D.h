@@ -52,6 +52,9 @@ namespace CaledonEngine
 		void DispatchContactEvents();																										// Calls the collision and trigger callbacks (Enter, Stay, Exit) for the contacts of the latest step
 		bool IsRegistered(const Collider2D* pCollider) const;																				// Whether the Collider2D is (still) registered to this PhysicsScene2D
 
+		void WakeTouchingBodies();																											// Wakes the sleeping bodies that an awake body touches (or that just lost a contact)
+		void UpdateSleeping(float deltaTime, int simulationLayers);																			// Lets bodies that stayed still for timeToSleep seconds fall asleep (a whole island of touching bodies at a time)
+
 		void UpdateContacts(int simulationLayers);																							// Finds which shapes touch (brute force) and compares them with the previous step: contacts begin, persist or end
 
 		void QueryRay(const Vector2f& origin, const Vector2f& direction, float distance, float castRadius,
@@ -223,18 +226,18 @@ namespace CaledonEngine
 		--------------------------------------------------------------------------------------------------------------------------*/
 		std::vector<Collider2D*> OverlapPointAll(const Vector2f& point, int layerMask = Physics2DConstants::kDefaultRaycastLayers, float minDepth = -Math::Infinity, float maxDepth = Math::Infinity) const;
 
-		Vector2f ClosestPoint(const Vector2f& position, const Collider2D* pCollider) const;													//
-		ColliderDistance2D Distance(const Collider2D* pColliderA, const Collider2D* pColliderB) const;										//
+		Vector2f ClosestPoint(const Vector2f& position, const Collider2D* pCollider) const;																		//
+		ColliderDistance2D Distance(const Collider2D* pColliderA, const Collider2D* pColliderB) const;															//
 		int GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;							// Retrieves the contact points of the latest step for the Collider, filtered by the contactFilter (as seen from that Collider)
 		int GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;					// Retrieves the Colliders that were in contact with the Collider in the latest step, filtered by the contactFilter
 		const std::vector<Contact2D>& GetContactList() const noexcept { return m_contacts; }																	// The contacts of the latest step
-		const std::vector<Contact2D>& GetEndedContacts() const noexcept { return m_endedContacts; }															// The contacts that ended in the latest step
-		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;													//
-		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;											// Check whether this Collider2D is touching the Collider2D or not
-		bool IsTouching(const ContactFilter2D& contactFilter) const;																		// Check whether this Collider2D is touching the Collider2D or not
-		bool IsTouchingLayers(LayerMask = LayerMask{ -1 }) const;																			// Check whether this Collider2D is touching any colliders on the specified LayerMask or not
+		const std::vector<Contact2D>& GetEndedContacts() const noexcept { return m_endedContacts; }																// The contacts that ended in the latest step
+		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;																		//
+		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;																// Check whether this Collider2D is touching the Collider2D or not
+		bool IsTouching(const ContactFilter2D& contactFilter) const;																							// Check whether this Collider2D is touching the Collider2D or not
+		bool IsTouchingLayers(LayerMask = LayerMask{ -1 }) const;																								// Check whether this Collider2D is touching any colliders on the specified LayerMask or not
 
-		void SyncTransforms();																												// Pushes the Transform poses of all registered bodies into the physics bodies
-		bool Simulate(float deltaTime, int simulationLayers = Physics2DConstants::kAllLayers);												// Simulate physics associated with this PhysicsScene2D.
+		void SyncTransforms();																																	// Pushes the Transform poses of all registered bodies into the physics bodies
+		bool Simulate(float deltaTime, int simulationLayers = Physics2DConstants::kAllLayers);																	// Simulate physics associated with this PhysicsScene2D.
 	};
 }

@@ -12,7 +12,7 @@ namespace CaledonEngine
 {
 	enum class GeometryType : uint8_t
 	{
-		Outlines,
-		Polygons
+		Outlines,				// Generates continuous edge chains along the outer boundary of the composite shape
+		Polygons				// Generates solid, decomposed convex polygons filling the interior of the composite shape
 	};
 }

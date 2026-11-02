@@ -8,13 +8,16 @@
 #include "Systems/Physics/Components/RigidBody2D.h"
 #include "Systems/Physics/Materials/PhysicsMaterial2D.h"
 #include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
+#include "Systems/Physics/Types/ContactSolver2D.h"
 #include "Systems/Scene/Component.h"
 #include "Systems/Scene/GameObject.h"
+#include "Systems/Scene/Transform.h"
 #include "Utilities/Math/Constants.h"
 
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <limits>
 #include <optional>
 #include <set>
 #include <unordered_map>
@@ -81,7 +84,7 @@ namespace
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------------
-	| --- ClassifyPair: 
+	| --- ClassifyPair:
 	------------------------------------------------------------------------------------------------------------------------------------*/
 	PairKind ClassifyPair(const CaledonEngine::Collider2D& a, const CaledonEngine::Collider2D& b)
 	{
@@ -107,7 +110,7 @@ namespace
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------------
-	| --- PointVelocity: 
+	| --- PointVelocity:
 	------------------------------------------------------------------------------------------------------------------------------------*/
 	CaledonEngine::Vector2f PointVelocity(const CaledonEngine::RigidBody2D* pBody, const CaledonEngine::Vector2f& point)
 	{
@@ -121,7 +124,7 @@ namespace
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------------
-	| --- MakeContactPoint: 
+	| --- MakeContactPoint:
 	------------------------------------------------------------------------------------------------------------------------------------*/
 	CaledonEngine::ContactPoint2D MakeContactPoint(const CaledonEngine::Contact2D& contact, int pointIndex, bool fromA)
 	{
@@ -140,14 +143,14 @@ namespace
 		point.bounciness = contact.bounciness;
 		point.friction = contact.friction;
 		point.separation = manifoldPoint.separation;
-		point.normalImpulse = 0.0f;
-		point.tangentImpulse = 0.0f;
+		point.normalImpulse = contact.normalImpulse[pointIndex];
+		point.tangentImpulse = contact.tangentImpulse[pointIndex];
 		point.enabled = true;
 		return point;
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------------
-	| --- PassesContactFilter: 
+	| --- PassesContactFilter:
 	------------------------------------------------------------------------------------------------------------------------------------*/
 	bool PassesContactFilter(const CaledonEngine::Contact2D& contact, bool fromA, const CaledonEngine::ContactFilter2D& contactFilter)
 	{
@@ -181,6 +184,192 @@ namespace
 		view.radius = radius;
 		return view;
 	}
+
+	/*------------------------------------------------------------------------------------------------------------------------------------
+	| --- ContactStepSolver: 
+	------------------------------------------------------------------------------------------------------------------------------------*/
+	class ContactStepSolver
+	{
+	private:
+		enum class Role { Immovable, Kinematic, Dynamic };
+
+		const CaledonEngine::Physics2DSettings& m_settings;
+		CaledonEngine::ContactSolverSettings2D m_solverSettings;
+		std::vector<CaledonEngine::SolverBody2D> m_bodies;
+		std::vector<CaledonEngine::RigidBody2D*> m_rigidBodies;
+		std::vector<Role> m_roles;
+		std::vector<CaledonEngine::ContactConstraint2D> m_constraints;
+		std::vector<std::size_t> m_contactIndices;
+		std::unordered_map<const void*, int> m_bodyIndex;
+		bool m_biasCleared = false;
+
+		static void ReadVelocities(const CaledonEngine::RigidBody2D& body, CaledonEngine::SolverBody2D& solverBody)
+		{
+			solverBody.linearVelocity = body.GetLinearVelocity();
+			solverBody.angularVelocity = body.GetAngularVelocity() * CaledonEngine::Math::Deg2Rad;
+		}
+
+		int GetBodyIndex(CaledonEngine::Collider2D* pCollider)
+		{
+			CaledonEngine::RigidBody2D* pBody = pCollider->GetAttachedRigidBody();
+			const void* key = pBody ? static_cast<const void*>(pBody) : static_cast<const void*>(pCollider);
+			const auto found = m_bodyIndex.find(key);
+			if (found != m_bodyIndex.end())
+				return found->second;
+
+			CaledonEngine::SolverBody2D solverBody;
+			Role role = Role::Immovable;
+			if (pBody != nullptr)
+			{
+				solverBody.position = pBody->GetWorldCenterOfMass();
+				solverBody.angle = pBody->GetRotation() * CaledonEngine::Math::Deg2Rad;
+				if (pBody->IsSimulated() && pBody->IsAwake() && pBody->GetBodyType() != CaledonEngine::BodyType2D::Static)
+				{
+					role = (pBody->GetBodyType() == CaledonEngine::BodyType2D::Dynamic) ? Role::Dynamic : Role::Kinematic;
+					ReadVelocities(*pBody, solverBody);
+				}
+				if (role == Role::Dynamic)
+				{
+					solverBody.inverseMass = (pBody->GetMass() > 0.0f) ? 1.0f / pBody->GetMass() : 0.0f;
+					solverBody.inverseInertia = (pBody->GetInertia() > 0.0f && !pBody->GetFreezeRotation()) ? 1.0f / pBody->GetInertia() : 0.0f;
+					const CaledonEngine::BodyConstraints2D constraints = pBody->GetConstraints();
+					solverBody.linearFactor.x = HasFlag(constraints, CaledonEngine::BodyConstraints2D::FreezePositionX) ? 0.0f : 1.0f;
+					solverBody.linearFactor.y = HasFlag(constraints, CaledonEngine::BodyConstraints2D::FreezePositionY) ? 0.0f : 1.0f;
+				}
+			}
+			else if (pCollider->GetOwner() != nullptr)
+			{
+				solverBody.position = pCollider->GetOwner()->GetTransform().GetPosition();
+			}
+
+			const int index = static_cast<int>(m_bodies.size());
+			m_bodies.push_back(solverBody);
+			m_rigidBodies.push_back(pBody);
+			m_roles.push_back(role);
+			m_bodyIndex.emplace(key, index);
+			return index;
+		}
+
+	public:
+		explicit ContactStepSolver(const CaledonEngine::Physics2DSettings& settings)
+			: m_settings{ settings }
+		{
+			m_solverSettings.bounceThreshold = settings.bounceThreshold;
+			m_solverSettings.baumgarte = settings.baumgarteScale;
+			m_solverSettings.linearSlop = CaledonEngine::Physics2DConstants::kLinearSlop;
+			m_solverSettings.maxLinearCorrection = settings.maxLinearCorrection;
+		}
+
+		void Build(const std::vector<CaledonEngine::Contact2D>& contacts)
+		{
+			for (std::size_t i = 0; i < contacts.size(); ++i)
+			{
+				const CaledonEngine::Contact2D& contact = contacts[i];
+				if (contact.isTrigger || contact.manifold.pointCount <= 0)
+					continue;
+
+				const int bodyA = GetBodyIndex(contact.pColliderA);
+				const int bodyB = GetBodyIndex(contact.pColliderB);
+
+				if (m_roles[static_cast<std::size_t>(bodyA)] != Role::Dynamic && m_roles[static_cast<std::size_t>(bodyB)] != Role::Dynamic)
+					continue;
+
+				CaledonEngine::ContactImpulses2D warm;
+				for (int p = 0; p < contact.manifold.pointCount; ++p)
+				{
+					warm.normal[p] = contact.normalImpulse[p];
+					warm.tangent[p] = contact.tangentImpulse[p];
+				}
+
+				m_constraints.push_back(CaledonEngine::ContactSolver2D::Build(contact.manifold, contact.friction, contact.bounciness, bodyA, bodyB, m_bodies, m_solverSettings, &warm));
+				m_contactIndices.push_back(i);
+			}
+		}
+
+		bool Handles(const CaledonEngine::RigidBody2D* pBody) const
+		{
+			const auto found = m_bodyIndex.find(pBody);
+			return found != m_bodyIndex.end() && m_roles[static_cast<std::size_t>(found->second)] != Role::Immovable;
+		}
+
+		void Solve(float deltaTime)
+		{
+			if (m_constraints.empty())
+				return;
+
+			for (std::size_t i = 0; i < m_bodies.size(); ++i)
+			{
+				if (m_roles[i] != Role::Immovable)
+					ReadVelocities(*m_rigidBodies[i], m_bodies[i]);	
+			}
+
+			CaledonEngine::ContactSolver2D::WarmStart(m_constraints, m_bodies);
+			for (int iteration = 0; iteration < m_settings.velocityIterations; ++iteration)
+				CaledonEngine::ContactSolver2D::SolveVelocity(m_constraints, m_bodies);
+
+			if (!m_biasCleared)
+			{
+				for (auto& constraint : m_constraints)
+				{
+					for (int p = 0; p < constraint.pointCount; ++p)
+						constraint.points[p].velocityBias = 0.0f;
+				}
+				m_biasCleared = true;
+			}
+
+			const float maxRotation = m_settings.maxRotationSpeed * CaledonEngine::Math::Deg2Rad;
+			for (std::size_t i = 0; i < m_bodies.size(); ++i)
+			{
+				if (m_roles[i] == Role::Immovable)
+					continue;
+
+				CaledonEngine::SolverBody2D& body = m_bodies[i];
+				if (m_roles[i] == Role::Dynamic)
+				{
+					if (m_settings.maxTranslationSpeed > 0.0f)
+						body.linearVelocity = CaledonEngine::Vector2f::ClampMagnitude(body.linearVelocity, m_settings.maxTranslationSpeed);
+					if (maxRotation > 0.0f)
+						body.angularVelocity = std::clamp(body.angularVelocity, -maxRotation, maxRotation);
+				}
+				body.position += body.linearVelocity * deltaTime;
+				body.angle += body.angularVelocity * deltaTime;
+			}
+
+			for (int iteration = 0; iteration < m_settings.positionIterations; ++iteration)
+			{
+				if (CaledonEngine::ContactSolver2D::SolvePosition(m_constraints, m_bodies, m_solverSettings))
+					break;
+			}
+
+			for (std::size_t i = 0; i < m_bodies.size(); ++i)
+			{
+				if (m_roles[i] == Role::Immovable)
+					continue;
+
+				CaledonEngine::RigidBody2D& body = *m_rigidBodies[i];
+				if (m_roles[i] == Role::Dynamic)
+				{
+					body.SetLinearVelocity(m_bodies[i].linearVelocity);
+					body.SetAngularVelocity(m_bodies[i].angularVelocity * CaledonEngine::Math::Rad2Deg);
+				}
+				body.SetPoseFromCenterOfMass(m_bodies[i].position, m_bodies[i].angle * CaledonEngine::Math::Rad2Deg);
+			}
+		}
+
+		void StoreImpulses(std::vector<CaledonEngine::Contact2D>& contacts) const
+		{
+			for (std::size_t k = 0; k < m_constraints.size(); ++k)
+			{
+				CaledonEngine::Contact2D& contact = contacts[m_contactIndices[k]];
+				const CaledonEngine::ContactImpulses2D impulses = CaledonEngine::ContactSolver2D::GetImpulses(m_constraints[k]);
+				for (int p = 0; p < m_constraints[k].pointCount; ++p)
+				{
+					contact.normalImpulse[p] = impulses.normal[p];
+					contact.tangentImpulse[p] = impulses.tangent[p];
+				}
+			}
+		}
+	};
 }
 
 /*-----------------------------------
@@ -196,7 +385,8 @@ CaledonEngine::PhysicsScene2D::PhysicsScene2D(const Physics2DSettings& settings)
 	, m_subStepCount{ 0 }
 	, m_subStepLostTime{ 0.0f }
 	, m_isValid{ true }
-{ }
+{
+}
 
 /*---------------------------------------------------------------
 | --- AddCollider: Adds a Collider2D to this PhysicsScene2D --- |
@@ -223,6 +413,17 @@ bool CaledonEngine::PhysicsScene2D::RemoveCollider(Collider2D* pCollider)
 		return false;
 
 	m_registeredColliders.erase(it);
+
+	// The bodies that were touching it lose their support: wake them
+	for (const Contact2D& contact : m_contacts)
+	{
+		if (contact.isTrigger || (contact.pColliderA != pCollider && contact.pColliderB != pCollider))
+			continue;
+
+		Collider2D* pOther = (contact.pColliderA == pCollider) ? contact.pColliderB : contact.pColliderA;
+		if (RigidBody2D* pBody = pOther->GetAttachedRigidBody())
+			pBody->WakeUp();
+	}
 
 	const auto touchesRemoved = [pCollider](const Contact2D& contact) { return contact.pColliderA == pCollider || contact.pColliderB == pCollider; };
 	m_contacts.erase(std::remove_if(m_contacts.begin(), m_contacts.end(), touchesRemoved), m_contacts.end());
@@ -623,9 +824,9 @@ int CaledonEngine::PhysicsScene2D::OverlapCollider(const Collider2D* pCollider, 
 	return QueryOverlaps(queryShapes, contactFilter, pCollider, results);
 }
 
-/*------------------------------------------------------------------------------------------------------------------------------------
+/*--------------------------------------------------------------------------------------------------------------------------------
 | --- OverlapShapes: Returns all intersections of a group of world-space shapes against the Colliders in this PhysicsScene2D --- |
-------------------------------------------------------------------------------------------------------------------------------------*/
+--------------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::OverlapShapes(const PhysicsShapeGroup2D& shapes, const Collider2D* pSource, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
 	std::vector<ShapeView2D> queryShapes;
@@ -760,8 +961,7 @@ bool CaledonEngine::PhysicsScene2D::IsTouchingLayers(LayerMask layerMask) const
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
-| --- GetContacts: Retrieves the contact points of the latest step for the Collider, filtered by the contactFilter --- |
-| Only solid contacts have contact points. A contact with two manifold points gives two ContactPoint2D. The results fill the span in order |
+| --- GetContacts: 
 --------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
@@ -788,7 +988,7 @@ int CaledonEngine::PhysicsScene2D::GetContacts(const Collider2D* pCollider, cons
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------
-| --- GetContactColliders: 
+| --- GetContactColliders:
 --------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::PhysicsScene2D::GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
@@ -838,6 +1038,7 @@ bool CaledonEngine::PhysicsScene2D::Simulate(float deltaTime, int simulationLaye
 
 	SyncTransforms();
 	UpdateContacts(simulationLayers);
+	WakeTouchingBodies();
 
 	int stepCount = 1;
 	float stepTime = deltaTime;
@@ -871,16 +1072,28 @@ bool CaledonEngine::PhysicsScene2D::Simulate(float deltaTime, int simulationLaye
 			return layer >= 0 && layer < Physics2DConstants::kLayerCount && ((simulationLayers >> layer) & 1) != 0;
 		};
 
+	ContactStepSolver solver(*m_pSettings);
 	for (int step = 0; step < stepCount; ++step)
 	{
 		for (RigidBody2D* pBody : m_registeredBodies)
 		{
 			if (isSimulated(*pBody))
-			{
-				pBody->Integrate(stepTime, *m_pSettings);
-			}
+				pBody->IntegrateVelocity(stepTime, *m_pSettings);
+		}
+
+		if (step == 0)
+			solver.Build(m_contacts);
+
+		solver.Solve(stepTime);
+
+		for (RigidBody2D* pBody : m_registeredBodies)
+		{
+			if (isSimulated(*pBody) && !solver.Handles(pBody))
+				pBody->IntegratePosition(stepTime);
 		}
 	}
+	solver.StoreImpulses(m_contacts);
+	UpdateSleeping(deltaTime, simulationLayers);
 
 	for (RigidBody2D* pBody : m_registeredBodies)
 	{
@@ -904,7 +1117,123 @@ bool CaledonEngine::PhysicsScene2D::Simulate(float deltaTime, int simulationLaye
 | --- Private Method Definitions --- |
 ------------------------------------*/
 /*-------------------------------------------------------------------------------------------------------------------------------------
-| --- IsRegistered: 
+| --- WakeTouchingBodies: 
+-------------------------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::PhysicsScene2D::WakeTouchingBodies()
+{
+	const auto isMover = [](const RigidBody2D* pBody) { return pBody != nullptr && pBody->IsSimulated() && pBody->GetBodyType() != BodyType2D::Static; };
+
+	for (const Contact2D& contact : m_endedContacts)
+	{
+		if (contact.isTrigger)
+			continue;
+
+		for (Collider2D* pCollider : { contact.pColliderA, contact.pColliderB })
+		{
+			if (!IsRegistered(pCollider))
+				continue;
+			if (RigidBody2D* pBody = pCollider->GetAttachedRigidBody(); isMover(pBody))
+				pBody->WakeUp();
+		}
+	}
+
+	bool changed = true;
+	while (changed)
+	{
+		changed = false;
+		for (const Contact2D& contact : m_contacts)
+		{
+			if (contact.isTrigger)
+				continue;
+
+			RigidBody2D* pBodyA = contact.pColliderA->GetAttachedRigidBody();
+			RigidBody2D* pBodyB = contact.pColliderB->GetAttachedRigidBody();
+			if (!isMover(pBodyA) || !isMover(pBodyB) || pBodyA->IsAwake() == pBodyB->IsAwake())
+				continue;
+
+			(pBodyA->IsAwake() ? pBodyB : pBodyA)->WakeUp();
+			changed = true;
+		}
+	}
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------
+| --- UpdateSleeping: 
+-------------------------------------------------------------------------------------------------------------------------------------*/
+void CaledonEngine::PhysicsScene2D::UpdateSleeping(float deltaTime, int simulationLayers)
+{
+	std::vector<RigidBody2D*> nodes;
+	std::unordered_map<const RigidBody2D*, int> nodeIndex;
+	for (RigidBody2D* pBody : m_registeredBodies)
+	{
+		const GameObject* pOwner = pBody->GetOwner();
+		if (pOwner == nullptr || !pBody->IsSimulated() || !pBody->IsAwake() || pBody->GetBodyType() == BodyType2D::Static)
+			continue;
+
+		const int layer = pOwner->GetLayer();
+		if (layer < 0 || layer >= Physics2DConstants::kLayerCount || ((simulationLayers >> layer) & 1) == 0)
+			continue;
+
+		nodeIndex.emplace(pBody, static_cast<int>(nodes.size()));
+		nodes.push_back(pBody);
+	}
+
+	std::vector<int> parent(nodes.size());
+	for (std::size_t i = 0; i < parent.size(); ++i)
+		parent[i] = static_cast<int>(i);
+
+	const auto find = [&parent](int x)
+		{
+			while (parent[static_cast<std::size_t>(x)] != x)
+			{
+				parent[static_cast<std::size_t>(x)] = parent[static_cast<std::size_t>(parent[static_cast<std::size_t>(x)])];
+				x = parent[static_cast<std::size_t>(x)];
+			}
+			return x;
+		};
+
+	for (const Contact2D& contact : m_contacts)
+	{
+		if (contact.isTrigger)
+			continue;
+
+		const auto a = nodeIndex.find(contact.pColliderA->GetAttachedRigidBody());
+		const auto b = nodeIndex.find(contact.pColliderB->GetAttachedRigidBody());
+		if (a == nodeIndex.end() || b == nodeIndex.end())
+			continue;
+
+		const int rootA = find(a->second);
+		const int rootB = find(b->second);
+		if (rootA != rootB)
+			parent[static_cast<std::size_t>(std::max(rootA, rootB))] = std::min(rootA, rootB);
+	}
+
+	const float linearTolerance = m_pSettings->linearSleepTolerance;
+	const float angularTolerance = m_pSettings->angularSleepTolerance;
+	std::vector<float> islandSleepTime(nodes.size(), std::numeric_limits<float>::max());
+	for (std::size_t i = 0; i < nodes.size(); ++i)
+	{
+		RigidBody2D* pBody = nodes[i];
+		const Vector2f velocity = pBody->GetLinearVelocity();
+		const bool still = pBody->GetSleepMode() != BodySleepMode2D::NeverSleep
+			&& velocity.x * velocity.x + velocity.y * velocity.y <= linearTolerance * linearTolerance
+			&& std::fabs(pBody->GetAngularVelocity()) <= angularTolerance;
+
+		pBody->SetSleepTime(still ? pBody->GetSleepTime() + deltaTime : 0.0f);
+
+		float& minimum = islandSleepTime[static_cast<std::size_t>(find(static_cast<int>(i)))];
+		minimum = std::min(minimum, pBody->GetSleepTime());
+	}
+
+	for (std::size_t i = 0; i < nodes.size(); ++i)
+	{
+		if (islandSleepTime[static_cast<std::size_t>(find(static_cast<int>(i)))] >= m_pSettings->timeToSleep)
+			nodes[i]->Sleep();
+	}
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------
+| --- IsRegistered:
 -------------------------------------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsScene2D::IsRegistered(const Collider2D* pCollider) const
 {
@@ -912,7 +1241,7 @@ bool CaledonEngine::PhysicsScene2D::IsRegistered(const Collider2D* pCollider) co
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------
-| --- DispatchContactEvents: 
+| --- DispatchContactEvents:
 -------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsScene2D::DispatchContactEvents()
 {
@@ -943,9 +1272,20 @@ void CaledonEngine::PhysicsScene2D::DispatchContactEvents()
 
 		touching.emplace(m_contacts[i].pColliderA, m_contacts[i].pColliderB);
 
-		PairEvent pairEvent{ m_contacts[i].pColliderA, m_contacts[i].pColliderB, allNew ? Phase::Enter : Phase::Stay, 
+		PairEvent pairEvent{ m_contacts[i].pColliderA, m_contacts[i].pColliderB, allNew ? Phase::Enter : Phase::Stay,
 			m_contacts[i].isTrigger, std::vector<Contact2D>(m_contacts.begin() + static_cast<std::ptrdiff_t>(i), m_contacts.begin() + static_cast<std::ptrdiff_t>(end)) };
 
+		// As in Unity, Stay is not sent while nothing in the pair is awake (a sleeping body resting on the ground)
+		const auto isAwakeMover = [](const Collider2D* pCollider)
+			{
+				const RigidBody2D* pBody = pCollider->GetAttachedRigidBody();
+				return pBody != nullptr && pBody->IsSimulated() && pBody->IsAwake() && pBody->GetBodyType() != BodyType2D::Static;
+			};
+		if (!allNew && !isAwakeMover(pairEvent.pA) && !isAwakeMover(pairEvent.pB))
+		{
+			i = end;
+			continue;
+		}
 		(allNew ? enters : stays).push_back(std::move(pairEvent));
 		i = end;
 	}
@@ -1046,7 +1386,7 @@ void CaledonEngine::PhysicsScene2D::DispatchContactEvents()
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------
-| --- UpdateContacts: 
+| --- UpdateContacts:
 -------------------------------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsScene2D::UpdateContacts(int simulationLayers)
 {
@@ -1140,6 +1480,34 @@ void CaledonEngine::PhysicsScene2D::UpdateContacts(int simulationLayers)
 						persisted[old->second] = 1;
 					}
 					contact.isNew = (old == previousIndex.end());
+
+					// Warm starting: a point that is still where it was keeps the impulse it had (contacts have no feature ids, so points are matched by distance)
+					if (!contact.isTrigger && old != previousIndex.end())
+					{
+						const Contact2D& before = previous[old->second];
+						bool used[2] = { false, false };
+						for (int p = 0; p < contact.manifold.pointCount; ++p)
+						{
+							int best = -1;
+							float bestDistance = Physics2DConstants::kWarmStartMatchDistance * Physics2DConstants::kWarmStartMatchDistance;
+							for (int q = 0; q < before.manifold.pointCount; ++q)
+							{
+								const Vector2f delta = contact.manifold.points[p].point - before.manifold.points[q].point;
+								const float distance = delta.x * delta.x + delta.y * delta.y;
+								if (!used[q] && distance <= bestDistance)
+								{
+									best = q;
+									bestDistance = distance;
+								}
+							}
+							if (best >= 0)
+							{
+								used[best] = true;
+								contact.normalImpulse[p] = before.normalImpulse[best];
+								contact.tangentImpulse[p] = before.tangentImpulse[best];
+							}
+						}
+					}
 
 					m_contacts.push_back(contact);
 				}

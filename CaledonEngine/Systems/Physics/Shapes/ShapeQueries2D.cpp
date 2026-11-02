@@ -82,6 +82,9 @@ namespace
 	bool IsInsidePolygon(std::span<const Vector2f> vertices, const Vector2f& p)
 	{
 		const std::size_t count = vertices.size();
+		if (count < 3)
+			return false;
+
 		for (std::size_t i = 0; i < count; ++i)
 		{
 			const Vector2f& a = vertices[i];
@@ -275,6 +278,9 @@ bool CaledonEngine::ShapeQueries2D::IsSupported(const ShapeView2D& shape)
 
 	case PhysicsShapeType2D::Polygon:
 		return IsConvexCounterClockwise(shape.vertices);
+
+	case PhysicsShapeType2D::Capsule:
+		return shape.vertices.size() == 2 && Vector2f::SqrDistance(shape.vertices[0], shape.vertices[1]) > kEpsilon * kEpsilon;
 
 	default:
 		return false;

@@ -34,7 +34,7 @@ namespace CaledonEngine
 
 	namespace BodyIntegration2D
 	{
-		void IntegrateVelocity(const BodyVelocityInput2D& input, float deltaTime, Vector2f& linearVelocity, float& angularVelocity);		// Advances the velocities by one step: forces, gravity, damping, then the speed limits
-		float ApplyDamping(float velocity, float damping, float deltaTime) noexcept;															// Returns velocity after damping for deltaTime
+		float ApplyDamping(float velocity, float damping, float deltaTime) noexcept;															// Applies an exponential-like velocity decay based on damping and deltaTime
+		void IntegrateVelocity(const BodyVelocityInput2D& input, float deltaTime, Vector2f& linearVelocity, float& angularVelocity);			// Updates linear and angular velocity using forces, damping, and speed caps
 	}
 }

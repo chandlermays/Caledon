@@ -28,6 +28,34 @@ namespace
 	}
 
 	/*-----------------------------------------------------------------------------------------------------------------------
+	| --- ComputeCapsule:
+	-----------------------------------------------------------------------------------------------------------------------*/
+	bool ComputeCapsule(const CaledonEngine::ShapeView2D& shape, CaledonEngine::ShapeMassData2D& massData)
+	{
+		if (shape.vertices.size() != 2 || !(shape.radius > 0.0f))
+			return false;
+
+		const CaledonEngine::Vector2f& p1 = shape.vertices[0];
+		const CaledonEngine::Vector2f& p2 = shape.vertices[1];
+		const float radius = shape.radius;
+		const float rr = radius * radius;
+		const float length = (p2 - p1).Magnitude();
+		const float h = 0.5f * length;
+
+		const float discArea = CaledonEngine::Math::Pi * rr;
+		const float boxArea = 2.0f * radius * length;
+		const float halfDiscCentroid = 4.0f * radius / (3.0f * CaledonEngine::Math::Pi);
+		const float discInertia = discArea * (0.5f * rr + h * h + 2.0f * h * halfDiscCentroid);
+		const float boxInertia = boxArea * (4.0f * rr + length * length) / 12.0f;
+
+		const CaledonEngine::Vector2f center = (p1 + p2) * 0.5f;
+		massData.area = discArea + boxArea;
+		massData.centroid = center;
+		massData.inertia = discInertia + boxInertia + massData.area * (center.x * center.x + center.y * center.y);
+		return true;
+	}
+
+	/*-----------------------------------------------------------------------------------------------------------------------
 	| --- ComputePolygon: 
 	-----------------------------------------------------------------------------------------------------------------------*/
 	bool ComputePolygon(const CaledonEngine::ShapeView2D& shape, CaledonEngine::ShapeMassData2D& massData)
@@ -94,6 +122,9 @@ bool CaledonEngine::ShapeMass2D::Compute(const ShapeView2D& shape, ShapeMassData
 
 	case PhysicsShapeType2D::Polygon:
 		return ComputePolygon(shape, massData);
+
+	case PhysicsShapeType2D::Capsule:
+		return ComputeCapsule(shape, massData);
 
 	default:
 		return false;

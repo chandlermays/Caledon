@@ -343,6 +343,12 @@
     <ClInclude Include="Systems\Physics\Events\Contact2D.h">
       <Filter>Source Files\Systems\Physics\Events</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\ContactSolver2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Components\EdgeCollider2D.h">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -497,6 +503,12 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\Shapes\ShapeManifold2D.cpp">
       <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Types\ContactSolver2D.cpp">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Components\EdgeCollider2D.cpp">
+      <Filter>Source Files\Systems\Physics\Components</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
