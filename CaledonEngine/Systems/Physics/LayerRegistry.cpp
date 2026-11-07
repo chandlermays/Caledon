@@ -32,17 +32,17 @@ CaledonEngine::LayerRegistry::LayerRegistry()
 {
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------
+| --- Name: Returns the name of the subsystem --- |
+-------------------------------------------------*/
 std::string_view CaledonEngine::LayerRegistry::Name() const noexcept
 {
 	return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initialize: Installs the BuiltIn layers --- |
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------
+| --- Initialize: Prepares the LayerRegistry for use --- |
+--------------------------------------------------------*/
 bool CaledonEngine::LayerRegistry::Initialize(EngineContext& context)
 {
 	m_pContext = &context;
@@ -56,9 +56,9 @@ bool CaledonEngine::LayerRegistry::Initialize(EngineContext& context)
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+| --- Shutdown: Cleans up the LayerRegistry and releases any resources --- |
+--------------------------------------------------------------------------*/
 void CaledonEngine::LayerRegistry::Shutdown() noexcept
 {
 	for (auto& name : m_names)
@@ -67,9 +67,9 @@ void CaledonEngine::LayerRegistry::Shutdown() noexcept
 	m_pContext = nullptr;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- NameToLayer:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- NameToLayer: Returns the index of the layer corresponding to the given layer name --- |
+-------------------------------------------------------------------------------------------*/
 int CaledonEngine::LayerRegistry::NameToLayer(std::string_view layerName) const noexcept
 {
 	if (layerName.empty())
@@ -84,9 +84,9 @@ int CaledonEngine::LayerRegistry::NameToLayer(std::string_view layerName) const 
 	return -1;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- LayerToName:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- LayerToName: Returns the name of the layer corresponding to the given layer index --- |
+-------------------------------------------------------------------------------------------*/
 std::string_view CaledonEngine::LayerRegistry::LayerToName(int layer) const noexcept
 {
 	if (layer < 0 || layer >= kLayerCount)
@@ -95,25 +95,25 @@ std::string_view CaledonEngine::LayerRegistry::LayerToName(int layer) const noex
 	return m_names[layer];
 }
 
-/*---------------------------------------------------------------------------------------
-| --- IsDefined:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------
+| --- IsDefined: Returns true if the layer has a name defined in the registry --- |
+---------------------------------------------------------------------------------*/
 bool CaledonEngine::LayerRegistry::IsDefined(int layer) const noexcept
 {
 	return layer >= 0 && layer < kLayerCount && !m_names[layer].empty();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- IsBuiltIn:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------------
+| --- IsBuiltIn: Returns true if the layer is a built-in layer (0-7) and cannot be changed by the user --- |
+----------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::LayerRegistry::IsBuiltIn(int layer) const noexcept
 {
 	return layer >= 0 && layer < kFirstUserLayer;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetMask:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------
+| --- GetMask: Returns a LayerMask that includes the layers specified by the given names --- |
+--------------------------------------------------------------------------------------------*/
 CaledonEngine::LayerMask CaledonEngine::LayerRegistry::GetMask(std::span<const std::string_view> layerNames) const noexcept
 {
 	unsigned int mask = 0;
@@ -124,7 +124,9 @@ CaledonEngine::LayerMask CaledonEngine::LayerRegistry::GetMask(std::span<const s
 		if (layer < 0)
 		{
 			if (m_pContext)
+			{
 				CE_LOG(*m_pContext, LogLevel::Warning, "Layers", "GetMask: unknown layer '{}'.", name);
+			}
 			continue;
 		}
 
@@ -134,17 +136,17 @@ CaledonEngine::LayerMask CaledonEngine::LayerRegistry::GetMask(std::span<const s
 	return LayerMask{ static_cast<int>(mask) };
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetMask:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------
+| --- GetMask: Returns a LayerMask that includes the layers specified by the given names --- |
+--------------------------------------------------------------------------------------------*/
 CaledonEngine::LayerMask CaledonEngine::LayerRegistry::GetMask(std::initializer_list<std::string_view> layerNames) const noexcept
 {
 	return GetMask(std::span<const std::string_view>{ layerNames.begin(), layerNames.size() });
 }
 
-/*---------------------------------------------------------------------------------------
-| --- MaskToString:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------------
+| --- MaskToString: Returns a string representation of the layers included in the given LayerMask --- |
+-----------------------------------------------------------------------------------------------------*/
 std::string CaledonEngine::LayerRegistry::MaskToString(LayerMask mask) const
 {
 	const unsigned int bits = static_cast<unsigned int>(mask.value);
@@ -156,16 +158,18 @@ std::string CaledonEngine::LayerRegistry::MaskToString(LayerMask mask) const
 			continue;
 
 		if (!result.empty())
+		{
 			result += ", ";
+		}
 		result += m_names[i];
 	}
 
 	return result;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetLayerName:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+| --- SetLayerName: Sets the name of the layer at the specified index --- |
+-------------------------------------------------------------------------*/
 bool CaledonEngine::LayerRegistry::SetLayerName(int layer, std::string_view layerName)
 {
 	if (layer < kFirstUserLayer || layer >= kLayerCount)

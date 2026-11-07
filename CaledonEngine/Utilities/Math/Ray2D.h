@@ -6,6 +6,8 @@
 
 #include "Utilities/Math/Vector2.h"
 
+#include <string>
+
 // In 2D spaces, this is a line segment that extends from a point in space in a specified direction.
 
 namespace CaledonEngine
@@ -25,7 +27,21 @@ namespace CaledonEngine
 			, m_direction{ direction }
 		{ }
 
-		// public Vector2f GetPoint(float distance);						// Returns a point that lies in a given distance along a ray
-		// public string ToString()											// Returns a formatted string for this ray
+		/*-----------------------------------------------------------------------------
+		| --- GetPoint: Returns a point that lies at a given distance along a ray --- |
+		-----------------------------------------------------------------------------*/
+		constexpr Vector2f GetPoint(float distance) const noexcept
+		{
+			return m_origin + m_direction * distance;
+		}
+
+		/*-----------------------------------------------------------
+		| --- ToString: Returns a formatted string for this ray --- |
+		-----------------------------------------------------------*/
+		std::string ToString() const
+		{
+			return "Ray2D(Origin: (" + std::to_string(m_origin.x) + ", " + std::to_string(m_origin.y) +
+				"), Direction: (" + std::to_string(m_direction.x) + ", " + std::to_string(m_direction.y) + "))";
+		}
 	};
 }

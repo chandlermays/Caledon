@@ -15,70 +15,49 @@
 ------------------------------------*/
 namespace
 {
-	using CaledonEngine::PhysicsShapeType2D;
-	using CaledonEngine::ShapeRayHit2D;
-	using CaledonEngine::ShapeView2D;
-	using CaledonEngine::Vector2f;
-
-	constexpr float kEpsilon = 1e-6f;
+	using namespace CaledonEngine;
 
 	struct BoundaryPoint
 	{
 		Vector2f point{ };
 		std::size_t edge = 0;
-		float sqrDistance = std::numeric_limits<float>::max();
+		float sqrDistance = Math::MaxFloat;
 	};
 
-	/*-----------------------------------------------------------------------------
-	| --- Dot:
-	-----------------------------------------------------------------------------*/
-	inline float Dot(const Vector2f& a, const Vector2f& b)
-	{
-		return Vector2f::Dot(a, b);
-	}
-
-	/*-----------------------------------------------------------------------------
-	| --- Cross:
-	-----------------------------------------------------------------------------*/
-	inline float Cross(const Vector2f& a, const Vector2f& b)
-	{
-		return Vector2f::Cross(a, b);
-	}
-
-	/*-------------------------------------------------------------------------------------------------
-	| --- NextIndex:
-	-------------------------------------------------------------------------------------------------*/
+	/*------------------------------------------------------------------------------------------------
+	| --- NextIndex: Returns the next vertex index in a ring, wrapping around to zero at the end --- |
+	------------------------------------------------------------------------------------------------*/
 	inline std::size_t NextIndex(std::size_t i, std::size_t count)
 	{
 		return (i + 1 == count) ? 0 : i + 1;
 	}
 
-	/*----------------------------------------------------------------------------------------------------------------
-	| --- OutwardNormal:
-	----------------------------------------------------------------------------------------------------------------*/
+	/*------------------------------------------------------------------------------------------------------
+	| --- OutwardNormal: Computes the normalized outward-facing normal vector for a given polygon edge --- |
+	------------------------------------------------------------------------------------------------------*/
 	inline Vector2f OutwardNormal(const Vector2f& a, const Vector2f& b)
 	{
 		const Vector2f edge = b - a;
 		return Vector2f{ edge.y, -edge.x }.Normalized();
 	}
 
-	/*----------------------------------------------------------------------
-	| --- ClosestPointOnSegment:
-	----------------------------------------------------------------------*/
+	/*--------------------------------------------------------------------------------------------
+	| --- ClosestPointOnSegment: Finds the closest point on a line segment to a target point --- |
+	--------------------------------------------------------------------------------------------*/
 	Vector2f ClosestPointOnSegment(const Vector2f& p, const Vector2f& a, const Vector2f& b)
 	{
 		const Vector2f ab = b - a;
-		const float lengthSqr = Dot(ab, ab);
+		const float lengthSqr = Vector2f::Dot(ab, ab);
 		if (lengthSqr <= 0.0f)
 			return a;
 
-		const float t = std::clamp(Dot(p - a, ab) / lengthSqr, 0.0f, 1.0f);
+		const float t = std::clamp(Vector2f::Dot(p - a, ab) / lengthSqr, 0.0f, 1.0f);
 		return a + ab * t;
 	}
 
-	/*-------------------------------------------------------------------------------------------------
-	| --- IsInsidePolygon:
-	-------------------------------------------------------------------------------------------------*/
+	/*--------------------------------------------------------------------------------------------------------------
+	| --- IsInsidePolygon: Tests whether a point lies strictly inside a convex polygon using half-plane checks --- |
+	--------------------------------------------------------------------------------------------------------------*/
 	bool IsInsidePolygon(std::span<const Vector2f> vertices, const Vector2f& p)
 	{
 		const std::size_t count = vertices.size();
@@ -90,15 +69,15 @@ namespace
 			const Vector2f& a = vertices[i];
 			const Vector2f& b = vertices[NextIndex(i, count)];
 
-			if (Cross(b - a, p - a) < 0.0f)
+			if (Vector2f::Cross(b - a, p - a) < 0.0f)
 				return false;
 		}
 		return true;
 	}
 
-	/*--------------------------------------------------------------------------------------
-	| --- ClosestPointOnPolygonBoundary:
-	--------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------
+	| --- ClosestPointOnPolygonBoundary: Finds the nearest point on the perimeter of a polygon --- |
+	----------------------------------------------------------------------------------------------*/
 	BoundaryPoint ClosestPointOnPolygonBoundary(std::span<const Vector2f> vertices, const Vector2f& p)
 	{
 		BoundaryPoint best;
@@ -117,9 +96,9 @@ namespace
 		return best;
 	}
 
-	/*-------------------------------------------------------------------------------------------------
-	| --- SqrDistanceToPolygonRegion:
-	-------------------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------
+	| --- SqrDistanceToPolygonRegion: Computes the squared distance from a point to a polygon region --- |
+	----------------------------------------------------------------------------------------------------*/
 	float SqrDistanceToPolygonRegion(std::span<const Vector2f> vertices, const Vector2f& p)
 	{
 		if (IsInsidePolygon(vertices, p))
@@ -128,14 +107,14 @@ namespace
 		return ClosestPointOnPolygonBoundary(vertices, p).sqrDistance;
 	}
 
-	/*------------------------------------------------------------------------------------------------------
-	| --- RaycastCircle:
-	------------------------------------------------------------------------------------------------------*/
+	/*---------------------------------------------------------------------------------------------------------
+	| --- RaycastCircle: Performs a ray-circle intersection test and returns the entry distance parameter --- |
+	---------------------------------------------------------------------------------------------------------*/
 	bool RaycastCircle(const Vector2f& origin, const Vector2f& direction, const Vector2f& center, float radius, float& t)
 	{
 		const Vector2f m = origin - center;
-		const float b = Dot(m, direction);
-		const float c = Dot(m, m) - radius * radius;
+		const float b = Vector2f::Dot(m, direction);
+		const float c = Vector2f::Dot(m, m) - radius * radius;
 
 		if (c > 0.0f && b > 0.0f)
 			return false;
@@ -148,33 +127,33 @@ namespace
 		return true;
 	}
 
-	/*-------------------------------------------------------------------------------------------------------------------
-	| --- RaycastSegment:
-	-------------------------------------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------
+	| --- RaycastSegment: Performs a ray-segment intersection test for linear shape boundaries --- |
+	----------------------------------------------------------------------------------------------*/
 	bool RaycastSegment(const Vector2f& origin, const Vector2f& direction, const Vector2f& a, const Vector2f& b, const Vector2f& normal, float& t)
 	{
-		if (Dot(normal, direction) >= 0.0f)
+		if (Vector2f::Dot(normal, direction) >= 0.0f)
 			return false;
 
 		const Vector2f segment = b - a;
-		const float denominator = Cross(direction, segment);
+		const float denominator = Vector2f::Cross(direction, segment);
 		if (std::fabs(denominator) <= 0.0f)
 			return false;
 
 		const Vector2f w = a - origin;
-		const float hitT = Cross(w, segment) / denominator;
-		const float u = Cross(w, direction) / denominator;
+		const float hitT = Vector2f::Cross(w, segment) / denominator;
+		const float u = Vector2f::Cross(w, direction) / denominator;
 
-		if (hitT < 0.0f || u < -kEpsilon || u > 1.0f + kEpsilon)
+		if (hitT < 0.0f || u < -Math::Epsilon || u > 1.0f + Math::Epsilon)
 			return false;
 
 		t = hitT;
 		return true;
 	}
 
-	/*------------------------------------------------------------------------------------------------------------------------
-	| --- HasSeparatingEdge:
-	------------------------------------------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------------
+	| --- HasSeparatingEdge: Checks for a separating axis along the polygon edges to determine non-overlap --- |
+	----------------------------------------------------------------------------------------------------------*/
 	bool HasSeparatingEdge(std::span<const Vector2f> first, std::span<const Vector2f> second)
 	{
 		const std::size_t count = first.size();
@@ -185,7 +164,9 @@ namespace
 
 			float gap = std::numeric_limits<float>::max();
 			for (const Vector2f& vertex : second)
-				gap = std::min(gap, Dot(normal, vertex - a));
+			{
+				gap = std::min(gap, Vector2f::Dot(normal, vertex - a));
+			}
 
 			if (gap > 0.0f)
 				return true;
@@ -193,9 +174,9 @@ namespace
 		return false;
 	}
 
-	/*-----------------------------------------------------------------------------------------------------------------
-	| --- SqrDistanceBetweenSeparatedPolygons:
-	-----------------------------------------------------------------------------------------------------------------*/
+	/*--------------------------------------------------------------------------------------------------------------------
+	| --- SqrDistanceBetweenSeparatedPolygons: Calculates the minimum squared distance between two disjoint polygons --- |
+	--------------------------------------------------------------------------------------------------------------------*/
 	float SqrDistanceBetweenSeparatedPolygons(std::span<const Vector2f> first, std::span<const Vector2f> second)
 	{
 		float best = std::numeric_limits<float>::max();
@@ -216,9 +197,9 @@ namespace
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
-/*-----------------------------------------------------------------------------------------------------------------
-| --- MakeView:
------------------------------------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------
+| --- MakeView: Creates a ShapeView2D descriptor for a specific shape index within a shape group --- |
+----------------------------------------------------------------------------------------------------*/
 CaledonEngine::ShapeView2D CaledonEngine::ShapeQueries2D::MakeView(const PhysicsShapeGroup2D& shapeGroup, int shapeIndex)
 {
 	const PhysicsShape2D* pShape = shapeGroup.GetShape(shapeIndex);
@@ -232,9 +213,9 @@ CaledonEngine::ShapeView2D CaledonEngine::ShapeQueries2D::MakeView(const Physics
 	return view;
 }
 
-/*-------------------------------------------------------------------------------------------------------------
-| --- IsConvexCounterClockwise:
--------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------------------
+| --- IsConvexCounterClockwise: Validates whether a given vertex collection forms a convex, counter-clockwise polygon --- |
+-------------------------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::IsConvexCounterClockwise(std::span<const Vector2f> vertices)
 {
 	const std::size_t count = vertices.size();
@@ -250,7 +231,7 @@ bool CaledonEngine::ShapeQueries2D::IsConvexCounterClockwise(std::span<const Vec
 		for (const Vector2f& vertex : vertices)
 		{
 			const Vector2f toVertex = vertex - a;
-			const float cross = Cross(edge, toVertex);
+			const float cross = Vector2f::Cross(edge, toVertex);
 			const float tolerance = 1e-5f * edge.Magnitude() * toVertex.Magnitude();
 
 			if (cross < -tolerance)
@@ -263,9 +244,9 @@ bool CaledonEngine::ShapeQueries2D::IsConvexCounterClockwise(std::span<const Vec
 	return hasArea;
 }
 
-/*---------------------------------------------------------------------------------
-| --- IsSupported:
----------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------------------
+| --- IsSupported: Checks if a shape view configuration is fully supported by the query pipeline --- |
+----------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::IsSupported(const ShapeView2D& shape)
 {
 	if (!(shape.radius >= 0.0f) || !std::isfinite(shape.radius))
@@ -280,16 +261,17 @@ bool CaledonEngine::ShapeQueries2D::IsSupported(const ShapeView2D& shape)
 		return IsConvexCounterClockwise(shape.vertices);
 
 	case PhysicsShapeType2D::Capsule:
-		return shape.vertices.size() == 2 && Vector2f::SqrDistance(shape.vertices[0], shape.vertices[1]) > kEpsilon * kEpsilon;
+	case PhysicsShapeType2D::Edges:
+		return shape.vertices.size() == 2 && Vector2f::SqrDistance(shape.vertices[0], shape.vertices[1]) > Math::Epsilon * Math::Epsilon;
 
 	default:
 		return false;
 	}
 }
 
-/*-------------------------------------------------------------------------------------------------
-| --- OverlapPoint:
--------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------
+| --- OverlapPoint: Tests whether a world-space point overlaps the interior or boundary of a shape --- |
+------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::OverlapPoint(const ShapeView2D& shape, const Vector2f& point)
 {
 	if (!IsSupported(shape))
@@ -305,9 +287,9 @@ bool CaledonEngine::ShapeQueries2D::OverlapPoint(const ShapeView2D& shape, const
 	return SqrDistanceToPolygonRegion(shape.vertices, point) <= radiusSqr;
 }
 
-/*---------------------------------------------------------------------------------------------------------------------------------
-| --- ClosestPointOnPerimeter:
----------------------------------------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------------------------------
+| --- ClosestPointOnPerimeter: Finds the point on the outer perimeter of a shape closest to a target reference position --- |
+---------------------------------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::ClosestPointOnPerimeter(const ShapeView2D& shape, const Vector2f& point, Vector2f& result)
 {
 	if (!IsSupported(shape))
@@ -319,7 +301,7 @@ bool CaledonEngine::ShapeQueries2D::ClosestPointOnPerimeter(const ShapeView2D& s
 	{
 		const Vector2f& center = shape.vertices[0];
 		const Vector2f offset = point - center;
-		const Vector2f direction = (offset.SqrMagnitude() > kEpsilon * kEpsilon) ? offset.Normalized() : Vector2f::Right();
+		const Vector2f direction = (offset.SqrMagnitude() > Math::Epsilon * Math::Epsilon) ? offset.Normalized() : Vector2f::Right();
 		result = center + direction * radius;
 		return true;
 	}
@@ -337,7 +319,7 @@ bool CaledonEngine::ShapeQueries2D::ClosestPointOnPerimeter(const ShapeView2D& s
 		}
 
 		const Vector2f offset = point - boundary.point;
-		const Vector2f direction = (offset.SqrMagnitude() > kEpsilon * kEpsilon) ? offset.Normalized() : OutwardNormal(vertices[boundary.edge], vertices[NextIndex(boundary.edge, count)]);
+		const Vector2f direction = (offset.SqrMagnitude() > Math::Epsilon * Math::Epsilon) ? offset.Normalized() : OutwardNormal(vertices[boundary.edge], vertices[NextIndex(boundary.edge, count)]);
 		result = boundary.point + direction * radius;
 		return true;
 	}
@@ -348,7 +330,7 @@ bool CaledonEngine::ShapeQueries2D::ClosestPointOnPerimeter(const ShapeView2D& s
 	{
 		const Vector2f& a = vertices[i];
 		const Vector2f normal = OutwardNormal(a, vertices[NextIndex(i, count)]);
-		const float depth = -Dot(normal, point - a);
+		const float depth = -Vector2f::Dot(normal, point - a);
 
 		if (depth < bestDepth)
 		{
@@ -361,9 +343,60 @@ bool CaledonEngine::ShapeQueries2D::ClosestPointOnPerimeter(const ShapeView2D& s
 	return true;
 }
 
-/*-----------------------------------------------------------------------------------------------------------------------
-| --- Raycast:
------------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------
+| --- ClosestPointsOfSegments: Finds the closest points between two line segments in 2D space --- |
+-------------------------------------------------------------------------------------------------*/
+CaledonEngine::SegmentClosestPoints2D CaledonEngine::ShapeQueries2D::ClosestPointsOfSegments(const Vector2f& p1, const Vector2f& q1, const Vector2f& p2, const Vector2f& q2) noexcept
+{
+	const Vector2f d1 = q1 - p1;
+	const Vector2f d2 = q2 - p2;
+	const Vector2f r = p1 - p2;
+	const float a = Vector2f::Dot(d1, d1);
+	const float e = Vector2f::Dot(d2, d2);
+	const float f = Vector2f::Dot(d2, r);
+
+	float s = 0.0f;
+	float t = 0.0f;
+	if (a <= Math::Epsilon && e <= Math::Epsilon)
+	{
+		// Both segments are points
+	}
+	else if (a <= Math::Epsilon)
+	{
+		t = std::clamp(f / e, 0.0f, 1.0f);
+	}
+	else
+	{
+		const float c = Vector2f::Dot(d1, r);
+		if (e <= Math::Epsilon)
+		{
+			s = std::clamp(-c / a, 0.0f, 1.0f);
+		}
+		else
+		{
+			const float b = Vector2f::Dot(d1, d2);
+			const float denominator = a * e - b * b;
+			s = (denominator > 0.0f) ? std::clamp((b * f - c * e) / denominator, 0.0f, 1.0f) : 0.0f;
+			t = (b * s + f) / e;
+			if (t < 0.0f)
+			{
+				t = 0.0f;
+				s = std::clamp(-c / a, 0.0f, 1.0f);
+			}
+			else if (t > 1.0f)
+			{
+				t = 1.0f;
+				s = std::clamp((b - c) / a, 0.0f, 1.0f);
+			}
+		}
+	}
+
+	return SegmentClosestPoints2D{ s, t, p1 + d1 * s, p2 + d2 * t };
+}
+
+/*-----------------------------------------------------------------------------------------------
+| --- Raycast: Casts a ray against a shape view and populates hit details upon intersection --- |
+-----------------------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::Raycast(const ShapeView2D& shape, const Vector2f& origin, const Vector2f& direction,
 	float maxDistance, bool hitIfStartsInside, ShapeRayHit2D& hit)
 {
@@ -437,9 +470,9 @@ bool CaledonEngine::ShapeQueries2D::Raycast(const ShapeView2D& shape, const Vect
 	return true;
 }
 
-/*-------------------------------------------------------------------------------------
-| --- Overlap:
--------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+| --- Overlap: Tests whether two shape views intersect or touch each other --- |
+------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeQueries2D::Overlap(const ShapeView2D& shapeA, const ShapeView2D& shapeB)
 {
 	if (!IsSupported(shapeA) || !IsSupported(shapeB))

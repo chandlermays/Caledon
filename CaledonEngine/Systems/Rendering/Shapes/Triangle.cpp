@@ -5,7 +5,7 @@
 #include "Triangle.h"
 
 #include "Systems/Rendering/Renderer.h"
-#include "Utilities/Math/Rect.h"
+#include "Utilities/Geometry/Rect.h"
 #include "Utilities/Math/Vector2.h"
 
 /*-----------------------------------

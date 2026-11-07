@@ -18,7 +18,7 @@
 
 namespace
 {
-	constexpr std::uint32_t kFnvOffsetBasis = 2166136261u;		// FNV-1a 32-bit
+	constexpr std::uint32_t kFnvOffsetBasis = 2166136261u;
 	constexpr std::uint32_t kFnvPrime = 16777619u;
 
 	/*----------------------------------------------------------------------------------
@@ -78,6 +78,8 @@ namespace
 	}
 }
 
+
+
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
@@ -87,29 +89,29 @@ namespace
 CaledonEngine::Collider2D::Collider2D()
 	: m_pAttachedRigidBody{ nullptr }
 	, m_pPhysicsScene2D{ nullptr }
-	, m_bounceCombine{ PhysicsMaterialCombine2D::Maximum }
-	, m_bounciness{ 0.0f }
+	, m_pComposite{ nullptr }
 	, m_bounds{ }
-	, m_density{ 1.0f }
+	, m_contactMask{ -1 }
+	, m_includeLayers{ 0 }
+	, m_excludeLayers{ 0 }
+	, m_layerOverridePriority{ 0 }
 	, m_friction{ 0.4f }
+	, m_bounciness{ 0.0f }
+	, m_density{ 1.0f }
 	, m_frictionCombine{ PhysicsMaterialCombine2D::Mean }
-	, m_isTrigger{ false }
+	, m_bounceCombine{ PhysicsMaterialCombine2D::Maximum }
 	, m_offset{ 0.0f, 0.0f }
 	, m_sharedMaterial{ }
 	, m_callbackLayers{ -1 }
 	, m_contactCaptureLayers{ -1 }
-	, m_contactMask{ -1 }
-	, m_excludeLayers{ 0 }
 	, m_forceReceiveLayers{ -1 }
 	, m_forceSendLayers{ -1 }
-	, m_includeLayers{ 0 }
-	, m_pComposite{ nullptr }
+	, m_compositeOrder{ 0 }
+	, m_shapeCount{ 0 }
+	, m_isTrigger{ false }
 	, m_compositeCapable{ false }
 	, m_compositeOperation{ CompositeOperation::None }
-	, m_compositeOrder{ 0 }
 	, m_errorState{ ColliderErrorState2D::None }
-	, m_layerOverridePriority{ 0 }
-	, m_shapeCount{ 0 }
 { }
 
 /*-------------------------------------------------------
@@ -179,32 +181,30 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	if (pCollider == nullptr || pCollider == this)
 		return false;
 
-	// both must be registered with the same PhysicsScene2D
+	// Both must be registered with the same PhysicsScene2D
 	if (m_pPhysicsScene2D == nullptr || pCollider->m_pPhysicsScene2D != m_pPhysicsScene2D)
 		return false;
 
-	//...
+	// Both must have valid GameObjects assigned as owners
 	if (m_pOwner == nullptr || pCollider->m_pOwner == nullptr)
 		return false;
 
-	//...
+	// Both the components and their respective owner GameObjects must be active
 	if (!IsActive() || !pCollider->IsActive() || !m_pOwner->IsActive() || !pCollider->m_pOwner->IsActive())
 		return false;
 
-	//...
+	// Colliders on the same GameObject cannot collide with each other
 	if (m_pOwner == pCollider->m_pOwner)
 		return false;
 
-	//...
+	// Colliders attached to the same RigidBody2D cannot collide with each other
 	if (m_pAttachedRigidBody != nullptr && m_pAttachedRigidBody == pCollider->m_pAttachedRigidBody)
 		return false;
 
-	// explicit per-pair ignore (Physics2D.IgnoreCollision)
+	// Explicit per-pair ignore check
 	if (m_pPhysicsScene2D->GetIgnoreCollision(this, pCollider))
 		return false;
 
-	// Each collider decides whether it accepts the other's layer:
-	// effective mask = (layer matrix row for its own layer | includeLayers) & ~excludeLayers
 	const auto& matrix = m_pPhysicsScene2D->GetSettings().layerCollisionMatrix;
 	const int layerA = m_pOwner->GetLayer();
 	const int layerB = pCollider->m_pOwner->GetLayer();
@@ -215,10 +215,11 @@ bool CaledonEngine::Collider2D::CanContact(const Collider2D* pCollider) const
 	const bool aAcceptsB = (maskA & (1u << layerB)) != 0;
 	const bool bAcceptsA = (maskB & (1u << layerA)) != 0;
 
+	// if both accept each other, then they can contact
 	if (aAcceptsB == bAcceptsA)
 		return aAcceptsB;
 
-	// Conflicting decisions: the higher layerOverridePriority wins. On a tie, the contact is refused (exclude beats include).
+	// if one accepts the other, then the one with the higher layer override priority wins
 	if (m_layerOverridePriority != pCollider->m_layerOverridePriority)
 		return (m_layerOverridePriority > pCollider->m_layerOverridePriority) ? aAcceptsB : bAcceptsA;
 
@@ -348,28 +349,6 @@ void CaledonEngine::Collider2D::OnTriggerStay2D(const Collision2D& collision)
 
 }
 
-/*--------------------------------------------------------------------------------
-| --- SetSharedMaterial: Sets the shared physics material of this Collider2D --- |
---------------------------------------------------------------------------------*/
-void CaledonEngine::Collider2D::SetSharedMaterial(const PhysicsMaterial2D& material)
-{
-	m_sharedMaterial = material;
-}
-
-/*-----------------------------------------------------------------------
-| --- RefreshBounds: Refreshes the bounding area of this Collider2D --- |
------------------------------------------------------------------------*/
-void CaledonEngine::Collider2D::RefreshBounds()
-{
-	PhysicsShapeGroup2D shapeGroup;
-	m_shapeCount = BuildShapes(shapeGroup, true);
-	m_errorState = (m_shapeCount > 0) ? ColliderErrorState2D::None : ColliderErrorState2D::NoShapes;
-	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);
-
-	if (m_pAttachedRigidBody != nullptr)
-		m_pAttachedRigidBody->UpdateMassData();				// The shapes changed, so the mass of the body might have changed
-}
-
 /*------------------------------------------------------------------------------------------------------------------
 | --- SetDensity: Sets the density value of this Collider2D (and updates the mass of the attached RigidBody2D) --- |
 ------------------------------------------------------------------------------------------------------------------*/
@@ -392,9 +371,33 @@ void CaledonEngine::Collider2D::SetIsTrigger(bool isTrigger)
 		m_pAttachedRigidBody->UpdateMassData();
 }
 
-/*------------------------------------------------------------------
-| --- GetShapes: Populates the shape group with physics shapes --- |
-------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------
+| --- SetSharedMaterial: Sets the shared physics material of this Collider2D --- |
+--------------------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::SetSharedMaterial(const PhysicsMaterial2D& material)
+{
+	m_sharedMaterial = material;
+}
+
+/*-----------------------------------------------------------------------
+| --- RefreshBounds: Refreshes the bounding area of this Collider2D --- |
+-----------------------------------------------------------------------*/
+void CaledonEngine::Collider2D::RefreshBounds()
+{
+	PhysicsShapeGroup2D shapeGroup;
+	m_shapeCount = BuildShapes(shapeGroup, true);
+	m_errorState = (m_shapeCount > 0) ? ColliderErrorState2D::None : ColliderErrorState2D::NoShapes;
+	m_bounds = ComputeShapeBounds(shapeGroup, nullptr, true);
+
+	if (m_pAttachedRigidBody != nullptr)
+	{
+		m_pAttachedRigidBody->UpdateMassData();				// The shapes changed, so the mass of the body might have changed
+	}
+}
+
+/*--------------------------------------------------------------------------------------
+| --- GetShapes: Populates the shape group with physics shapes for this Collider2D --- |
+--------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
 	return BuildShapes(physicsShapeGroup, true);
@@ -433,9 +436,9 @@ std::uint32_t CaledonEngine::Collider2D::GetShapesHash() const
 	return hash;
 }
 
-/*-------------------------------------------------------------------
-| --- GetShapeBounds: Returns bounds for all constituent shapes --- |
--------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------
+| --- GetShapeBounds: Returns the bounds for all of the constituent shapes of this Collider2D --- |
+-------------------------------------------------------------------------------------------------*/
 CaledonEngine::AABB2D CaledonEngine::Collider2D::GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const
 {
 	PhysicsShapeGroup2D shapeGroup;
@@ -445,21 +448,28 @@ CaledonEngine::AABB2D CaledonEngine::Collider2D::GetShapeBounds(std::vector<AABB
 	return ComputeShapeBounds(shapeGroup, &bounds, useRadii);
 }
 
-/*-------------------------------------------------------------------------------------
-| --- Cast:
--------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------
+| --- Cast: Casts this Collider2D's shape into the Scene starting at the specified position and rotation --- |
+------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Cast(const Vector2f& direction, const ContactFilter2D& contactFilter, std::span<ColliderHit2D> results, float distance, bool ignoreSiblingColliders) const
 {
-	/*
+	if (m_pPhysicsScene2D == nullptr)
+		return 0;
 
+	PhysicsShapeGroup2D shapes;
+	GetShapes(shapes);
 
+	Vector2f origin;
+	float rotation;
+	Vector2f scale;
+	GetWorldPose(origin, rotation, scale);
 
-	*/
+	return m_pPhysicsScene2D->CastShapes(shapes, origin, direction, distance, this, ignoreSiblingColliders, contactFilter, results);
 }
 
-/*----------------------------------------------------------------------------------------
-| --- Overlap:
-----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------------------------
+| --- Overlap: Returns the number of Collider2D that overlap this Collider2D at a given position and rotation --- |
+-----------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
 	results.clear();
@@ -488,9 +498,9 @@ int CaledonEngine::Collider2D::Overlap(const Vector2f& position, float angle, co
 	return m_pPhysicsScene2D->OverlapShapes(shapes, this, contactFilter, results);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Raycast:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------------------------------------
+| --- Raycast: Casts a ray from the center of this Collider2D in a given direction and returns the number of hits detected --- |
+------------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<ColliderHit2D> results, float distance, LayerMask layerMask, float minDepth, float maxDepth) const
 {
 	if (m_pPhysicsScene2D == nullptr)
@@ -510,17 +520,17 @@ int CaledonEngine::Collider2D::Raycast(const Vector2f& direction, std::span<Coll
 	return static_cast<int>(count);
 }
 
-/*-------------------------------------------------------------------------
-| --- GetContacts: Retrieves contact points involving this Collider2D --- |
--------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------------
+| --- GetContacts: Retrieves all contact points involving this Collider2D filtered by the given ContactFilter2D --- |
+-------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const
 {
 	return (m_pPhysicsScene2D != nullptr) ? m_pPhysicsScene2D->GetContacts(this, contactFilter, contacts) : 0;
 }
 
-/*--------------------------------------------------------------------------------------------
-| --- GetContactColliders: Retrieves colliders currently in contact with this Collider2D --- |
---------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------------------------------
+| --- GetContactColliders: Retrieves all colliders currently in contact with this Collider2D filtered by the given ContactFilter2D --- |
+--------------------------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const
 {
 	if (m_pPhysicsScene2D == nullptr)
@@ -532,24 +542,27 @@ int CaledonEngine::Collider2D::GetContactColliders(const ContactFilter2D& contac
 	return m_pPhysicsScene2D->GetContactColliders(this, contactFilter, colliders);
 }
 
+
+
 /*--------------------------------------
 | --- Protected Method Definitions --- |
 --------------------------------------*/
-/*---------------------------------------------------------------------------------------------------
-| --- AddLocalShapes:
----------------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+| --- AddLocalShapes: Adds the local shapes of this Collider2D to the physics shape group --- |
+---------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::AddLocalShapes(PhysicsShapeGroup2D&) const
 {
 	return 0;
 }
 
 
+
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*------------------------------------------------------------------------------------------------------------------
-| --- BuildShapes:
-------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------------
+| --- BuildShapes: Builds the physics shapes for this Collider2D and adds them to the given PhysicsShapeGroup2D --- |
+-------------------------------------------------------------------------------------------------------------------*/
 int CaledonEngine::Collider2D::BuildShapes(PhysicsShapeGroup2D& physicsShapeGroup, bool worldSpace) const
 {
 	const int firstShape = physicsShapeGroup.GetShapeCount();
@@ -603,9 +616,9 @@ int CaledonEngine::Collider2D::BuildShapes(PhysicsShapeGroup2D& physicsShapeGrou
 	return lastShape - firstShape;
 }
 
-/*-----------------------------------------------------------------------------------------------------
-| --- GetWorldPose:
------------------------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------
+| --- GetWorldPose: Retrieves the world-space position, rotation, and scale of this Collider2D --- |
+--------------------------------------------------------------------------------------------------*/
 void CaledonEngine::Collider2D::GetWorldPose(Vector2f& position, float& rotation, Vector2f& scale) const
 {
 	position = Vector2f{ 0.0f, 0.0f };

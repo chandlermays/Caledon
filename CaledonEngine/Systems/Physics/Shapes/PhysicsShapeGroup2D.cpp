@@ -2,8 +2,8 @@
 | File: PhysicsShapeGroup2D.cpp
 | Author: Chandler Mays
 ------------------------------*/
-
 #include "PhysicsShapeGroup2D.h"
+
 #include "Utilities/Math/Constants.h"
 
 #include <cmath>
@@ -23,9 +23,9 @@ CaledonEngine::PhysicsShapeGroup2D::PhysicsShapeGroup2D(int shapeCapacity, int v
 		m_vertices.reserve(static_cast<std::size_t>(vertexCapacity));
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Add:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------
+| --- Add: Adds the shapes and vertices from another PhysicsShapeGroup2D to this PhysicsShapeGroup2D --- |
+--------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsShapeGroup2D::Add(const PhysicsShapeGroup2D& physicsShapeGroup)
 {
 	if (&physicsShapeGroup == this)
@@ -49,12 +49,12 @@ void CaledonEngine::PhysicsShapeGroup2D::Add(const PhysicsShapeGroup2D& physicsS
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddBox: A rotated rectangle stored as a 4 vertex Polygon (counter-clockwise) --- |
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------
+| --- AddBox: Adds a box shape to this PhysicsShapeGroup2D --- |
+--------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddBox(const Vector2f& center, const Vector2f& size, float angle, float edgeRadius)
 {
-	if (!(size.x > 0.0f) || !(size.y > 0.0f) || !(edgeRadius >= 0.0f))
+	if (size.x < 0.0f || size.y < 0.0f || edgeRadius <= 0.0f)
 		return -1;
 
 	const float radians = angle * Math::Deg2Rad;
@@ -67,14 +67,16 @@ int CaledonEngine::PhysicsShapeGroup2D::AddBox(const Vector2f& center, const Vec
 	Vector2f corners[4];
 
 	for (int i = 0; i < 4; ++i)
+	{
 		corners[i] = Vector2f(center.x + local[i][0] * c - local[i][1] * s, center.y + local[i][0] * s + local[i][1] * c);
+	}
 
 	return AddShape(PhysicsShapeType2D::Polygon, corners, edgeRadius);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddCapsule:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------
+| --- AddCapsule: Adds a capsule shape to this PhysicsShapeGroup2D --- |
+----------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddCapsule(const Vector2f& vertex0, const Vector2f& vertex1, float radius)
 {
 	if (radius <= 0.0f)
@@ -84,9 +86,9 @@ int CaledonEngine::PhysicsShapeGroup2D::AddCapsule(const Vector2f& vertex0, cons
 	return AddShape(PhysicsShapeType2D::Capsule, ends, radius);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddCircle:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- AddCircle: Adds a circle shape to this PhysicsShapeGroup2D --- |
+--------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddCircle(const Vector2f& center, float radius)
 {
 	if (radius <= 0.0f)
@@ -95,20 +97,20 @@ int CaledonEngine::PhysicsShapeGroup2D::AddCircle(const Vector2f& center, float 
 	return AddShape(PhysicsShapeType2D::Circle, std::span<const Vector2f>(&center, 1), radius);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddEdges:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------
+| --- AddEdges: Adds an edges shape to this PhysicsShapeGroup2D --- |
+-------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddEdges(std::span<const Vector2f> vertices, float edgeRadius)
 {
-	if (vertices.size() < 2 || (edgeRadius <= 0.0f))
+	if (vertices.size() < 2 || edgeRadius <= 0.0f)
 		return -1;
 
 	return AddShape(PhysicsShapeType2D::Edges, vertices, edgeRadius);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddPolygon:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------
+| --- AddPolygon: Adds a polygon shape to this PhysicsShapeGroup2D --- |
+----------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddPolygon(std::span<const Vector2f> vertices)
 {
 	if (vertices.size() < 3)
@@ -117,18 +119,18 @@ int CaledonEngine::PhysicsShapeGroup2D::AddPolygon(std::span<const Vector2f> ver
 	return AddShape(PhysicsShapeType2D::Polygon, vertices, 0.0f);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Clear:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| --- Clear: Clears all shapes and vertices from this PhysicsShapeGroup2D --- |
+-----------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsShapeGroup2D::Clear() noexcept
 {
 	m_shapes.clear();
 	m_vertices.clear();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- DeleteShape: 
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- DeleteShape: Deletes a shape from this PhysicsShapeGroup2D --- |
+--------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::DeleteShape(int shapeIndex)
 {
 	if (!IsValidShape(shapeIndex))
@@ -141,31 +143,33 @@ bool CaledonEngine::PhysicsShapeGroup2D::DeleteShape(int shapeIndex)
 	m_shapes.erase(m_shapes.begin() + shapeIndex);
 
 	for (std::size_t i = static_cast<std::size_t>(shapeIndex); i < m_shapes.size(); ++i)
+	{
 		m_shapes[i].vertexStartIndex -= removed.vertexCount;
+	}
 
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetShape:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------
+| --- GetShape: Returns a pointer to the PhysicsShape2D at the given index --- |
+------------------------------------------------------------------------------*/
 const CaledonEngine::PhysicsShape2D* CaledonEngine::PhysicsShapeGroup2D::GetShape(int shapeIndex) const noexcept
 {
 	return IsValidShape(shapeIndex) ? &m_shapes[static_cast<std::size_t>(shapeIndex)] : nullptr;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetShapeData:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------------------
+| --- GetShapeData: Copies the shapes and vertices from this PhysicsShapeGroup2D into the provided vectors --- |
+--------------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsShapeGroup2D::GetShapeData(std::vector<PhysicsShape2D>& shapes, std::vector<Vector2f>& vertices) const
 {
 	shapes.assign(m_shapes.begin(), m_shapes.end());
 	vertices.assign(m_vertices.begin(), m_vertices.end());
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetShapeVertex:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------------------------
+| --- GetShapeVertex: Returns a pointer to the vertex at the given index for the shape at the given index --- |
+-------------------------------------------------------------------------------------------------------------*/
 const CaledonEngine::Vector2f* CaledonEngine::PhysicsShapeGroup2D::GetShapeVertex(int shapeIndex, int vertexIndex) const noexcept
 {
 	const PhysicsShape2D* pShape = GetShape(shapeIndex);
@@ -175,9 +179,9 @@ const CaledonEngine::Vector2f* CaledonEngine::PhysicsShapeGroup2D::GetShapeVerte
 	return &m_vertices[static_cast<std::size_t>(pShape->vertexStartIndex + vertexIndex)];
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetShapeVertices:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- GetShapeVertices: Returns a span of the vertices for the shape at the given index --- |
+-------------------------------------------------------------------------------------------*/
 std::span<const CaledonEngine::Vector2f> CaledonEngine::PhysicsShapeGroup2D::GetShapeVertices(int shapeIndex) const noexcept
 {
 	const PhysicsShape2D* pShape = GetShape(shapeIndex);
@@ -187,18 +191,18 @@ std::span<const CaledonEngine::Vector2f> CaledonEngine::PhysicsShapeGroup2D::Get
 	return std::span<const Vector2f>(m_vertices.data() + pShape->vertexStartIndex, static_cast<std::size_t>(pShape->vertexCount));
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetShapeVertices:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------------
+| --- GetShapeVertices: Copies the vertices for the shape at the given index into the provided vector --- |
+---------------------------------------------------------------------------------------------------------*/
 void CaledonEngine::PhysicsShapeGroup2D::GetShapeVertices(int shapeIndex, std::vector<Vector2f>& vertices) const
 {
 	const std::span<const Vector2f> view = GetShapeVertices(shapeIndex);
 	vertices.assign(view.begin(), view.end());
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetShapeAdjacentVertices:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------
+| --- SetShapeAdjacentVertices: Sets the adjacent vertices for the shape at the given index --- |
+-----------------------------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::SetShapeAdjacentVertices(int shapeIndex, bool useAdjStart, bool useAdjEnd, const Vector2f& adjStart, const Vector2f& adjEnd)
 {
 	if (!IsValidShape(shapeIndex))
@@ -215,21 +219,21 @@ bool CaledonEngine::PhysicsShapeGroup2D::SetShapeAdjacentVertices(int shapeIndex
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetShapeRadius:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+| --- SetShapeRadius: Sets the radius for the shape at the given index --- |
+--------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::SetShapeRadius(int shapeIndex, float radius)
 {
-	if (!IsValidShape(shapeIndex) || !(radius >= 0.0f))
+	if (!IsValidShape(shapeIndex) || radius <= 0.0f)
 		return false;
 
 	m_shapes[static_cast<std::size_t>(shapeIndex)].radius = radius;
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetShapeVertex:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+| --- SetShapeVertex: Sets the vertex at the given index for the shape at the given index --- |
+---------------------------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::SetShapeVertex(int shapeIndex, int vertexIndex, const Vector2f& vertex)
 {
 	const PhysicsShape2D* pShape = GetShape(shapeIndex);
@@ -245,9 +249,9 @@ bool CaledonEngine::PhysicsShapeGroup2D::SetShapeVertex(int shapeIndex, int vert
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*----------------------------------------------------------------------------------------------
-| --- AddShape:
-----------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------
+| --- AddShape: Adds a shape to this PhysicsShapeGroup2D --- |
+------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddShape(PhysicsShapeType2D type, std::span<const Vector2f> vertices, float radius)
 {
 	m_shapes.reserve(m_shapes.size() + 1);
@@ -264,9 +268,9 @@ int CaledonEngine::PhysicsShapeGroup2D::AddShape(PhysicsShapeType2D type, std::s
 	return GetShapeCount() - 1;
 }
 
-/*----------------------------------------------------------------------------------------------
-| --- IsValidShape:
-----------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+| --- IsValidShape: Returns true if the shape index is valid for this PhysicsShapeGroup2D --- |
+---------------------------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::IsValidShape(int shapeIndex) const noexcept
 {
 	return shapeIndex >= 0 && shapeIndex < GetShapeCount();

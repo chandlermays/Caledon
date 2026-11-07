@@ -16,7 +16,5 @@ namespace CaledonEngine
 		Capsule,				// Two vertices (the centers of the two end circles) plus a radius
 		Polygon,				// Three or more vertices forming a convex polygon (counter-clockwise); radius rounds its corners
 		Edges,					// Two or more vertices forming an open chain of edges; radius thickens it
-
-		// ..expand for Caledon's capabilities
 	};
 }

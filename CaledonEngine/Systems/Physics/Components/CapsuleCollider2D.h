@@ -20,26 +20,26 @@ namespace CaledonEngine
 	class CapsuleCollider2D : public Collider2D
 	{
 	private:
-		CapsuleDirection2D m_direction;															// The direction that the capsule sides can extend
-		Vector2f m_size;																		// The width and height of the capsule
+		CapsuleDirection2D m_direction;																		// The direction that the capsule sides can extend
+		Vector2f m_size;																					// The width and height of the capsule
 
 	protected:
-		int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const override;				//
+		int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const override;							// Adds the local shapes of this CapsuleCollider2D to the physics shape group
 
 	public:
-		CapsuleCollider2D();																	// Constructor
-		~CapsuleCollider2D() override = default;												// Destructor
-		CapsuleCollider2D(const CapsuleCollider2D&) = delete;									// Prevent copy-construction
-		CapsuleCollider2D& operator=(const CapsuleCollider2D&) = delete;						// Prevent copy-assignment
-		CapsuleCollider2D(CapsuleCollider2D&&) = delete;										// Prevent move-construction
-		CapsuleCollider2D& operator=(CapsuleCollider2D&&) = delete;								// Prevent move-assignment
+		CapsuleCollider2D();																				// Constructor
+		~CapsuleCollider2D() override = default;															// Destructor
+		CapsuleCollider2D(const CapsuleCollider2D&) = delete;												// Prevent copy-construction
+		CapsuleCollider2D& operator=(const CapsuleCollider2D&) = delete;									// Prevent copy-assignment
+		CapsuleCollider2D(CapsuleCollider2D&&) = delete;													// Prevent move-construction
+		CapsuleCollider2D& operator=(CapsuleCollider2D&&) = delete;											// Prevent move-assignment
 
-		const std::string& GetTypeName() const override;										// Returns the type name of this Component
+		const std::string& GetTypeName() const override;													// Returns the type name of this Component
 
-		CapsuleDirection2D GetDirection() const noexcept { return m_direction; }				// Returns the direction of this CapsuleCollider2D
-		void SetDirection(CapsuleDirection2D direction);										// Sets the direction of this CapsuleCollider2D
+		CapsuleDirection2D GetDirection() const noexcept			{ return m_direction; }					// Returns the direction of this CapsuleCollider2D
+		void SetDirection(CapsuleDirection2D direction);													// Sets the direction of this CapsuleCollider2D
 
-		const Vector2f& GetSize() const noexcept { return m_size; }								// Returns the size of this CapsuleCollider2D
-		void SetSize(const Vector2f& size);														// Sets the size of this CapsuleCollider2D
+		const Vector2f& GetSize() const noexcept					{ return m_size; }						// Returns the size of this CapsuleCollider2D
+		void SetSize(const Vector2f& size);																	// Sets the size of this CapsuleCollider2D
 	};
 }

@@ -4,7 +4,8 @@
 ------------------------------*/
 #include "ShapeManifold2D.h"
 
-#include <cfloat>
+#include "Utilities/Math/Constants.h"
+
 #include <cmath>
 
 namespace
@@ -14,24 +15,12 @@ namespace
 	constexpr float kReferenceTolerance = 0.0005f;
 
 	/*------------------------------------------------------------------------------------------------
-	| --- Dot: 
-	------------------------------------------------------------------------------------------------*/
-	float Dot(const Vector2f& a, const Vector2f& b) noexcept
-	{
-		return a.x * b.x + a.y * b.y;
-	}
-
-	/*------------------------------------------------------------------------------------------------
 	| --- EdgeNormal: The unit normal that points out of a counter-clockwise polygon edge a -> b --- |
 	------------------------------------------------------------------------------------------------*/
 	Vector2f EdgeNormal(const Vector2f& a, const Vector2f& b) noexcept
 	{
 		const Vector2f edge = b - a;
-		const float length = std::sqrt(edge.x * edge.x + edge.y * edge.y);
-		if (!(length > 0.0f))
-			return Vector2f{ 0.0f, 0.0f };
-
-		return Vector2f{ edge.y / length, -edge.x / length };
+		return Vector2f{ edge.y, -edge.x }.Normalized();			// A zero-length edge gives the zero vector
 	}
 
 	/*-------------------------------------------------------------------------------------------------------
@@ -54,12 +43,12 @@ namespace
 		const float totalRadius = a.radius + b.radius;
 
 		const Vector2f delta = centerB - centerA;
-		const float distance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-		if (distance - totalRadius > 0.0f)
+		const float distance = delta.Magnitude();
+		if (distance > totalRadius)
 			return false;
 
 		// Perfectly stacked centers have no direction, so any direction is as good as another
-		const Vector2f normal = (distance > FLT_EPSILON) ? delta * (1.0f / distance) : Vector2f{ 1.0f, 0.0f };
+		const Vector2f normal = (distance > Math::Epsilon) ? delta / distance : Vector2f::Right();
 
 		manifold.normal = normal;
 		manifold.pointCount = 1;
@@ -79,10 +68,10 @@ namespace
 		const float totalRadius = polygon.radius + circle.radius;
 
 		std::size_t faceIndex = 0;
-		float faceSeparation = -FLT_MAX;
+		float faceSeparation = -Math::MaxFloat;
 		for (std::size_t i = 0; i < count; ++i)
 		{
-			const float separation = Dot(EdgeNormal(vertices[i], vertices[(i + 1) % count]), center - vertices[i]);
+			const float separation = Vector2f::Dot(EdgeNormal(vertices[i], vertices[(i + 1) % count]), center - vertices[i]);
 			if (separation > totalRadius)
 				return false;
 
@@ -101,19 +90,21 @@ namespace
 		Vector2f corePoint = center - faceNormal * faceSeparation;
 		float coreSeparation = faceSeparation;
 
-		if (faceSeparation > FLT_EPSILON)
+		if (faceSeparation > Math::Epsilon)
 		{
-			const float beyondV1 = Dot(center - v1, v2 - v1);
-			const float beyondV2 = Dot(center - v2, v1 - v2);
+			const float beyondV1 = Vector2f::Dot(center - v1, v2 - v1);
+			const float beyondV2 = Vector2f::Dot(center - v2, v1 - v2);
+
 			if (beyondV1 <= 0.0f || beyondV2 <= 0.0f)
 			{
 				const Vector2f& corner = (beyondV1 <= 0.0f) ? v1 : v2;
 				const Vector2f delta = center - corner;
-				const float distance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+
+				const float distance = delta.Magnitude();
 				if (distance > totalRadius)
 					return false;
 
-				normal = (distance > FLT_EPSILON) ? delta * (1.0f / distance) : faceNormal;
+				normal = (distance > Math::Epsilon) ? delta / distance : faceNormal;
 				corePoint = corner;
 				coreSeparation = distance;
 			}
@@ -129,7 +120,7 @@ namespace
 	struct EdgeSeparation
 	{
 		std::size_t edge = 0;
-		float separation = -FLT_MAX;
+		float separation = -Math::MaxFloat;
 	};
 
 	/*------------------------------------------------------------------------------------------------------------------------
@@ -142,9 +133,12 @@ namespace
 		{
 			const Vector2f normal = EdgeNormal(a[i], a[(i + 1) % a.size()]);
 
-			float nearest = FLT_MAX;
+			float nearest = Math::MaxFloat;
+
 			for (const Vector2f& vertex : b)
-				nearest = std::fmin(nearest, Dot(normal, vertex - a[i]));
+			{
+				nearest = std::fmin(nearest, Vector2f::Dot(normal, vertex - a[i]));
+			}
 
 			if (nearest > best.separation)
 			{
@@ -160,14 +154,19 @@ namespace
 	-------------------------------------------------------------------------------------------------------------------------*/
 	int ClipSegment(const Vector2f in[2], Vector2f out[2], const Vector2f& normal, float offset) noexcept
 	{
-		const float distance0 = Dot(normal, in[0]) - offset;
-		const float distance1 = Dot(normal, in[1]) - offset;
+		const float distance0 = Vector2f::Dot(normal, in[0]) - offset;
+		const float distance1 = Vector2f::Dot(normal, in[1]) - offset;
 
 		int count = 0;
 		if (distance0 <= 0.0f)
+		{
 			out[count++] = in[0];
+		}
+
 		if (distance1 <= 0.0f)
+		{
 			out[count++] = in[1];
+		}
 
 		if (distance0 * distance1 < 0.0f)
 		{
@@ -175,70 +174,6 @@ namespace
 			out[count++] = in[0] + (in[1] - in[0]) * t;
 		}
 		return count;
-	}
-
-	struct SegmentPair
-	{
-		float s = 0.0f;
-		float t = 0.0f;
-		Vector2f point1{ };
-		Vector2f point2{ };
-	};
-
-	/*-------------------------------------------------------------------------------------------------------------------------
-	| --- ClosestPointsOfSegments:
-	-------------------------------------------------------------------------------------------------------------------------*/
-	SegmentPair ClosestPointsOfSegments(const Vector2f& p1, const Vector2f& q1, const Vector2f& p2, const Vector2f& q2) noexcept
-	{
-		const Vector2f d1 = q1 - p1;
-		const Vector2f d2 = q2 - p2;
-		const Vector2f r = p1 - p2;
-		const float a = Dot(d1, d1);
-		const float e = Dot(d2, d2);
-		const float f = Dot(d2, r);
-
-		float s = 0.0f;
-		float t = 0.0f;
-		if (a <= FLT_EPSILON && e <= FLT_EPSILON)
-		{
-			// Both segments are single points
-		}
-		else if (a <= FLT_EPSILON)
-		{
-			t = std::fmin(std::fmax(f / e, 0.0f), 1.0f);
-		}
-		else
-		{
-			const float c = Dot(d1, r);
-			if (e <= FLT_EPSILON)
-			{
-				s = std::fmin(std::fmax(-c / a, 0.0f), 1.0f);
-			}
-			else
-			{
-				const float b = Dot(d1, d2);
-				const float denominator = a * e - b * b;
-				s = (denominator > 0.0f) ? std::fmin(std::fmax((b * f - c * e) / denominator, 0.0f), 1.0f) : 0.0f;
-				t = (b * s + f) / e;
-				if (t < 0.0f)
-				{
-					t = 0.0f;
-					s = std::fmin(std::fmax(-c / a, 0.0f), 1.0f);
-				}
-				else if (t > 1.0f)
-				{
-					t = 1.0f;
-					s = std::fmin(std::fmax((b - c) / a, 0.0f), 1.0f);
-				}
-			}
-		}
-
-		SegmentPair result;
-		result.s = s;
-		result.t = t;
-		result.point1 = p1 + d1 * s;
-		result.point2 = p2 + d2 * t;
-		return result;
 	}
 
 	/*-------------------------------------------------------------------------------------------------------------------------------
@@ -269,10 +204,10 @@ namespace
 		const Vector2f referenceNormal = EdgeNormal(r1, r2);
 
 		std::size_t incidentEdge = 0;
-		float mostOpposite = FLT_MAX;
+		float mostOpposite = Math::MaxFloat;
 		for (std::size_t i = 0; i < incVertices.size(); ++i)
 		{
-			const float alignment = Dot(referenceNormal, EdgeNormal(incVertices[i], incVertices[(i + 1) % incVertices.size()]));
+			const float alignment = Vector2f::Dot(referenceNormal, EdgeNormal(incVertices[i], incVertices[(i + 1) % incVertices.size()]));
 			if (alignment < mostOpposite)
 			{
 				mostOpposite = alignment;
@@ -285,40 +220,41 @@ namespace
 		const float referenceSeparation = referenceIsB ? separationB.separation : separationA.separation;
 		if (referenceSeparation > kReferenceTolerance)
 		{
-			const SegmentPair closest = ClosestPointsOfSegments(r1, r2, incidentSegment[0], incidentSegment[1]);
+			const SegmentClosestPoints2D closest = ShapeQueries2D::ClosestPointsOfSegments(r1, r2, incidentSegment[0], incidentSegment[1]);
 			const bool referenceEnd = (closest.s == 0.0f || closest.s == 1.0f);
 			const bool incidentEnd = (closest.t == 0.0f || closest.t == 1.0f);
+
 			if (referenceEnd && incidentEnd)
 			{
-				const Vector2f delta = closest.point2 - closest.point1;
-				const float distance = std::sqrt(Dot(delta, delta));
+				const Vector2f delta = closest.pointOnSecond - closest.pointOnFirst;
+				const float distance = delta.Magnitude();
 				if (distance > totalRadius)
 					return false;
 
-				const Vector2f toIncident = (distance > FLT_EPSILON) ? delta * (1.0f / distance) : referenceNormal;
-				manifold.normal = referenceIsB ? toIncident * -1.0f : toIncident;
+				const Vector2f toIncident = (distance > Math::Epsilon) ? delta / distance : referenceNormal;
+				manifold.normal = referenceIsB ? -toIncident : toIncident;
 				manifold.pointCount = 1;
-				manifold.points[0].point = Midpoint(closest.point1, reference.radius, closest.point2, incident.radius, toIncident);
+				manifold.points[0].point = Midpoint(closest.pointOnFirst, reference.radius, closest.pointOnSecond, incident.radius, toIncident);
 				manifold.points[0].separation = distance - totalRadius;
 				return true;
 			}
 		}
 
-		const Vector2f tangent = (r2 - r1) * (1.0f / std::sqrt(Dot(r2 - r1, r2 - r1)));
+		const Vector2f tangent = (r2 - r1).Normalized();
 		Vector2f clippedA[2];
 		Vector2f clippedB[2];
 
-		if (ClipSegment(incidentSegment, clippedA, tangent * -1.0f, -Dot(tangent, r1)) < 2)
+		if (ClipSegment(incidentSegment, clippedA, -tangent, -Vector2f::Dot(tangent, r1)) < 2)
 			return false;
 
-		if (ClipSegment(clippedA, clippedB, tangent, Dot(tangent, r2)) < 2)
+		if (ClipSegment(clippedA, clippedB, tangent, Vector2f::Dot(tangent, r2)) < 2)
 			return false;
 
-		manifold.normal = referenceIsB ? referenceNormal * -1.0f : referenceNormal;
+		manifold.normal = referenceIsB ? -referenceNormal : referenceNormal;
 		manifold.pointCount = 0;
 		for (const Vector2f& clipped : clippedB)
 		{
-			const float coreSeparation = Dot(referenceNormal, clipped - r1);
+			const float coreSeparation = Vector2f::Dot(referenceNormal, clipped - r1);
 			const float separation = coreSeparation - totalRadius;
 			if (separation > 0.0f)
 				continue;
@@ -358,7 +294,7 @@ bool CaledonEngine::ShapeManifold2DQueries::Collide(const ShapeView2D& shapeA, c
 	else if (circleA)
 	{
 		touching = CollidePolygonCircle(shapeB, shapeA, manifold);
-		manifold.normal = manifold.normal * -1.0f;
+		manifold.normal = -manifold.normal;
 	}
 	else
 	{

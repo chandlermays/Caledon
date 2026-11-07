@@ -3,7 +3,7 @@
 | Author: Chandler Mays
 ------------------------------*/
 #pragma once
-#include "Utilities/Math/Rect.h"
+#include "Utilities/Geometry/Rect.h"
 #include "Utilities/Math/Vector2.h"
 
 #include <memory>

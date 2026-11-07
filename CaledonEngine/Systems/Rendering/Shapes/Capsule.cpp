@@ -5,7 +5,7 @@
 #include "Capsule.h"
 
 #include "Systems/Rendering/Renderer.h"
-#include "Utilities/Math/Rect.h"
+#include "Utilities/Geometry/Rect.h"
 
 /*-----------------------------------
 | --- Public Method Definitions --- |

@@ -13,12 +13,12 @@ namespace CaledonEngine
 	class BoxCollider2D : public Collider2D
 	{
 	private:
-		bool m_autoTiling;																		// Determines whether the BoxCollider2D's shape is automatically updated based on a SpriteComponent's tiling properties
-		float m_edgeRadius;																		// Controls the radius of all edges created by the collider
 		Vector2f m_size;																		// The width and height of the rectangle
+		float m_edgeRadius;																		// Controls the radius of all edges created by the collider
+		bool m_autoTiling;																		// Determines whether the BoxCollider2D's shape is automatically updated based on a SpriteComponent's tiling properties
 
 	protected:
-		int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const override;				//
+		int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const override;				// Adds the local shapes of this BoxCollider2D to the physics shape group
 
 	public:
 		BoxCollider2D();																		// Constructor

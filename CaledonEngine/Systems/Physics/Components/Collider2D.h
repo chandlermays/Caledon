@@ -50,49 +50,49 @@ namespace CaledonEngine
 		using CollisionCallback = std::function<void(Collider2D*)>;															// Type alias for a collision callback function that takes a pointer to another Collider2D as an argument
 
 	protected:
-		virtual int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const;											//
+		virtual int AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const;											// Adds the local shapes of this Collider2D to the physics shape group
 
 	private:
 		RigidBody2D* m_pAttachedRigidBody;																					// The RigidBody2D attached to this Collider2D
 		PhysicsScene2D* m_pPhysicsScene2D;																					// The PhysicsScene2D this Collider2D is registered with
-		PhysicsMaterialCombine2D m_bounceCombine;																			// The bounciness combine mode used by this Collider2D
-		float m_bounciness;																									// The bounciness used by this Collider2D
+		CompositeCollider2D* m_pComposite;																					// Get the CompositeCollider2D that is available to be attached to this Collider2D
+		
 		AABB2D m_bounds;																									// The world-space bounding area of this Collider2D
-		float m_density;																									// The density of this Collider2D used to calculate its mass (when auto mass is enabled)
+		LayerMask m_contactMask;																							// Calculates the effective LayerMask that the Collider2D will use when determining if it can contact another Collider2D
+		LayerMask m_includeLayers;																							// The additional Layers that this Collider2D should include when decidiing if a contact with another Collider2D should happen or not
+		LayerMask m_excludeLayers;																							// The additional Layers that this Collider2D should exclude when decidiing if a contact with another Collider2D should happen or not
+		int m_layerOverridePriority;																						// A decision priority assigned to this Collider2D used when there is a conflicting decision on whether a contact between itself and another Collision2D should happen or not
 		float m_friction;																									// The friction used by this Collider2D
+		float m_bounciness;																									// The bounciness used by this Collider2D
+		float m_density;																									// The density of this Collider2D used to calculate its mass (when auto mass is enabled)
 		PhysicsMaterialCombine2D m_frictionCombine;																			// The friction combine mode used by this Collider2D
-		bool m_isTrigger;																									// Is this collider configured as a trigger?
+		PhysicsMaterialCombine2D m_bounceCombine;																			// The bounciness combine mode used by this Collider2D
+		
 		Vector2f m_offset;																									// The local offset of the collider geometry
 		PhysicsMaterial2D m_sharedMaterial;																					// The PhysicsMaterial2D that is applied to this Collider2D
+		LayerMask m_callbackLayers;																							// The Layers that this Collider2D will report collision or trigger callbacks for during a contact with another Collider2D
+		LayerMask m_contactCaptureLayers;																					// The layers of other Collider2D involved in contacts with this Collider2D that will be captured
+		LayerMask m_forceReceiveLayers;																						// The Layers that this Collider2D can receive forces from during a Collision contact with another Collider2D
+		LayerMask m_forceSendLayers;																						// The Layers that this Collider2D is allowed to send forces to during a Collision contact with another Collider2D
+		int m_compositeOrder;																								// The composite operation order to be used by a CompositeCollider2D
+		int m_shapeCount;																									// The number of active PhysicsShape2D this Collider2D is currently using
 
 		std::vector<CollisionCallback> m_onEnterCallbacks;																	// Callbacks to invoke when a collision starts
 		std::vector<CollisionCallback> m_onUpdateCallbacks;																	// Callbacks to invoke when a collision is ongoing
 		std::vector<CollisionCallback> m_onExitCallbacks;																	// Callbacks to invoke when a collision ends
 
-		LayerMask m_callbackLayers;																							// The Layers that this Collider2D will report collision or trigger callbacks for during a contact with another Collider2D
-		LayerMask m_contactCaptureLayers;																					// The layers of other Collider2D involved in contacts with this Collider2D that will be captured
-		LayerMask m_contactMask;																							// Calculates the effective LayerMask that the Collider2D will use when determining if it can contact another Collider2D
-		LayerMask m_excludeLayers;																							// The additional Layers that this Collider2D should exclude when decidiing if a contact with another Collider2D should happen or not
-		LayerMask m_forceReceiveLayers;																						// The Layers that this Collider2D can receive forces from during a Collision contact with another Collider2D
-		LayerMask m_forceSendLayers;																						// The Layers that this Collider2D is allowed to send forces to during a Collision contact with another Collider2D
-		LayerMask m_includeLayers;																							// The additional Layers that this Collider2D should include when decidiing if a contact with another Collider2D should happen or not
-
-		CompositeCollider2D* m_pComposite;																					// Get the CompositeCollider2D that is available to be attached to this Collider2D
+		bool m_isTrigger;																									// Is this collider configured as a trigger?
 		bool m_compositeCapable;																							// Indicates if this Collider2D is capable of being composited by the CompositeCollider2D
 		CompositeOperation m_compositeOperation;																			// The composite operation to be used by a CompositeCollider2D
-		int m_compositeOrder;																								// The composite operation order to be used by a CompositeCollider2D
 		ColliderErrorState2D m_errorState;																					// The error state that indicates the state of the physics shapes the Collider2D tried to create
-		int m_layerOverridePriority;																						// A decision priority assigned to this Collider2D used when there is a conflicting decision on whether a contact between itself and another Collision2D should happen or not
-		
-		int m_shapeCount;																									// The number of active PhysicsShape2D this Collider2D is currently using
 		
 		// Properties to add
 		//------------------------
 		// Matrix4x4 m_localToWorldMatrix;																					// The transformation matrix used to transform the Collider physics shapes to world-space
 
 	private:
-		int BuildShapes(PhysicsShapeGroup2D& physicsShapeGroup, bool worldSpace) const;										//
-		void GetWorldPose(Vector2f& position, float& rotation, Vector2f& scale) const;										//
+		int BuildShapes(PhysicsShapeGroup2D& physicsShapeGroup, bool worldSpace) const;										// Builds the physics shapes for this Collider2D and adds them to the given PhysicsShapeGroup2D
+		void GetWorldPose(Vector2f& position, float& rotation, Vector2f& scale) const;										// Retrieves the world-space position, rotation, and scale of this Collider2D
 
 	public:
 		Collider2D();																										// Constructor
@@ -178,24 +178,24 @@ namespace CaledonEngine
 		int GetShapeCount() const noexcept																					{ return m_shapeCount; }							// Returns the number of active shapes of this Collider2D
 		const AABB2D& GetBounds() const noexcept																			{ return m_bounds; }								// Returns the world-space bounds of this Collider2D
 
-		void RefreshBounds();																								// Refreshes the bounding area of this collider
-		virtual int GetShapes(PhysicsShapeGroup2D& physicsSHapeGroup) const;												// Populates the shape group with physics shapes
-		std::uint32_t GetShapesHash() const;																				// Generates a hash representing the current shapes
-		AABB2D GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const;						// Returns bounds for all constituent shapes
+		void RefreshBounds();																								// Refreshes the bounding area of this Collider2D
+		virtual int GetShapes(PhysicsShapeGroup2D& physicsSHapeGroup) const;												// Populates the shape group with physics shapes for this Collider2D
+		std::uint32_t GetShapesHash() const;																				// Generates a hash representing the current shapes of this Collider2D
+		AABB2D GetShapeBounds(std::vector<AABB2D>& bounds, bool useRadii, bool useWorldSpace) const;						// Returns the bounds for all of the constituent shapes of this Collider2D
 
-		int Cast(const Vector2f& direction, const ContactFilter2D& contactFilter,											// 
+		int Cast(const Vector2f& direction, const ContactFilter2D& contactFilter,											// Casts this Collider2D's shape into the Scene starting at the specified position and rotation
 			std::span<ColliderHit2D> results, float distance = Math::Infinity,
 			bool ignoreSiblingColliders = true) const;
 
-		int Overlap(const Vector2f& position, float angle,																	// 
+		int Overlap(const Vector2f& position, float angle,																	// Returns the number of Collider2D that overlap this Collider2D at a given position and rotation
 			const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;
 
-		int Raycast(const Vector2f& direction, std::span<ColliderHit2D> results,											// 
+		int Raycast(const Vector2f& direction, std::span<ColliderHit2D> results,											// Casts a ray from the center of this Collider2D in a given direction and returns the number of hits detected
 			float distance = Math::Infinity, LayerMask layerMask = LayerMask{ -1 },
 			float minDepth = -Math::Infinity, float maxDepth = Math::Infinity) const;
 
-		int GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;					// Retrieves contact points involving this Collider2D
-		int GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const;			// Retrieves colliders currently in contact with this Collider2D
+		int GetContacts(const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;					// Retrieves all contact points involving this Collider2D filtered by the given ContactFilter2D
+		int GetContactColliders(const ContactFilter2D& contactFilter, std::vector<Collider2D*>& colliders) const;			// Retrieves all colliders currently in contact with this Collider2D filtered by the given ContactFilter2D
 
 		// Methods to add
 		//------------------------

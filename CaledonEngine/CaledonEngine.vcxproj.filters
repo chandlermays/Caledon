@@ -349,6 +349,15 @@
     <ClInclude Include="Systems\Physics\Components\EdgeCollider2D.h">
       <Filter>Source Files\Systems\Physics\Components</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\ShapeCasts2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Shapes\ShapeDistance2D.h">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\Physics\Types\BodySlide2D.h">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">
@@ -509,6 +518,15 @@
     </ClCompile>
     <ClCompile Include="Systems\Physics\Components\EdgeCollider2D.cpp">
       <Filter>Source Files\Systems\Physics\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\ShapeCasts2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Shapes\ShapeDistance2D.cpp">
+      <Filter>Source Files\Systems\Physics\Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\Physics\Types\BodySlide2D.cpp">
+      <Filter>Source Files\Systems\Physics\Types</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -88,7 +88,7 @@ void CaledonEngine::SceneSubsystem::UnloadAllScenes()
 bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 {
 	if (!pScene)
-		return;
+		return false;
 
 	if (m_pContext != nullptr && !InitializeScene(*pScene))
 		return false;

@@ -9,7 +9,6 @@
 #include "Utilities/Math/Vector2.h"
 
 #include <cmath>
-#include <limits>
 
 // Filters contact results by angle, layer, depth, and trigger state.
 // Angles are measured in world space, with 0° along +X and increasing counterclockwise.
@@ -24,34 +23,34 @@ namespace CaledonEngine
 {
 	struct ContactFilter2D
 	{
-		static constexpr float kNormalAngleUpperLimit = 359.9999f;							//
+		static constexpr float kNormalAngleUpperLimit = 359.9999f;							// The maximum angle allowed for a normal angle filter
 
-		LayerMask layerMask{ -1 };															//
+		LayerMask layerMask{ -1 };															// The layer mask used to filter contacts by layer
 
-		float maxDepth = std::numeric_limits<float>::infinity();							//
-		float minDepth = -std::numeric_limits<float>::infinity();							//
+		float maxDepth = Math::Infinity;													// The maximum depth allowed for a depth filter
+		float minDepth = -Math::Infinity;													// The minimum depth allowed for a depth filter
 
-		float maxNormalAngle = kNormalAngleUpperLimit;										//
-		float minNormalAngle = 0.0f;														//
+		float maxNormalAngle = kNormalAngleUpperLimit;										// The maximum angle allowed for a normal angle filter
+		float minNormalAngle = 0.0f;														// The minimum angle allowed for a normal angle filter
 
-		bool useDepth = false;																//
-		bool useLayerMask = false;															//
-		bool useNormalAngle = false;														//
-		bool useOutsideDepth = false;														//
-		bool useOutsideNormalAngle = false;													//
-		bool useTriggers = true;															//
+		bool useDepth = false;																// Indicates whether to filter contacts by depth
+		bool useLayerMask = false;															// Indicates whether to filter contacts by layer
+		bool useNormalAngle = false;														// Indicates whether to filter contacts by normal angle
+		bool useOutsideDepth = false;														// Indicates whether to filter contacts outside (or inside) the depth range
+		bool useOutsideNormalAngle = false;													// Indicates whether to filter contacts outside (or inside) the normal angle range
+		bool useTriggers = true;															// Indicates whether to include trigger colliders
 
-		/*---------------------------------------------------------------------------------------
-		| --- NoFilter:
-		---------------------------------------------------------------------------------------*/
+		/*-------------------------------------------------------------------------------
+		| --- NoFilter: Returns a ContactFilter2D that does not filter any contacts --- |
+		-------------------------------------------------------------------------------*/
 		static ContactFilter2D NoFilter() noexcept
 		{
 			return ContactFilter2D{ };
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- CreateLegacyFilter:
-		---------------------------------------------------------------------------------------*/
+		/*----------------------------------------------------------------------------------------------------------------
+		| --- CreateLegacyFilter: Returns a ContactFilter2D that filters contacts by layer, depth, and trigger state --- |
+		----------------------------------------------------------------------------------------------------------------*/
 		static ContactFilter2D CreateLegacyFilter(int layerMask, float minDepth, float maxDepth, bool useTriggers = true) noexcept
 		{
 			ContactFilter2D contactFilter;
@@ -66,41 +65,41 @@ namespace CaledonEngine
 			return contactFilter;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFiltering:
-		---------------------------------------------------------------------------------------*/
+		/*-------------------------------------------------------------------------------------
+		| --- IsFiltering: Returns whether this ContactFilter2D is filtering any contacts --- |
+		-------------------------------------------------------------------------------------*/
 		bool IsFiltering() const noexcept
 		{
 			return !useTriggers || useLayerMask || useDepth || useNormalAngle;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- ClearDepth:
-		---------------------------------------------------------------------------------------*/
+		/*----------------------------------------------------------------------
+		| --- ClearDepth: Clears the depth filter for this ContactFilter2D --- |
+		----------------------------------------------------------------------*/
 		void ClearDepth() noexcept
 		{
 			useDepth = false;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- ClearLayerMask:
-		---------------------------------------------------------------------------------------*/
+		/*-------------------------------------------------------------------------------
+		| --- ClearLayerMask: Clears the layer mask filter for this ContactFilter2D --- |
+		-------------------------------------------------------------------------------*/
 		void ClearLayerMask() noexcept
 		{
 			useLayerMask = false;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- ClearNormalAngle:
-		---------------------------------------------------------------------------------------*/
+		/*-----------------------------------------------------------------------------------
+		| --- ClearNormalAngle: Clears the normal angle filter for this ContactFilter2D --- |
+		-----------------------------------------------------------------------------------*/
 		void ClearNormalAngle() noexcept
 		{
 			useNormalAngle = false;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- SetDepth:
-		---------------------------------------------------------------------------------------*/
+		/*-------------------------------------------------------------------------------------------
+		| --- SetDepth: Sets the depth filter for this ContactFilter2D, with min and max values --- |
+		-------------------------------------------------------------------------------------------*/
 		void SetDepth(float min, float max) noexcept
 		{
 			minDepth = min;
@@ -108,18 +107,18 @@ namespace CaledonEngine
 			useDepth = true;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- SetLayerMask:
-		---------------------------------------------------------------------------------------*/
+		/*---------------------------------------------------------------------------
+		| --- SetLayerMask: Sets the layer mask filter for this ContactFilter2D --- |
+		---------------------------------------------------------------------------*/
 		void SetLayerMask(LayerMask mask) noexcept
 		{
 			layerMask = mask;
 			useLayerMask = true;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- SetNormalAngle:
-		---------------------------------------------------------------------------------------*/
+		/*--------------------------------------------------------------------------------------------------------
+		| --- SetNormalAngle: Sets the normal angle filter for this ContactFilter2D, with min and max values --- |
+		--------------------------------------------------------------------------------------------------------*/
 		void SetNormalAngle(float min, float max) noexcept
 		{
 			minNormalAngle = min;
@@ -127,9 +126,9 @@ namespace CaledonEngine
 			useNormalAngle = true;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFilteringDepth:
-		---------------------------------------------------------------------------------------*/
+		/*-----------------------------------------------------------------------------------------------
+		| --- IsFilteringDepth: Returns whether this ContactFilter2D is filtering contacts by depth --- |
+		-----------------------------------------------------------------------------------------------*/
 		bool IsFilteringDepth(float depth) const noexcept
 		{
 			if (!useDepth)
@@ -139,9 +138,9 @@ namespace CaledonEngine
 			return useOutsideDepth ? inRange : !inRange;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFilteringLayerMask:
-		---------------------------------------------------------------------------------------*/
+		/*---------------------------------------------------------------------------------------------------
+		| --- IsFilteringLayerMask: Returns whether this ContactFilter2D is filtering contacts by layer --- |
+		---------------------------------------------------------------------------------------------------*/
 		bool IsFilteringLayerMask(int layer) const noexcept
 		{
 			if (!useLayerMask)
@@ -153,9 +152,9 @@ namespace CaledonEngine
 			return (static_cast<unsigned int>(layerMask.value) & (1u << layer)) == 0u;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFilteringNormalAngle:
-		---------------------------------------------------------------------------------------*/
+		/*------------------------------------------------------------------------------------------------------------
+		| --- IsFilteringNormalAngle: Returns whether this ContactFilter2D is filtering contacts by normal angle --- |
+		------------------------------------------------------------------------------------------------------------*/
 		bool IsFilteringNormalAngle(float angle) const noexcept
 		{
 			if (!useNormalAngle)
@@ -167,17 +166,17 @@ namespace CaledonEngine
 			return useOutsideNormalAngle ? inRange : !inRange;
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFilteringNormalAngle:
-		---------------------------------------------------------------------------------------*/
+		/*------------------------------------------------------------------------------------------------------------
+		| --- IsFilteringNormalAngle: Returns whether this ContactFilter2D is filtering contacts by normal angle --- |
+		------------------------------------------------------------------------------------------------------------*/
 		bool IsFilteringNormalAngle(const Vector2f& normal) const noexcept
 		{
 			return IsFilteringNormalAngle(std::atan2(normal.y, normal.x) * Math::Rad2Deg);
 		}
 
-		/*---------------------------------------------------------------------------------------
-		| --- IsFilteringTrigger:
-		---------------------------------------------------------------------------------------*/
+		/*---------------------------------------------------------------------------------------------------------
+		| --- IsFilteringTrigger: Returns whether this ContactFilter2D is filtering contacts by trigger state --- |
+		---------------------------------------------------------------------------------------------------------*/
 		bool IsFilteringTrigger(bool isTrigger) const noexcept
 		{
 			return isTrigger && !useTriggers;

@@ -26,13 +26,13 @@ void CaledonEngine::BodyIntegration2D::IntegrateVelocity(const BodyVelocityInput
 	angularVelocity = input.angularVelocity + input.torque * input.inverseInertia * Math::Rad2Deg * deltaTime;
 
 	// Apply linear and angular damping decay
-	linearVelocity = linearVelocity * (1.0f / (1.0f + deltaTime * std::fmax(input.linearDamping, 0.0f)));
+	linearVelocity = linearVelocity / (1.0f + deltaTime * std::fmax(input.linearDamping, 0.0f));
 	angularVelocity = ApplyDamping(angularVelocity, input.angularDamping, deltaTime);
 
 	// Clamp linear velocity to the maximum translation speed limit if enabled
 	if (input.maxTranslationSpeed > 0.0f)
 	{
-		const float speedSqr = linearVelocity.x * linearVelocity.x + linearVelocity.y * linearVelocity.y;
+		const float speedSqr = linearVelocity.SqrMagnitude();
 		if (speedSqr > input.maxTranslationSpeed * input.maxTranslationSpeed)
 		{
 			linearVelocity = linearVelocity * (input.maxTranslationSpeed / std::sqrt(speedSqr));

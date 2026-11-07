@@ -10,6 +10,7 @@
 #include "Systems/Physics/Shapes/PhysicsShapeGroup2D.h"
 #include "Systems/Physics/Shapes/ShapeMass2D.h"
 #include "Systems/Physics/Types/BodyIntegration2D.h"
+#include "Systems/Physics/Types/BodySlide2D.h"
 #include "Systems/Scene/Scene.h"
 #include "Systems/Scene/Transform.h"
 
@@ -46,21 +47,11 @@ namespace
 | --- Constructor: Constructs this RigidBody2D with default values --- |
 ----------------------------------------------------------------------*/
 CaledonEngine::RigidBody2D::RigidBody2D()
-	: m_pPhysicsScene{ nullptr }
-	, m_bodyType{ BodyType2D::Dynamic }
-	, m_simulated{ true }
-	, m_constraints{ BodyConstraints2D::None }
-	, m_collisionDetectionMode{ CollisionDetectionMode2D::Discrete }
-	, m_interpolation{ BodyInterpolation2D::None }
-	, m_useFullKinematicContacts{ false }
-	, m_sleepMode{ BodySleepMode2D::StartAwake }
-	, m_isAwake{ true }
-	, m_sleepTime{ 0.0f }
-	, m_lastAppliedPosition{ 0.0f, 0.0f }
-	, m_lastAppliedRotation{ 0.0f }
-	, m_hasAppliedPose{ false }
+	: m_pAttachedColliders{ }
+	, m_pPhysicsScene{ nullptr }
 	, m_position{ 0.0f, 0.0f }
 	, m_rotation{ 0.0f }
+	// , m_localToWorldMatrix{ }
 	, m_linearVelocity{ 0.0f, 0.0f }
 	, m_angularVelocity{ 0.0f }
 	, m_linearDamping{ 0.0f }
@@ -68,14 +59,25 @@ CaledonEngine::RigidBody2D::RigidBody2D()
 	, m_gravityScale{ 1.0f }
 	, m_totalForce{ 0.0f, 0.0f }
 	, m_totalTorque{ 0.0f }
-	, m_useAutoMass{ false }
 	, m_mass{ 1.0f }
-	, m_centerOfMass{ 0.0f, 0.0f }
 	, m_inertia{ 1.0f }
-	, m_pAttachedColliders{ }
+	, m_centerOfMass{ 0.0f, 0.0f }
+	, m_sleepTime{ 0.0f }
+	, m_lastAppliedPosition{ 0.0f, 0.0f }
+	, m_lastAppliedRotation{ 0.0f }
 	, m_sharedMaterial{ }
 	, m_includeLayers{ 0 }
 	, m_excludeLayers{ 0 }
+	, m_bodyType{ BodyType2D::Dynamic }
+	, m_constraints{ BodyConstraints2D::None }
+	, m_collisionDetectionMode{ CollisionDetectionMode2D::Discrete }
+	, m_interpolation{ BodyInterpolation2D::None }
+	, m_sleepMode{ BodySleepMode2D::StartAwake }
+	, m_simulated{ true }
+	, m_isAwake{ true }
+	, m_useFullKinematicContacts{ false }
+	, m_hasAppliedPose{ false }
+	, m_useAutoMass{ false }
 { }
 
 /*-------------------------------------------------------
@@ -233,24 +235,113 @@ void CaledonEngine::RigidBody2D::MoveRotation(float angle)
 --------------------------------------------------------------------------------------------------------------------------*/
 CaledonEngine::SlideResults2D CaledonEngine::RigidBody2D::Slide(const Vector2f& velocity, float deltaTime, const SlideConfig2D& slideConfig)
 {
-	/*
+	SlideResults2D results;
+	results.position = slideConfig.useStartPosition ? slideConfig.startPosition : m_position;
+	results.remainingVelocity = velocity;
 
-	// throw excp if deltaTime is negative
+	if (!(deltaTime > 0.0f) || !std::isfinite(deltaTime) || m_pPhysicsScene == nullptr)
+		return results;
 
-	if (Math::Approximately(deltaTime, 0f))
+	if (slideConfig.maxIterations <= 0)
+		return results;
+
+	if (m_bodyType == BodyType2D::Static && slideConfig.useSimulationMove)
+		return results;
+
+	if (slideConfig.selectedCollider != nullptr && slideConfig.selectedCollider->GetAttachedRigidBody() != this)
+		return results;
+
+	std::vector<const Collider2D*> sources;
+	if (slideConfig.selectedCollider != nullptr)
 	{
-		return new SlideResults
+		sources.push_back(slideConfig.selectedCollider);
+	}
+	else
+	{
+		for (const Collider2D* pCollider : m_pAttachedColliders)
 		{
-			position = (slideConfig.useStartPosition ? slideConfig.startPosition : position),
-			remainingVelocity = velocity;
+			if (pCollider != nullptr && pCollider->IsActive() && (!pCollider->IsTrigger() || slideConfig.useAttachedTriggers))
+			{
+				sources.push_back(pCollider);
+			}
 		}
 	}
 
-	// throw excp -> using simulation move when body type is Static
-	// throw excp -> maxIterations must be greater than zero
-	// throw excp -> selected collider must be attached to the slide RigidBody2D
+	std::vector<PhysicsShapeGroup2D> sourceShapes(sources.size());
+	for (std::size_t i = 0; i < sources.size(); ++i)
+	{
+		sources[i]->GetShapes(sourceShapes[i]);
+	}
 
-	*/
+	ContactFilter2D filter = ContactFilter2D::NoFilter();
+	filter.useTriggers = false;
+	if (slideConfig.useLayerMask)
+	{
+		filter.SetLayerMask(slideConfig.layerMask);
+	}
+
+	std::vector<ColliderHit2D> hitBuffer(static_cast<std::size_t>(std::max(m_pPhysicsScene->GetColliderCount(), 1)));
+	const Vector2f startPosition = m_position;
+
+	const SlideCastFunction cast = [&](const Vector2f& position, const Vector2f& direction, float distance, ColliderHit2D& hit)
+		{
+			hit = ColliderHit2D{ };
+			const Vector2f offset = position - startPosition;
+
+			for (std::size_t i = 0; i < sources.size(); ++i)
+			{
+				PhysicsShapeGroup2D moved = sourceShapes[i];
+				for (int s = 0; s < moved.GetShapeCount(); ++s)
+				{
+					const int vertexCount = static_cast<int>(moved.GetShapeVertices(s).size());
+					for (int v = 0; v < vertexCount; ++v)
+					{
+						moved.SetShapeVertex(s, v, moved.GetShapeVertices(s)[static_cast<std::size_t>(v)] + offset);
+					}
+				}
+
+				const int count = m_pPhysicsScene->CastShapes(moved, position, direction, distance, sources[i], true, filter, std::span<ColliderHit2D>(hitBuffer));
+				for (int k = 0; k < count; ++k)
+				{
+					const ColliderHit2D& candidate = hitBuffer[static_cast<std::size_t>(k)];
+					if (!slideConfig.useLayerMask && !sources[i]->CanContact(candidate.pCollider))
+						continue;
+
+					if (!hit.IsValid() || candidate.distance < hit.distance)
+					{
+						hit = candidate;
+					}
+				}
+			}
+			return hit.IsValid();
+		};
+
+	SlideInput2D input;
+	input.position = results.position;
+	input.velocity = velocity;
+	input.deltaTime = deltaTime;
+	input.gravity = slideConfig.gravity;
+	input.gravitySlipAngle = slideConfig.gravitySlipAngle;
+	input.maxIterations = slideConfig.maxIterations;
+	input.surfaceAnchor = slideConfig.surfaceAnchor;
+	input.surfaceSlideAngle = slideConfig.surfaceSlideAngle;
+	input.surfaceUp = slideConfig.surfaceUp;
+	input.skin = Physics2DConstants::kLinearSlop;
+
+	BodySlide2D::Compute(input, cast, results);
+
+	if (!slideConfig.useNoMove)
+	{
+		if (slideConfig.useSimulationMove)
+		{
+			MovePosition(results.position);
+		}
+		else
+		{
+			SetPosition(results.position);
+		}
+	}
+	return results;
 }
 
 /*----------------------------------------------------------------------------------------------------------------------------
@@ -560,7 +651,7 @@ void CaledonEngine::RigidBody2D::UpdateMassData()
 
 	m_mass = std::max(totalMass, kMinMass);
 	m_centerOfMass = centerOfMass;
-	m_inertia = std::max(inertiaAboutOrigin - totalMass * (centerOfMass.x * centerOfMass.x + centerOfMass.y * centerOfMass.y), 0.0f);
+	m_inertia = std::max(inertiaAboutOrigin - totalMass * centerOfMass.SqrMagnitude(), 0.0f);
 }
 
 /*-----------------------------------------------------------------------------------------

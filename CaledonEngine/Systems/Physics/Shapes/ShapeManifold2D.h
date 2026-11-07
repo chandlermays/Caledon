@@ -28,17 +28,17 @@ namespace CaledonEngine
 {
 	struct ShapeManifoldPoint2D
 	{
-		Vector2f point{ };																							// The contact point in world space (halfway between the two surfaces)
-		float separation = 0.0f;																					// The gap along the normal (negative when the shapes overlap)
+		Vector2f point{ };																							// The contact point, halfway between the two surfaces
+		float separation = 0.0f;																					// The separation along the normal: negative = overlapping, 0 = just touching
 	};
 
 	struct ShapeManifold2D
 	{
-		Vector2f normal{ };																							// The unit normal pointing from shape A toward shape B
-		int pointCount = 0;																							// How many entries of 'points' are valid (0, 1 or 2)
-		ShapeManifoldPoint2D points[2];																			// The contact points
+		Vector2f normal{ };																							// The normal points from shape A toward shape B
+		int pointCount = 0;																							// The number of contact points (0, 1, or 2)
+		ShapeManifoldPoint2D points[2];																				// The contact points, if any
 
-		void Clear() noexcept																						// Empties the manifold
+		void Clear() noexcept																						// Resets the manifold to an empty state
 		{
 			normal = Vector2f{ 0.0f, 0.0f };
 			pointCount = 0;
@@ -49,6 +49,6 @@ namespace CaledonEngine
 
 	namespace ShapeManifold2DQueries
 	{
-		bool Collide(const ShapeView2D& shapeA, const ShapeView2D& shapeB, ShapeManifold2D& manifold);				// Computes the contact between two shapes; returns false (and an empty manifold) if they don't touch or aren't supported
+		bool Collide(const ShapeView2D& shapeA, const ShapeView2D& shapeB, ShapeManifold2D& manifold);				// Computes the contact manifold for two shapes, if they touch or overlap
 	}
 }

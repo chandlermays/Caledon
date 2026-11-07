@@ -8,7 +8,7 @@
 | --- Public Method Definitions --- |
 -----------------------------------*/
 /*---------------------------------------------------------------------------------------
-| --- GetGameObject:
+| --- GetGameObject: Returns the GameObject associate with the incoming Collision2D --- |
 ---------------------------------------------------------------------------------------*/
 CaledonEngine::GameObject* CaledonEngine::Collision2D::GetGameObject() const noexcept
 {
@@ -18,9 +18,9 @@ CaledonEngine::GameObject* CaledonEngine::Collision2D::GetGameObject() const noe
 	return m_pCollider ? m_pCollider->GetOwner() : nullptr;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetTransform:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------
+| --- GetTransform: Returns the Transform associate with the incoming Collision2D --- |
+-------------------------------------------------------------------------------------*/
 CaledonEngine::Transform* CaledonEngine::Collision2D::GetTransform() const noexcept
 {
 	GameObject* pGameObject = GetGameObject();

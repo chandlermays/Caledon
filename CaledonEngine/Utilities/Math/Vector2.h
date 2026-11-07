@@ -188,6 +188,17 @@ namespace CaledonEngine
 			return { x * cosA - y * sinA, x * sinA + y * cosA };
 		}
 
+		/*------------------------------------------------------------------------------------
+		| --- RotateRadians: Returns a copy of this vector rotated by an angle (radians) --- |
+		------------------------------------------------------------------------------------*/
+		inline Vector2 RotateRadians(const T angleRadians) const
+		{
+			T cosA = static_cast<T>(std::cos(angleRadians));
+			T sinA = static_cast<T>(std::sin(angleRadians));
+
+			return { x * cosA - y * sinA, x * sinA + y * cosA };
+		}
+
 		/*--------------------------------------------------------------------------
 		| --- Angle: Returns the unsigned angle in degrees between from and to --- |
 		--------------------------------------------------------------------------*/
@@ -248,6 +259,22 @@ namespace CaledonEngine
 		static constexpr inline T Cross(const Vector2& lhs, const Vector2& rhs)
 		{
 			return lhs.x * rhs.y - lhs.y * rhs.x;
+		}
+
+		/*----------------------------------------------------------------------
+		| --- Cross: Returns the 2D cross product of a scalar and a vector --- |
+		----------------------------------------------------------------------*/
+		static constexpr inline Vector2 Cross(const T s, const Vector2& v)
+		{
+			return { -s * v.y, s * v.x };
+		}
+
+		/*----------------------------------------------------------------------
+		| --- Cross: Returns the 2D cross product of a vector and a scalar --- |
+		----------------------------------------------------------------------*/
+		static constexpr inline Vector2 Cross(const Vector2& v, const T s)
+		{
+			return { s * v.y, -s * v.x };
 		}
 
 		/*-------------------------------------------------------------------------------

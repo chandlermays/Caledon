@@ -41,20 +41,8 @@ namespace CaledonEngine
 	class RigidBody2D : public Component
 	{
 	private:
+		std::vector<Collider2D*> m_pAttachedColliders;																												// The Collider2D attached to this RigidBody2D
 		PhysicsScene2D* m_pPhysicsScene;																															// The PhysicsScene2D this RigidBody2D is registered with
-		BodyType2D m_bodyType;																																		// The physical behavior type of this RigidBody2D
-		bool m_simulated;																																			// Indicates whether the RigidBody2D should be simulated or not by the physics system
-		BodyConstraints2D m_constraints;																															// Controls which degrees of freedom are allowed for the simulation of this RigidBody2D
-		CollisionDetectionMode2D m_collisionDetectionMode;																											// The method used by the physics engine to check if two objects have collided
-		BodyInterpolation2D m_interpolation;																														// Physics interpolation used between updates
-		bool m_useFullKinematicContacts;																															// Should kinematic/kinematic and kinematic/static collisions be allowed?
-		BodySleepMode2D m_sleepMode;																																// The sleep state that the RigidBody2D will initially be in
-		bool m_isAwake;																																				// The current sleep state
-
-		Vector2f m_lastAppliedPosition;																																// The position last written to the Transform
-		float m_lastAppliedRotation;																																// The rotation last written to the Transform
-		float m_sleepTime;																																			// How long (seconds) this RigidBody2D has been nearly still. At timeToSleep, and with everything it touches also still, it goes to sleep
-		bool m_hasAppliedPose;																																		// Whether a pose has ever been written to the Transform
 
 		Vector2f m_position;																																		// The position of the RigidBody2D
 		float m_rotation;																																			// The rotation of the RigidBody2D in degrees
@@ -67,16 +55,27 @@ namespace CaledonEngine
 		float m_gravityScale;																																		// The degree to which this object is affected by gravity
 		Vector2f m_totalForce;																																		// The total amount of force that has been explicitly applied to this RigidBody2D since the last physics simulation step
 		float m_totalTorque;																																		// The total amount of torque that has been explicitly applied to this RigidBody2D since the last physics simulation step
-
-		bool m_useAutoMass;																																			// Should the total RigidBody2D mass be automatically calculated from the Collider2D.density of attached colliders?
 		float m_mass;																																				// Mass of the RigidBody2D
-		Vector2f m_centerOfMass;																																	// The center of mass of this RigidBody2D in local space
 		float m_inertia;																																			// The RigidBody's resistance to changes in angular velocity (rotation)
+		Vector2f m_centerOfMass;																																	// The center of mass of this RigidBody2D in local space
 
-		std::vector<Collider2D*> m_pAttachedColliders;																												// The Collider2D attached to this RigidBody2D
+		float m_sleepTime;																																			// How long (seconds) this RigidBody2D has been nearly still. At timeToSleep, and with everything it touches also still, it goes to sleep
+		Vector2f m_lastAppliedPosition;																																// The position last written to the Transform
+		float m_lastAppliedRotation;																																// The rotation last written to the Transform
 		PhysicsMaterial2D m_sharedMaterial;																															// The PhysicsMaterial2D that is applied to all Collider2D attached to this RigidBody2D
 		LayerMask m_includeLayers;																																	// The additional Layers that all Collider2D attached to this RigidBody2D should include when deciding if a contact with another Collider2D should happen or not
 		LayerMask m_excludeLayers;																																	// The additional Layers that all Collider2D attached to this RigidBody2D should exclude when deciding if a contact with another Collider2D should happen or not
+
+		BodyType2D m_bodyType;																																		// The physical behavior type of this RigidBody2D
+		BodyConstraints2D m_constraints;																															// Controls which degrees of freedom are allowed for the simulation of this RigidBody2D
+		CollisionDetectionMode2D m_collisionDetectionMode;																											// The method used by the physics engine to check if two objects have collided
+		BodyInterpolation2D m_interpolation;																														// Physics interpolation used between updates
+		BodySleepMode2D m_sleepMode;																																// The sleep state that the RigidBody2D will initially be in
+		bool m_simulated;																																			// Indicates whether the RigidBody2D should be simulated or not by the physics system
+		bool m_isAwake;																																				// The current sleep state
+		bool m_useFullKinematicContacts;																															// Should kinematic/kinematic and kinematic/static collisions be allowed?
+		bool m_hasAppliedPose;																																		// Whether a pose has ever been written to the Transform
+		bool m_useAutoMass;																																			// Should the total RigidBody2D mass be automatically calculated from the Collider2D.density of attached colliders?
 
 		void WakeIfNeeded() noexcept;																																// Forces and velocity changes wake a sleeping body
 		bool CanReceiveForces() const noexcept { return m_bodyType == BodyType2D::Dynamic && m_simulated; }															// Only simulated Dynamic bodies respond to forces

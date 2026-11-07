@@ -31,6 +31,6 @@ namespace CaledonEngine
 
 	namespace ShapeMass2D
 	{
-		bool Compute(const ShapeView2D& shape, ShapeMassData2D& massData);							// Computes the mass data of a shape; returns false if the shape has no area or isn't supported
+		bool Compute(const ShapeView2D& shape, ShapeMassData2D& massData);							// Computes the mass data for a shape, if it is supported
 	}
 }

@@ -16,7 +16,7 @@ namespace
 	---------------------------------------------------------------------------------------*/
 	void WeldVertices(std::vector<CaledonEngine::Vector2f>& loop, float minDistance)
 	{
-		if (!(minDistance > 0.0f) || loop.size() < 2)
+		if (minDistance < 0.0f || loop.size() < 2)
 			return;
 
 		const float minSq = minDistance * minDistance;
@@ -31,11 +31,15 @@ namespace
 		for (std::size_t i = 1; i < loop.size(); ++i)
 		{
 			if (!closeTo(loop[i], loop[kept - 1]))
+			{
 				loop[kept++] = loop[i];
+			}
 		}
 
 		while (kept > 1 && closeTo(loop[kept - 1], loop[0]))
+		{
 			--kept;
+		}
 
 		loop.resize(kept);
 	}
@@ -49,11 +53,11 @@ namespace
 ------------------------------------------------------------------------------*/
 CaledonEngine::CompositeCollider2D::CompositeCollider2D()
 	: m_edgeRadius{ 0.0f }
+	, m_offsetDistance{ 0.00005f }
+	, m_vertexDistance{ 0.0005f }
 	, m_generationType{ GenerationType::Synchronous }
 	, m_geometryType{ GeometryType::Outlines }
-	, m_offsetDistance{ 0.00005f }
 	, m_useDelaunayMesh{ false }
-	, m_vertexDistance{ 0.0005f }
 	, m_isGeometryDirty{ false }
 { }
 
@@ -87,7 +91,9 @@ void CaledonEngine::CompositeCollider2D::SetGenerationType(GenerationType genera
 	m_generationType = generationType;
 
 	if (m_generationType == GenerationType::Synchronous && m_isGeometryDirty)
+	{
 		GenerateGeometry();
+	}
 }
 
 /*---------------------------------------------------------------------------------------
@@ -148,7 +154,9 @@ void CaledonEngine::CompositeCollider2D::GenerateGeometry()
 	PhysicsShapeGroup2D shapes;
 
 	for (Collider2D* pCollider : m_compositedColliders)
+	{
 		pCollider->GetShapes(shapes);
+	}
 
 	m_pathVertices.clear();
 	m_paths.clear();
@@ -247,7 +255,9 @@ int CaledonEngine::CompositeCollider2D::AddCompositedColliders(std::span<Collide
 	}
 
 	if (added > 0)
+	{
 		OnChanged();
+	}
 
 	return added;
 }
@@ -265,7 +275,9 @@ void CaledonEngine::CompositeCollider2D::OnChanged()
 	m_isGeometryDirty = true;
 
 	if (m_generationType == GenerationType::Synchronous)
+	{
 		GenerateGeometry();
+	}
 }
 
 /*---------------------------------------------------------------------------------------

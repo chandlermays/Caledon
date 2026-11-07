@@ -4,6 +4,8 @@
 ------------------------------*/
 #include "ContactSolver2D.h"
 
+#include "Utilities/Math/Constants.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -11,16 +13,6 @@ namespace
 {
 	using CaledonEngine::SolverBody2D;
 	using CaledonEngine::Vector2f;
-
-	float Cross(const Vector2f& a, const Vector2f& b) noexcept { return a.x * b.y - a.y * b.x; }
-	float Dot(const Vector2f& a, const Vector2f& b) noexcept { return a.x * b.x + a.y * b.y; }
-	Vector2f Cross(float s, const Vector2f& v) noexcept { return Vector2f{ -s * v.y, s * v.x }; }
-	Vector2f Rotate(const Vector2f& v, float angle) noexcept
-	{
-		const float c = std::cos(angle);
-		const float s = std::sin(angle);
-		return Vector2f{ c * v.x - s * v.y, s * v.x + c * v.y };
-	}
 
 	/*---------------------------------------------------------------------------------------------
 	| --- InverseMassAlong: Calculates the inverse mass of a body along a specified direction --- |
@@ -36,14 +28,18 @@ namespace
 	void ApplyImpulse(SolverBody2D& a, SolverBody2D& b, const Vector2f& rA, const Vector2f& rB, const Vector2f& impulse) noexcept
 	{
 		a.linearVelocity -= Vector2f{ a.linearFactor.x * impulse.x, a.linearFactor.y * impulse.y } * a.inverseMass;
-		a.angularVelocity -= a.inverseInertia * Cross(rA, impulse);
+		a.angularVelocity -= a.inverseInertia * Vector2f::Cross(rA, impulse);
+
 		b.linearVelocity += Vector2f{ b.linearFactor.x * impulse.x, b.linearFactor.y * impulse.y } * b.inverseMass;
-		b.angularVelocity += b.inverseInertia * Cross(rB, impulse);
+		b.angularVelocity += b.inverseInertia * Vector2f::Cross(rB, impulse);
 	}
 
+	/*-----------------------------------------------------------------------------------------------------
+	| --- RelativeVelocity: Computes the relative velocity between two bodies at their contact points --- |
+	-----------------------------------------------------------------------------------------------------*/
 	Vector2f RelativeVelocity(const SolverBody2D& a, const SolverBody2D& b, const Vector2f& rA, const Vector2f& rB) noexcept
 	{
-		return (b.linearVelocity + Cross(b.angularVelocity, rB)) - (a.linearVelocity + Cross(a.angularVelocity, rA));
+		return (b.linearVelocity + Vector2f::Cross(b.angularVelocity, rB)) - (a.linearVelocity + Vector2f::Cross(a.angularVelocity, rA));
 	}
 
 	float Reciprocal(float value) noexcept { return value > 0.0f ? 1.0f / value : 0.0f; }
@@ -78,15 +74,15 @@ CaledonEngine::ContactConstraint2D CaledonEngine::ContactSolver2D::Build(const S
 		point.anchorB = manifold.points[i].point - b.position;
 		point.separation = manifold.points[i].separation;
 
-		const float rnA = Cross(point.anchorA, normal);
-		const float rnB = Cross(point.anchorB, normal);
+		const float rnA = Vector2f::Cross(point.anchorA, normal);
+		const float rnB = Vector2f::Cross(point.anchorB, normal);
 		point.normalMass = Reciprocal(InverseMassAlong(a, normal) + InverseMassAlong(b, normal) + a.inverseInertia * rnA * rnA + b.inverseInertia * rnB * rnB);
 
-		const float rtA = Cross(point.anchorA, tangent);
-		const float rtB = Cross(point.anchorB, tangent);
+		const float rtA = Vector2f::Cross(point.anchorA, tangent);
+		const float rtB = Vector2f::Cross(point.anchorB, tangent);
 		point.tangentMass = Reciprocal(InverseMassAlong(a, tangent) + InverseMassAlong(b, tangent) + a.inverseInertia * rtA * rtA + b.inverseInertia * rtB * rtB);
 
-		const float closing = Dot(normal, RelativeVelocity(a, b, point.anchorA, point.anchorB));
+		const float closing = Vector2f::Dot(normal, RelativeVelocity(a, b, point.anchorA, point.anchorB));
 		point.velocityBias = (closing < -settings.bounceThreshold) ? -restitution * closing : 0.0f;
 
 		if (warm != nullptr)
@@ -134,7 +130,7 @@ void CaledonEngine::ContactSolver2D::SolveVelocity(std::span<ContactConstraint2D
 		for (int i = 0; i < constraint.pointCount; ++i)
 		{
 			ContactPointConstraint2D& point = constraint.points[i];
-			const float slide = Dot(tangent, RelativeVelocity(a, b, point.anchorA, point.anchorB));
+			const float slide = Vector2f::Dot(tangent, RelativeVelocity(a, b, point.anchorA, point.anchorB));
 			const float maxFriction = constraint.friction * point.normalImpulse;
 			const float newImpulse = std::clamp(point.tangentImpulse - point.tangentMass * slide, -maxFriction, maxFriction);
 			ApplyImpulse(a, b, point.anchorA, point.anchorB, tangent * (newImpulse - point.tangentImpulse));
@@ -145,7 +141,7 @@ void CaledonEngine::ContactSolver2D::SolveVelocity(std::span<ContactConstraint2D
 		for (int i = 0; i < constraint.pointCount; ++i)
 		{
 			ContactPointConstraint2D& point = constraint.points[i];
-			const float closing = Dot(normal, RelativeVelocity(a, b, point.anchorA, point.anchorB));
+			const float closing = Vector2f::Dot(normal, RelativeVelocity(a, b, point.anchorA, point.anchorB));
 			const float newImpulse = std::max(point.normalImpulse - point.normalMass * (closing - point.velocityBias), 0.0f);
 			ApplyImpulse(a, b, point.anchorA, point.anchorB, normal * (newImpulse - point.normalImpulse));
 			point.normalImpulse = newImpulse;
@@ -169,21 +165,22 @@ bool CaledonEngine::ContactSolver2D::SolvePosition(std::span<const ContactConstr
 		for (int i = 0; i < constraint.pointCount; ++i)
 		{
 			const ContactPointConstraint2D& point = constraint.points[i];
-			const Vector2f rA = Rotate(point.anchorA, a.angle - constraint.angleA);
-			const Vector2f rB = Rotate(point.anchorB, b.angle - constraint.angleB);
-			const float separation = point.separation + Dot((b.position + rB) - (a.position + rA), normal);
+			const Vector2f rA = point.anchorA.RotateRadians(a.angle - constraint.angleA);
+			const Vector2f rB = point.anchorB.RotateRadians(b.angle - constraint.angleB);
+
+			const float separation = point.separation + Vector2f::Dot((b.position + rB) - (a.position + rA), normal);
 			minSeparation = std::min(minSeparation, separation);
 
 			const float correction = std::clamp(settings.baumgarte * (separation + settings.linearSlop), -settings.maxLinearCorrection, 0.0f);
-			const float rnA = Cross(rA, normal);
-			const float rnB = Cross(rB, normal);
+			const float rnA = Vector2f::Cross(rA, normal);
+			const float rnB = Vector2f::Cross(rB, normal);
 			const float effectiveMass = Reciprocal(InverseMassAlong(a, normal) + InverseMassAlong(b, normal) + a.inverseInertia * rnA * rnA + b.inverseInertia * rnB * rnB);
 			const Vector2f impulse = normal * (-correction * effectiveMass);
 
 			a.position -= Vector2f{ a.linearFactor.x * impulse.x, a.linearFactor.y * impulse.y } * a.inverseMass;
-			a.angle -= a.inverseInertia * Cross(rA, impulse);
+			a.angle -= a.inverseInertia * Vector2f::Cross(rA, impulse);
 			b.position += Vector2f{ b.linearFactor.x * impulse.x, b.linearFactor.y * impulse.y } * b.inverseMass;
-			b.angle += b.inverseInertia * Cross(rB, impulse);
+			b.angle += b.inverseInertia * Vector2f::Cross(rB, impulse);
 		}
 	}
 
@@ -195,11 +192,11 @@ bool CaledonEngine::ContactSolver2D::SolvePosition(std::span<const ContactConstr
 ------------------------------------------------------------------------------------------------------*/
 CaledonEngine::ContactImpulses2D CaledonEngine::ContactSolver2D::GetImpulses(const ContactConstraint2D& constraint) noexcept
 {
-	ContactImpulses2D impulses;
+	ContactImpulses2D resultImpulses;
 	for (int i = 0; i < constraint.pointCount; ++i)
 	{
-		impulses.normal[i] = constraint.points[i].normalImpulse;
-		impulses.tangent[i] = constraint.points[i].tangentImpulse;
+		resultImpulses.normal[i] = constraint.points[i].normalImpulse;
+		resultImpulses.tangent[i] = constraint.points[i].tangentImpulse;
 	}
-	return impulses;
+	return resultImpulses;
 }

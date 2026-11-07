@@ -16,9 +16,9 @@
 ------------------------------------------------------------------------*/
 CaledonEngine::BoxCollider2D::BoxCollider2D()
 	: Collider2D{ }
-	, m_autoTiling{ false }
-	, m_edgeRadius{ 0.0f }
 	, m_size{ 1.0f, 1.0f }
+	, m_edgeRadius{ 0.0f }
+	, m_autoTiling{ false }
 { }
 
 /*--------------------------------------------------------------
