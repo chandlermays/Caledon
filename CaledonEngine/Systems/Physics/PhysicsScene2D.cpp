@@ -440,7 +440,8 @@ PhysicsScene2D::PhysicsScene2D(const Physics2DSettings& settings)
 	, m_subStepCount{ 0 }
 	, m_subStepLostTime{ 0.0f }
 	, m_isValid{ true }
-{ }
+{
+}
 
 /*---------------------------------------------------------------
 | --- AddCollider: Adds a Collider2D to this PhysicsScene2D --- |
@@ -811,7 +812,7 @@ std::vector<ColliderHit2D> PhysicsScene2D::Linecast(const Vector2f& start, const
 	const Vector2f line = end - start;
 	const float length = line.Magnitude();
 
-	if (length <= 0.0f)
+	if (!(length > 0.0f))
 		return std::vector<ColliderHit2D>();
 
 	return Raycast(start, line / length, contactFilter, length);
@@ -968,7 +969,7 @@ std::vector<Collider2D*> PhysicsScene2D::OverlapCircle(const Vector2f& point, fl
 ------------------------------------------------------------------------------------------------------------------------*/
 int PhysicsScene2D::OverlapCircle(const Vector2f& point, float radius, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const
 {
-	if (radius <= 0.0f)
+	if (!(radius >= 0.0f))
 	{
 		results.clear();
 		return 0;
@@ -1157,7 +1158,7 @@ bool PhysicsScene2D::Simulate(float deltaTime, int simulationLayers)
 	m_subStepCount = 0;
 	m_subStepLostTime = 0.0f;
 
-	if (!m_isValid || deltaTime < 0.0f || !std::isfinite(deltaTime))
+	if (!m_isValid || !(deltaTime > 0.0f) || !std::isfinite(deltaTime))
 		return false;
 
 	SyncTransforms();
@@ -1680,7 +1681,7 @@ void PhysicsScene2D::QueryRay(const Vector2f& origin, const Vector2f& direction,
 	hits.clear();
 
 	const Vector2f rayDirection = direction.Normalized();
-	if (rayDirection.SqrMagnitude() <= 0.0f || distance <= 0.0f || castRadius < 0.0f)
+	if (!(rayDirection.SqrMagnitude() > 0.0f) || !(distance >= 0.0f) || !(castRadius >= 0.0f))
 		return;
 
 	PhysicsShapeGroup2D candidateShapes;

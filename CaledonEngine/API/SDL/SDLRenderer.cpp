@@ -20,8 +20,7 @@
 ------------------------------------------------------------------------*/
 CaledonEngine::SDLRenderer::SDLRenderer()
 	: m_pRenderer{ nullptr }
-{
-}
+{ }
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -355,75 +354,56 @@ void CaledonEngine::SDLRenderer::DrawTriangle(const Vector2f& v1, const Vector2f
 	}
 }
 
-/*----------------------------------------------------
-| --- DrawCapsule: Draws a capsule to the screen --- |
-----------------------------------------------------*/
-void CaledonEngine::SDLRenderer::DrawCapsule(float centerX, float centerY, float width, float height, const Color& color, bool filled)
+/*---------------------------------------------
+| --- DrawQuad: Draws a quad to the screen --- |
+---------------------------------------------*/
+void CaledonEngine::SDLRenderer::DrawQuad(const Vector2f& v1, const Vector2f& v2, const Vector2f& v3, const Vector2f& v4, const Color& color, bool filled)
 {
 	if (!m_pRenderer)
 		return;
 
-	SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
-
-	bool isVertical = height > width;
-
-	if (isVertical)
+	if (filled)
 	{
-		// Vertical capsule
-		float radius = width / 2.0f;
-		float rectHeight = height - width;
-
-		// Top semicircle
-		float topY = centerY - rectHeight / 2.0f;
-		DrawCircle(centerX, topY, radius, color, filled);
-
-		if (filled)
-		{
-			// Middle rectangle
-			RectFloat middleRect(centerX - radius, topY, width, rectHeight);
-			DrawRect(middleRect, color, true);
-		}
-		else
-		{
-			// Side lines
-			float rectTop = topY;
-			float rectBottom = topY + rectHeight;
-			SDL_RenderLine(m_pRenderer, centerX - radius, rectTop, centerX - radius, rectBottom);
-			SDL_RenderLine(m_pRenderer, centerX + radius, rectTop, centerX + radius, rectBottom);
-		}
-
-		// Bottom semicircle
-		float bottomY = centerY + rectHeight / 2.0f;
-		DrawCircle(centerX, bottomY, radius, color, filled);
+		// Split the quad along its diagonal into two triangles
+		DrawTriangle(v1, v2, v3, color, true);
+		DrawTriangle(v1, v3, v4, color, true);
 	}
 	else
 	{
-		// Horizontal capsule
-		float radius = height / 2.0f;
-		float rectWidth = width - height;
+		SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
+		SDL_RenderLine(m_pRenderer, v1.x, v1.y, v2.x, v2.y);
+		SDL_RenderLine(m_pRenderer, v2.x, v2.y, v3.x, v3.y);
+		SDL_RenderLine(m_pRenderer, v3.x, v3.y, v4.x, v4.y);
+		SDL_RenderLine(m_pRenderer, v4.x, v4.y, v1.x, v1.y);
+	}
+}
 
-		// Left semicircle
-		float leftX = centerX - rectWidth / 2.0f;
-		DrawCircle(leftX, centerY, radius, color, filled);
+/*----------------------------------------------------
+| --- DrawCapsule: Draws a capsule to the screen --- |
+----------------------------------------------------*/
+void CaledonEngine::SDLRenderer::DrawCapsule(const Vector2f& a, const Vector2f& b, float radius, const Color& color, bool filled)
+{
+	if (!m_pRenderer)
+		return;
 
-		if (filled)
-		{
-			// Middle rectangle
-			RectFloat middleRect(leftX, centerY - radius, rectWidth, height);
-			DrawRect(middleRect, color, true);
-		}
-		else
-		{
-			// Top and bottom lines
-			float rectLeft = leftX;
-			float rectRight = leftX + rectWidth;
-			SDL_RenderLine(m_pRenderer, rectLeft, centerY - radius, rectRight, centerY - radius);
-			SDL_RenderLine(m_pRenderer, rectLeft, centerY + radius, rectRight, centerY + radius);
-		}
+	// Cap at each end of the segment
+	DrawCircle(a.x, a.y, radius, color, filled);
+	DrawCircle(b.x, b.y, radius, color, filled);
 
-		// Right semicircle
-		float rightX = centerX + rectWidth / 2.0f;
-		DrawCircle(rightX, centerY, radius, color, filled);
+	// Body between the caps: offset the segment sideways by the radius (perpendicular to its direction)
+	const Vector2f side = (b - a).Normalized().Perpendicular() * radius;
+	if (side.SqrMagnitude() == 0.0f)
+		return;																		// Both caps sit on the same point, so the capsule is just a circle
+
+	if (filled)
+	{
+		DrawQuad(a + side, b + side, b - side, a - side, color, true);
+	}
+	else
+	{
+		SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
+		SDL_RenderLine(m_pRenderer, a.x + side.x, a.y + side.y, b.x + side.x, b.y + side.y);
+		SDL_RenderLine(m_pRenderer, a.x - side.x, a.y - side.y, b.x - side.x, b.y - side.y);
 	}
 }
 

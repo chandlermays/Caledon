@@ -605,9 +605,6 @@ CaledonEngine::Vector2f CaledonEngine::RigidBody2D::GetWorldCenterOfMass() const
 ----------------------------------------------------------------------------------------------------*/
 void CaledonEngine::RigidBody2D::UpdateMassData()
 {
-	if (!m_useAutoMass)
-		return;
-
 	float totalMass = 0.0f;
 	Vector2f weightedCentroid{ 0.0f, 0.0f };
 	float inertiaAboutOrigin = 0.0f;
@@ -649,9 +646,16 @@ void CaledonEngine::RigidBody2D::UpdateMassData()
 
 	const Vector2f centerOfMass = weightedCentroid / totalMass;
 
-	m_mass = std::max(totalMass, kMinMass);
+	if (m_useAutoMass)
+	{
+		m_mass = std::max(totalMass, kMinMass);
+	}
+
+	// With a fixed mass the shapes are scaled to weigh exactly m_mass. Without this the inertia would not depend on the size of the colliders
+	const float massScale = m_mass / totalMass;
+
 	m_centerOfMass = centerOfMass;
-	m_inertia = std::max(inertiaAboutOrigin - totalMass * centerOfMass.SqrMagnitude(), 0.0f);
+	m_inertia = std::max((inertiaAboutOrigin - totalMass * centerOfMass.SqrMagnitude()) * massScale, 0.0f);
 }
 
 /*-----------------------------------------------------------------------------------------

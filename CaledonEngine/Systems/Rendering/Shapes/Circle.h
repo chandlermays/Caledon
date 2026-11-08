@@ -17,7 +17,8 @@ namespace CaledonEngine
 	public:
 		Circle(const Color& color = Color::White(), int radius = 50, bool isFilled = true);					// Constructor
 
-		void Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color) const override;		// Draws the circle onto the screen
+		void Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color,						// Draws the circle onto the screen, rotated around the origin
+			float rotation, const Vector2f& origin) const override;
 
 		void SetRadius(int radius);																			// Sets the radius of the circle
 		int GetRadius() const;																				// Returns the radius of the circle

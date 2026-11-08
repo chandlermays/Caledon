@@ -20,19 +20,18 @@ CaledonEngine::Circle::Circle(const Color& color, int radius, bool isFilled)
 /*------------------------------------------------------------------------------
 | --- Render: Draws the circle onto the screen using the provided Renderer --- |
 ------------------------------------------------------------------------------*/
-void CaledonEngine::Circle::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color) const
+void CaledonEngine::Circle::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color, float rotation, const Vector2f& origin) const
 {
 	if (pRenderer == nullptr)
 		return;
 
-	// Calculate the center position of the circle
-	float centerX = destRect.m_x + destRect.m_width / 2.0f;
-	float centerY = destRect.m_y + destRect.m_height / 2.0f;
+	// Calculate the center position of the circle, swung around the origin (the circle looks the same at any angle, only its center moves)
+	const Vector2f center = RotateAround({ destRect.m_x + destRect.m_width / 2.0f, destRect.m_y + destRect.m_height / 2.0f }, origin, rotation);
 
 	// Calculate the radius based on the destination rectangle
 	float scaledRadius = (destRect.m_width < destRect.m_height ? destRect.m_width : destRect.m_height) / 2.0f;
 
-	pRenderer->DrawCircle(centerX, centerY, scaledRadius, color, m_isFilled);
+	pRenderer->DrawCircle(center.x, center.y, scaledRadius, color, m_isFilled);
 }
 
 /*--------------------------------------------------

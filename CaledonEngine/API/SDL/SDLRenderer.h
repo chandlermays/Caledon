@@ -43,7 +43,10 @@ namespace CaledonEngine
 		virtual void DrawTriangle(const Vector2f& v1, const Vector2f& v2,
 			const Vector2f& v3, const Color& color, bool filled) override;								// Draws a triangle to the screen
 
-		virtual void DrawCapsule(float centerX, float centerY, float width, float height,
+		virtual void DrawQuad(const Vector2f& v1, const Vector2f& v2, const Vector2f& v3,
+			const Vector2f& v4, const Color& color, bool filled) override;								// Draws a quad to the screen
+
+		virtual void DrawCapsule(const Vector2f& a, const Vector2f& b, float radius,
 			const Color& color, bool filled) override;													// Draws a capsule to the screen
 
 		virtual void* GetNativeHandle() const override;													// Returns the native renderer handle

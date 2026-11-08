@@ -21,14 +21,14 @@ CaledonEngine::Triangle::Triangle(const Color& color, int width, int height, boo
 /*--------------------------------------------------------------------------------
 | --- Render: Draws the triangle onto the screen using the provided Renderer --- |
 --------------------------------------------------------------------------------*/
-void CaledonEngine::Triangle::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color) const
+void CaledonEngine::Triangle::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color, float rotation, const Vector2f& origin) const
 {
 	if (!pRenderer)
 		return;
 
-	Vector2f v1(destRect.m_x + destRect.m_width / 2, destRect.m_y);
-	Vector2f v2(destRect.m_x, destRect.m_y + destRect.m_height);
-	Vector2f v3(destRect.m_x + destRect.m_width, destRect.m_y + destRect.m_height);
+	Vector2f v1 = RotateAround({ destRect.m_x + destRect.m_width / 2.0f, destRect.m_y }, origin, rotation);
+	Vector2f v2 = RotateAround({ destRect.m_x, destRect.m_y + destRect.m_height }, origin, rotation);
+	Vector2f v3 = RotateAround({ destRect.m_x + destRect.m_width, destRect.m_y + destRect.m_height }, origin, rotation);
 
 	pRenderer->DrawTriangle(v1, v2, v3, color, m_isFilled);
 }

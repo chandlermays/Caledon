@@ -4,6 +4,7 @@
 ------------------------------*/
 #include "MovementComponent.h"
 
+#include "CaledonEngine/Systems/Physics/Components/RigidBody2D.h"
 #include "CaledonEngine/Systems/Scene/GameObject.h"
 #include "CaledonEngine/Systems/Scene/Transform.h"
 
@@ -33,6 +34,13 @@ const std::string& PacmanModule::MovementComponent::GetTypeName() const
 ------------------------------------------------------------------------*/
 void PacmanModule::MovementComponent::Update(float deltaTime)
 {
+    // With a RigidBody2D the physics system moves the object (and stops it at colliders), so drive its velocity instead of the Transform
+    if (CaledonEngine::RigidBody2D* pBody = GetComponent<CaledonEngine::RigidBody2D>())
+    {
+        pBody->SetLinearVelocity(m_direction * m_speed);
+        return;
+    }
+
     if (m_speed == 0.0f || m_direction == CaledonEngine::Vector2f::Zero())
         return;
 

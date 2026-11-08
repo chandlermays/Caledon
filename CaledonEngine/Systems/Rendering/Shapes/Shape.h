@@ -28,6 +28,8 @@ namespace CaledonEngine
 		int m_height;																							// The height of the shape
 		bool m_isFilled;																						// Whether the shape is filled or just an outline
 
+		static Vector2f RotateAround(const Vector2f& point, const Vector2f& origin, float rotation);			// Rotates a point around an origin by the given angle (degrees)
+
 	public:
 		Shape(ShapeType type, const Color& color = Color::White(),
 			int width = 100, int height = 100, bool isFilled = true);											// Constructor
@@ -38,7 +40,8 @@ namespace CaledonEngine
 		Shape(Shape&&) = delete;																				// Prevent move-construction
 		Shape& operator=(Shape&&) = delete;																		// Prevent move-assignment
 
-		virtual void Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color) const = 0;		// Draws the shape onto the screen
+		virtual void Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color,					// Draws the shape onto the screen, rotated (degrees, clockwise on screen) around the origin
+			float rotation, const Vector2f& origin) const = 0;
 
 		void SetColor(const Color& color);																		// Sets the color of the shape
 		void SetColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);				// Sets the color of the shape

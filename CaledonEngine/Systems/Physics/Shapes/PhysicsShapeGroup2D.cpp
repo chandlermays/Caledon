@@ -54,7 +54,7 @@ void CaledonEngine::PhysicsShapeGroup2D::Add(const PhysicsShapeGroup2D& physicsS
 --------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddBox(const Vector2f& center, const Vector2f& size, float angle, float edgeRadius)
 {
-	if (size.x < 0.0f || size.y < 0.0f || edgeRadius <= 0.0f)
+	if (!(size.x > 0.0f) || !(size.y > 0.0f) || !(edgeRadius >= 0.0f))
 		return -1;
 
 	const float radians = angle * Math::Deg2Rad;
@@ -102,7 +102,7 @@ int CaledonEngine::PhysicsShapeGroup2D::AddCircle(const Vector2f& center, float 
 -------------------------------------------------------------------*/
 int CaledonEngine::PhysicsShapeGroup2D::AddEdges(std::span<const Vector2f> vertices, float edgeRadius)
 {
-	if (vertices.size() < 2 || edgeRadius <= 0.0f)
+	if (vertices.size() < 2 || !(edgeRadius >= 0.0f))
 		return -1;
 
 	return AddShape(PhysicsShapeType2D::Edges, vertices, edgeRadius);
@@ -224,7 +224,7 @@ bool CaledonEngine::PhysicsShapeGroup2D::SetShapeAdjacentVertices(int shapeIndex
 --------------------------------------------------------------------------*/
 bool CaledonEngine::PhysicsShapeGroup2D::SetShapeRadius(int shapeIndex, float radius)
 {
-	if (!IsValidShape(shapeIndex) || radius <= 0.0f)
+	if (!IsValidShape(shapeIndex) || !(radius >= 0.0f))
 		return false;
 
 	m_shapes[static_cast<std::size_t>(shapeIndex)].radius = radius;

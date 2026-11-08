@@ -60,10 +60,10 @@ int CaledonEngine::CapsuleCollider2D::AddLocalShapes(PhysicsShapeGroup2D& physic
 	const bool vertical = (m_direction == CapsuleDirection2D::Vertical);
 	const float radius = 0.5f * (vertical ? m_size.x : m_size.y);
 	const float halfLength = 0.5f * ((vertical ? m_size.y : m_size.x) - 2.0f * radius);
-	if (radius < 0.0f)
+	if (!(radius > 0.0f))
 		return 0;
 
-	if (halfLength < 0.0f)
+	if (!(halfLength > 0.0f))
 		return (physicsShapeGroup.AddCircle(GetOffset(), radius) >= 0) ? 1 : 0;
 
 	const Vector2f axis = vertical ? Vector2f{ 0.0f, halfLength } : Vector2f{ halfLength, 0.0f };

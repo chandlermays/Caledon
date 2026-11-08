@@ -111,7 +111,9 @@ void CaledonEngine::RenderingSubsystem::Render()
 		return;
 
 	if (!m_pScenes && m_pContext)
+	{
 		m_pScenes = m_pContext->Get<SceneSubsystem>();
+	}
 
 	const Scene* pScene = m_pScenes ? m_pScenes->GetCurrentScene() : nullptr;
 	if (!pScene || !pScene->IsActive())
@@ -122,7 +124,9 @@ void CaledonEngine::RenderingSubsystem::Render()
 	for (const auto& pObject : pScene->GetGameObjects())
 	{
 		if (pObject)
+		{
 			CacheSprites(*pObject);
+		}
 	}
 
 	std::stable_sort(m_drawList.begin(), m_drawList.end(),
@@ -136,10 +140,14 @@ void CaledonEngine::RenderingSubsystem::Render()
 	}
 
 	for (const SpriteComponent* pSprite : m_drawList)
+	{
 		RenderSprite(*pSprite);
+	}
 
 	if (m_pRenderTarget)
+	{
 		m_pRendererAPI->SetRenderTarget(nullptr);
+	}
 }
 
 /*---------------------------------------------------------------------------------------
@@ -277,6 +285,6 @@ void CaledonEngine::RenderingSubsystem::RenderSprite(const SpriteComponent& spri
 			renderColor.a = static_cast<uint8_t>((renderColor.a * tint.a) / 255);
 		}
 
-		pShape->Render(m_pRendererAPI.get(), destRect, renderColor);
+		pShape->Render(m_pRendererAPI.get(), destRect, renderColor, transform.GetRotation(), Vector2f{ x, y });		// Rotated around the transform's position (the pivot point)
 	}
 }

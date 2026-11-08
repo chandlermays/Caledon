@@ -19,6 +19,17 @@ CaledonEngine::Shape::Shape(ShapeType type, const Color& color, int width, int h
 	, m_bounds{ 0, 0, width, height }
 { }
 
+/*-----------------------------------
+| --- Protected Method Definitions --- |
+-----------------------------------*/
+/*----------------------------------------------------------------------------------------
+| --- RotateAround: Rotates a point around an origin by the given angle (degrees) --- |
+----------------------------------------------------------------------------------------*/
+CaledonEngine::Vector2f CaledonEngine::Shape::RotateAround(const Vector2f& point, const Vector2f& origin, float rotation)
+{
+	return origin + (point - origin).Rotate(rotation);
+}
+
 /*-----------------------------------------------
 | --- SetColor: Sets the color of the shape --- |
 -----------------------------------------------*/

@@ -53,8 +53,11 @@ namespace CaledonEngine
 		virtual void DrawTriangle(const Vector2f& v1, const Vector2f& v2,
 			const Vector2f& v3, const Color& color, bool filled) = 0;									// Draws an outlined triangle
 
-		virtual void DrawCapsule(float centerX, float centerY, float width, float height,
-			const Color& color, bool filled) = 0;														// Draws an outlined capsule
+		virtual void DrawQuad(const Vector2f& v1, const Vector2f& v2, const Vector2f& v3,
+			const Vector2f& v4, const Color& color, bool filled) = 0;									// Draws a quad from four corners (in order around the edge), so it can be rotated
+
+		virtual void DrawCapsule(const Vector2f& a, const Vector2f& b, float radius,
+			const Color& color, bool filled) = 0;														// Draws a capsule: the segment from a to b swept by the radius
 
 		virtual void* GetNativeHandle() const = 0;														// Returns the native Renderer handle
 		const std::string& GetLastError() const noexcept { return m_lastError; }

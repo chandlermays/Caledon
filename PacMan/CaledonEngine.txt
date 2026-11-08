@@ -4,9 +4,22 @@
 [LOG] [Engine] Initialized subsystem 'Input'
 [DISPLAY] [Rendering] Renderer started (SDL)
 [LOG] [Engine] Initialized subsystem 'Rendering'
+[LOG] [Engine] Initialized subsystem 'Physics2D'
 [LOG] [Engine] Initialized subsystem 'ComponentRegistry'
 [DISPLAY] [Module] Loaded 'PacManModule.dll' (2 components)
 [LOG] [Engine] Initialized subsystem 'Module'
 [LOG] [Engine] Initialized subsystem 'Scene'
-[DISPLAY] [SceneSandbox] Test scene ready (Player)
+[DISPLAY] [SceneSandbox] Sandbox 1 is active
 [LOG] [Engine] Initialized subsystem 'SceneSandbox'
+[DISPLAY] [SceneSandbox] Sandbox 2 is active
+[DISPLAY] [SceneSandbox] Sandbox 3 is active
+[DISPLAY] [SceneSandbox] Sandbox 4 is active
+[DISPLAY] [SceneSandbox] Sandbox 5 is active
+[DISPLAY] [SceneSandbox] Sandbox 5 is active
+[DISPLAY] [SceneSandbox] Sandbox 4 is active
+[DISPLAY] [SceneSandbox] Sandbox 5 is active
+[DISPLAY] [SceneSandbox] Sandbox 4 is active
+[DISPLAY] [SceneSandbox] Sandbox 5 is active
+[DISPLAY] [SceneSandbox] Sandbox 4 is active
+[DISPLAY] [SceneSandbox] Sandbox 5 is active
+[DISPLAY] [SceneSandbox] Sandbox 4 is active

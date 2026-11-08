@@ -19,10 +19,23 @@ CaledonEngine::Square::Square(const Color& color, int size, bool isFilled)
 /*------------------------------------------------------------------------------
 | --- Render: Draws the square onto the screen using the provided Renderer --- |
 ------------------------------------------------------------------------------*/
-void CaledonEngine::Square::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color) const
+void CaledonEngine::Square::Render(Renderer* pRenderer, const RectFloat& destRect, const Color& color, float rotation, const Vector2f& origin) const
 {
     if (!pRenderer)
         return;
 
-    pRenderer->DrawRect(destRect, color, m_isFilled);
+    Vector2f corners[4]
+    {
+        { destRect.m_x,                    destRect.m_y },
+        { destRect.m_x + destRect.m_width, destRect.m_y },
+        { destRect.m_x + destRect.m_width, destRect.m_y + destRect.m_height },
+        { destRect.m_x,                    destRect.m_y + destRect.m_height }
+    };
+
+    for (Vector2f& corner : corners)
+    {
+        corner = RotateAround(corner, origin, rotation);
+    }
+
+    pRenderer->DrawQuad(corners[0], corners[1], corners[2], corners[3], color, m_isFilled);
 }
