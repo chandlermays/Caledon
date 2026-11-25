@@ -4,6 +4,7 @@
 ------------------------------*/
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -17,6 +18,7 @@ namespace CaledonEngine
 	class GameObject
 	{
 	private:
+		std::uint64_t m_id;																					// The stable, unique identifier of this GameObject (never 0)
 		Scene* m_pScene;																					// Pointer to the Scene this GameObject is in
 		GameObject* m_pParent;																				// Pointer to this GameObject's parent
 		std::vector<std::unique_ptr<GameObject>> m_children;												// Vector of pointers to this GameObject's children
@@ -25,9 +27,18 @@ namespace CaledonEngine
 		std::string m_tag;																					// The tag of this GameObject
 		int m_layer;																						// The physics layer of this GameObject
 		bool m_isActive;																					// Whether this GameObject is active or not
+		bool m_isPendingDestroy;																			// Whether this GameObject is waiting to be destroyed at the end of the frame
 
 		Transform* m_pTransform;																			// Pointer to this GameObject's Transform component
 		std::vector<std::unique_ptr<Component>> m_components;												// Vector of pointers to Components attached to this GameObject
+
+		static std::uint64_t GenerateID();																	// Returns a new random, non-zero 64-bit identifier
+		void AttachChild(std::unique_ptr<GameObject> pChild);												// Takes ownership of a child (no initialization; used by AddChild, SetParent and the Scene)
+		std::unique_ptr<GameObject> ReleaseChild(GameObject* pChild);										// Hands ownership of a child to the caller without destroying it
+		std::unique_ptr<Component> ReleaseComponent(Component* pComponent);									// Hands ownership of a Component to the caller without destroying it
+		void DestroyImmediate() noexcept;																	// Destroys the children and Components right away (destructor and end-of-frame flush only)
+
+		friend class Scene;																					// The Scene moves GameObjects in and out of the hierarchy during its end-of-frame flush
 
 	public:
 		GameObject();																						// Constructor
@@ -40,15 +51,20 @@ namespace CaledonEngine
 		bool Initialize();																					// Initializes this GameObject and its components
 		void Update(float);																					// Updates this GameObject and its components
 
+		std::uint64_t GetID() const noexcept;																// Returns the stable, unique identifier of this GameObject
+		void SetID(std::uint64_t id) noexcept;																// Sets the identifier (used when loading a scene; 0 is ignored)
+
 		Scene* GetScene() const;																			// Returns a pointer to the Scene this GameObject is in
-		void SetScene(Scene* pScene);																		// Sets the Scene this GameObject is in
+		void SetScene(Scene* pScene);																		// Sets the Scene this GameObject (and its children) is in
 
 		GameObject* GetParent() const;																		// Returns a pointer to this GameObject's parent
-		void SetParent(GameObject* pParent);																// Sets the parent of this GameObject
+		bool SetParent(GameObject* pNewParent, bool worldPositionStays = true);							// Moves this GameObject under a new parent (nullptr = scene root), keeping its world pose by default
+		bool IsAncestorOf(const GameObject* pGameObject) const;												// Returns whether this GameObject is a parent, grandparent, etc. of the given one
 
 		const std::vector<std::unique_ptr<CaledonEngine::GameObject>>& GetChildren() const;					// Returns a vector of pointers to this GameObject's children
-		void AddChild(std::unique_ptr<GameObject> pChild);													// Adds a child to this GameObject
-		void RemoveChild(GameObject* pChild);																// Removes a child from this GameObject
+		GameObject* AddChild(std::unique_ptr<GameObject> pChild);											// Adds a new child (deferred to the end of the frame while its Scene is updating)
+		void DetachChildren();																				// Moves every child to the scene root, keeping their world poses (Unity's DetachChildren)
+		// Adds a new child (deferred to the end of the frame while its Scene is updating)
 
 		const std::string& GetName() const;																	// Returns the name of this GameObject
 		void SetName(const std::string& name);																// Sets the name of this GameObject
@@ -74,9 +90,10 @@ namespace CaledonEngine
 
 		const std::vector<std::unique_ptr<Component>>& GetAllComponents() const;							// Returns a vector of pointers to all Components attached to this GameObject
 		void AddComponent(std::unique_ptr<Component> pComponent);											// Adds a component to this GameObject
-		void RemoveComponent(Component* pComponent);														// Removes a component from this GameObject
+		void RemoveComponent(Component* pComponent);														// Marks a component for removal at the end of the frame (the Transform can't be removed)
 
-		void Destroy();																						// Destroys this GameObject and its components
+		void Destroy();																						// Marks this GameObject and its children for destruction at the end of the frame
+		bool IsPendingDestroy() const noexcept;																// Returns whether this GameObject (or a parent) is waiting to be destroyed
 
 		// void BroadcastMessage(method:...)																// Calls a method on every Component attached to this GameObject or any of its children
 		// void SendMessage(method:...)																		// Calls a method on every Component attached to this GameObject

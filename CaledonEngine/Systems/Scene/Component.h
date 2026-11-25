@@ -18,6 +18,9 @@ namespace CaledonEngine
 		GameObject* m_pOwner;																// Pointer to the owning GameObject
 		std::string m_id;																	// The unique identifier of the Component
 		bool m_isActive;																	// Whether the Component is active or not
+		bool m_isPendingDestroy;															// Whether the Component is waiting to be destroyed at the end of the frame
+
+		friend class GameObject;															// Marks the Component for destruction (GameObject::RemoveComponent)
 
 	public:
 		Component();																		// Constructor
@@ -47,6 +50,7 @@ namespace CaledonEngine
 
 		bool IsActive() const;																// Returns whether the Component is active or not
 		void SetActive(bool isActive);														// Sets whether the Component is active or not
+		bool IsPendingDestroy() const;														// Returns whether the Component (or its GameObject) is waiting to be destroyed
 
 		template<typename T> T* GetComponent() const;										// Returns a reference to a component of type T attached to the same GameObject
 		template<typename T> T* GetComponentInChildren() const;								// Returns a reference to a component of type T attached to same GameObject, or any of its children

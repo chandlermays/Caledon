@@ -4,6 +4,8 @@
 ------------------------------*/
 #include "Component.h"
 
+#include "Systems/Scene/GameObject.h"
+
 /*---------------------------------------------------------------------------------------------------------------
 | --- NOTE: If this class has nothing more than one-line defintions, consider making it a header-only class --- |
 ---------------------------------------------------------------------------------------------------------------*/
@@ -16,7 +18,9 @@
 CaledonEngine::Component::Component()
 	: m_pOwner{ nullptr }
 	, m_isActive{ true }
-{ }
+	, m_isPendingDestroy{ false }
+{
+}
 
 /*-----------------------------------------------------------
 | --- GetOwner: Gets a pointer to the owning GameObject --- |
@@ -64,4 +68,12 @@ bool CaledonEngine::Component::IsActive() const
 void CaledonEngine::Component::SetActive(bool isActive)
 {
 	m_isActive = isActive;
+}
+
+/*--------------------------------------------------------------------------------------------------------
+| --- IsPendingDestroy: Returns whether the Component (or its GameObject) is waiting to be destroyed --- |
+--------------------------------------------------------------------------------------------------------*/
+bool CaledonEngine::Component::IsPendingDestroy() const
+{
+	return m_isPendingDestroy || (m_pOwner != nullptr && m_pOwner->IsPendingDestroy());
 }

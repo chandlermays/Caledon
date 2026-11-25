@@ -32,7 +32,8 @@ CaledonEngine::RenderingSubsystem::RenderingSubsystem()
 	, m_pContext{ nullptr }
 	, m_pScenes{ nullptr }
 	, m_pRenderTarget{ nullptr }
-{ }
+{
+}
 
 /*-----------------------------------------------------------------------------
 | --- Destructor: Defined here so Renderer can stay a forward declaration --- |
@@ -195,13 +196,14 @@ CaledonEngine::Renderer* CaledonEngine::RenderingSubsystem::GetRenderer() const 
 ---------------------------------------------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::CacheSprites(const GameObject& gameObject)
 {
-	if (!gameObject.IsActive())
+	// A GameObject waiting to be destroyed (and so its children) is no longer drawn
+	if (!gameObject.IsActive() || gameObject.IsPendingDestroy())
 		return;
 
 	for (const auto& pComponent : gameObject.GetAllComponents())
 	{
 		const SpriteComponent* pSprite = dynamic_cast<const SpriteComponent*>(pComponent.get());
-		if (pSprite && pSprite->IsActive() && pSprite->GetSprite())
+		if (pSprite && pSprite->IsActive() && !pSprite->IsPendingDestroy() && pSprite->GetSprite())
 		{
 			m_drawList.push_back(pSprite);
 		}

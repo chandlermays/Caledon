@@ -18,7 +18,8 @@ CaledonEngine::SceneSubsystem::SceneSubsystem()
 	: m_pCurrentScene{ nullptr }
 	, m_pContext{ nullptr }
 	, m_pPhysics2D{ nullptr }
-{ }
+{
+}
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -37,7 +38,7 @@ std::string_view CaledonEngine::SceneSubsystem::Name() const noexcept
 }
 
 /*------------------------------------------------------------------------
-| --- Initialize: 
+| --- Initialize:
 ------------------------------------------------------------------------*/
 bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
@@ -62,14 +63,24 @@ void CaledonEngine::SceneSubsystem::Shutdown() noexcept
 	m_pPhysics2D = nullptr;
 }
 
-/*------------------------------------------------------------------------
-| --- Update:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------------------------
+| --- Update: Updates the current Scene, then flushes every Scene's queued adds and destructions. --- |
+| ---         The flush runs every frame even when the Scene isn't updated (Stage 5h's Edit and   --- |
+| ---         Paused modes will gate only the Update), so the Editor's deletions still go through --- |
+-----------------------------------------------------------------------------------------------------*/
 void CaledonEngine::SceneSubsystem::Update(float deltaTime)
 {
 	if (m_pCurrentScene != nullptr && m_pCurrentScene->IsActive())
 	{
 		m_pCurrentScene->Update(deltaTime);
+	}
+
+	for (const auto& pScene : m_pScenes)
+	{
+		if (pScene)
+		{
+			pScene->FlushPendingChanges();
+		}
 	}
 }
 
@@ -97,7 +108,7 @@ bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 	{
 		m_pCurrentScene = pScene.get();
 	}
-		
+
 	m_pScenes.emplace_back(std::move(pScene));
 	return true;
 }

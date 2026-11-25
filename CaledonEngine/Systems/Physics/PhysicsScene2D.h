@@ -33,6 +33,8 @@ namespace CaledonEngine
 	private:
 		std::vector<Collider2D*> m_registeredColliders;																											// Collection of all active Collider2Ds registered to this PhysicsScene2D
 		std::vector<RigidBody2D*> m_registeredBodies;																											// Collection of all active RigidBody2Ds registered to this PhysicsScene2D
+		std::vector<Collider2D*> m_pendingColliders;																											// Collider2Ds added during a step (e.g. from a collision callback), registered when the step ends
+		std::vector<RigidBody2D*> m_pendingBodies;																												// RigidBody2Ds added during a step, registered when the step ends
 
 		std::vector<Contact2D> m_contacts;																														// The contacts of the latest step (solid contacts and trigger overlaps), ordered by collider registration order
 		std::vector<Contact2D> m_endedContacts;																													// The contacts that existed in the step before but not in the latest one
@@ -45,7 +47,9 @@ namespace CaledonEngine
 		int m_subStepCount;																																		// The number of simulation sub-steps that occurred during the last physics step
 		float m_subStepLostTime;																																// The amount of simulation time lost due to hitting the max allowed sub-steps
 		bool m_isValid;																																			// Indicates whether this PhysicsScene2D is valid and operational
+		bool m_isStepping;																																		// Whether Simulate is running (its lists must not change until it ends)
 
+		void RegisterPending();																																	// Registers the Collider2Ds and RigidBody2Ds that were added during the step
 		bool IsRegistered(const Collider2D* pCollider) const;																									// Returns whether the given Collider2D is registered to this PhysicsScene2D
 		void UpdateContacts(int simulationLayers);																												// Finds which shapes touch (brute force) and compares them with the previous step so contacts begin, persist or end
 		void WakeTouchingBodies();																																// Wakes the bodies that just lost a contact and any sleeping body that an awake body is touching
@@ -69,17 +73,17 @@ namespace CaledonEngine
 		PhysicsScene2D(PhysicsScene2D&&) = delete;																												// Prevent move-construction
 		PhysicsScene2D& operator=(PhysicsScene2D&&) = delete;																									// Prevent move-assignment
 
-		const Physics2DSettings& GetSettings() const noexcept				{ return *m_pSettings; }															// Returns the shared physics settings this PhysicsScene2D simulates with
+		const Physics2DSettings& GetSettings() const noexcept { return *m_pSettings; }															// Returns the shared physics settings this PhysicsScene2D simulates with
 
-		int GetSubStepCount() const noexcept								{ return m_subStepCount; }															// Returns the number of simulation sub-steps from the last step
-		float GetSubStepLostTime() const noexcept							{ return m_subStepLostTime; }														// Returns the amount of simulation time lost during sub-stepping
+		int GetSubStepCount() const noexcept { return m_subStepCount; }															// Returns the number of simulation sub-steps from the last step
+		float GetSubStepLostTime() const noexcept { return m_subStepLostTime; }														// Returns the amount of simulation time lost during sub-stepping
 
-		int GetColliderCount() const noexcept								{ return static_cast<int>(m_registeredColliders.size()); }							// Returns the total number of registered Collider2D in this PhysicsScene2D
-		int GetBodyCount() const noexcept									{ return static_cast<int>(m_registeredBodies.size()); }								// Returns the total number of registered RigidBody2D in this PhysicsScene2D
+		int GetColliderCount() const noexcept { return static_cast<int>(m_registeredColliders.size()); }							// Returns the total number of registered Collider2D in this PhysicsScene2D
+		int GetBodyCount() const noexcept { return static_cast<int>(m_registeredBodies.size()); }								// Returns the total number of registered RigidBody2D in this PhysicsScene2D
 
-		bool IsEmpty() const noexcept										{ return m_registeredColliders.empty() && m_registeredBodies.empty(); }				// Checks whether this PhysicsScene2D contains any Collider2D or RigidBody2D
-		bool IsValid() const noexcept										{ return m_isValid; }																// Checks whether this PhysicsScene2D is valid and active
-		void Invalidate() noexcept											{ m_isValid = false; }																// Marks this PhysicsScene2D as invalid
+		bool IsEmpty() const noexcept { return m_registeredColliders.empty() && m_registeredBodies.empty(); }				// Checks whether this PhysicsScene2D contains any Collider2D or RigidBody2D
+		bool IsValid() const noexcept { return m_isValid; }																// Checks whether this PhysicsScene2D is valid and active
+		void Invalidate() noexcept { m_isValid = false; }																// Marks this PhysicsScene2D as invalid
 
 		bool AddCollider(Collider2D* pCollider);																												// Adds a Collider2D to this PhysicsScene2D
 		bool RemoveCollider(Collider2D* pCollider);																												// Removes a Collider2D from this PhysicsScene2D
@@ -90,8 +94,8 @@ namespace CaledonEngine
 		bool GetIgnoreCollision(const Collider2D* pCollider1, const Collider2D* pCollider2) const;																// Checks whether collision between two Collider2D are to be ignored
 		void SetIgnoreCollision(Collider2D* pCollider1, Collider2D* pCollider2, bool ignore = true);															// Sets a collision between two Collider2D to be ignored (or not)
 
-		const std::vector<Contact2D>& GetContactList() const noexcept		{ return m_contacts; }																// Returns all of the Contact2D of the latest step
-		const std::vector<Contact2D>& GetEndedContacts() const noexcept		{ return m_endedContacts; }															// Returns all of the Contact2D that ended in the latest step
+		const std::vector<Contact2D>& GetContactList() const noexcept { return m_contacts; }																// Returns all of the Contact2D of the latest step
+		const std::vector<Contact2D>& GetEndedContacts() const noexcept { return m_endedContacts; }															// Returns all of the Contact2D that ended in the latest step
 
 		int GetContacts(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::span<ContactPoint2D> contacts) const;							// Retrieves all of the ContactPoint2D with the given Collider2D, with the results filtered by the ContactFilter2D
 		int GetContactColliders(const Collider2D* pCollider, const ContactFilter2D& contactFilter, std::vector<Collider2D*>& results) const;					// Retrieves all of the unique Collider2D in contact with the given Collider2D, with the results filtered by the ContactFilter2D
@@ -246,7 +250,7 @@ namespace CaledonEngine
 
 		Vector2f ClosestPoint(const Vector2f& position, const Collider2D* pCollider) const;																// Returns a point on the perimeter of the given Collider2D that is closest to the specified position
 		ColliderDistance2D Distance(const Collider2D* pColliderA, const Collider2D* pColliderB) const;													// Calculates the minimum distance between two Collider2D
-		
+
 		void SyncTransforms();																															// Pushes the Transform poses of all registered bodies into the physics bodies
 		bool Simulate(float deltaTime, int simulationLayers = Physics2DConstants::kAllLayers);															// Simulate physics associated with this PhysicsScene2D
 	};

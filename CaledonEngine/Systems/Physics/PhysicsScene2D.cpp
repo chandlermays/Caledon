@@ -440,6 +440,7 @@ PhysicsScene2D::PhysicsScene2D(const Physics2DSettings& settings)
 	, m_subStepCount{ 0 }
 	, m_subStepLostTime{ 0.0f }
 	, m_isValid{ true }
+	, m_isStepping{ false }
 {
 }
 
@@ -454,6 +455,16 @@ bool PhysicsScene2D::AddCollider(Collider2D* pCollider)
 	if (std::find(m_registeredColliders.begin(), m_registeredColliders.end(), pCollider) != m_registeredColliders.end())
 		return false;
 
+	// During a step the lists are being walked, so a collider added by a callback waits until the step ends
+	if (m_isStepping)
+	{
+		if (std::find(m_pendingColliders.begin(), m_pendingColliders.end(), pCollider) != m_pendingColliders.end())
+			return false;
+
+		m_pendingColliders.push_back(pCollider);
+		return true;
+	}
+
 	m_registeredColliders.push_back(pCollider);
 	return true;
 }
@@ -463,6 +474,13 @@ bool PhysicsScene2D::AddCollider(Collider2D* pCollider)
 -----------------------------------------------------------------------*/
 bool PhysicsScene2D::RemoveCollider(Collider2D* pCollider)
 {
+	const auto pendingIt = std::find(m_pendingColliders.begin(), m_pendingColliders.end(), pCollider);
+	if (pendingIt != m_pendingColliders.end())
+	{
+		m_pendingColliders.erase(pendingIt);
+		return true;
+	}
+
 	const auto it = std::find(m_registeredColliders.begin(), m_registeredColliders.end(), pCollider);
 	if (it == m_registeredColliders.end())
 		return false;
@@ -502,6 +520,16 @@ bool PhysicsScene2D::AddRigidBody2D(RigidBody2D* pRigidBody2D)
 	if (std::find(m_registeredBodies.begin(), m_registeredBodies.end(), pRigidBody2D) != m_registeredBodies.end())
 		return false;
 
+	// During a step the lists are being walked, so a body added by a callback waits until the step ends
+	if (m_isStepping)
+	{
+		if (std::find(m_pendingBodies.begin(), m_pendingBodies.end(), pRigidBody2D) != m_pendingBodies.end())
+			return false;
+
+		m_pendingBodies.push_back(pRigidBody2D);
+		return true;
+	}
+
 	m_registeredBodies.push_back(pRigidBody2D);
 	return true;
 }
@@ -511,6 +539,13 @@ bool PhysicsScene2D::AddRigidBody2D(RigidBody2D* pRigidBody2D)
 ---------------------------------------------------------------------------*/
 bool PhysicsScene2D::RemoveRigidBody2D(RigidBody2D* pRigidBody2D)
 {
+	const auto pendingIt = std::find(m_pendingBodies.begin(), m_pendingBodies.end(), pRigidBody2D);
+	if (pendingIt != m_pendingBodies.end())
+	{
+		m_pendingBodies.erase(pendingIt);
+		return true;
+	}
+
 	const auto it = std::find(m_registeredBodies.begin(), m_registeredBodies.end(), pRigidBody2D);
 	if (it == m_registeredBodies.end())
 		return false;
@@ -672,9 +707,9 @@ bool PhysicsScene2D::IsTouchingLayers(LayerMask layerMask) const
 	return IsTouching(filter);
 }
 
-/*----------------------------------------------------------------------------------------------------------
+/*---------------------------------------------------------------------------------------------------------
 | --- BoxCast: Returns all intersections of a casted Box against the Collider2D in this PhysicsScene2D --- |
-----------------------------------------------------------------------------------------------------------*/
+---------------------------------------------------------------------------------------------------------*/
 std::vector<ColliderHit2D> PhysicsScene2D::BoxCast(const Vector2f& origin, const Vector2f& size, float angle, const Vector2f& direction, const ContactFilter2D& contactFilter, float distance) const
 {
 	PhysicsShapeGroup2D boxGroup;
@@ -1161,6 +1196,9 @@ bool PhysicsScene2D::Simulate(float deltaTime, int simulationLayers)
 	if (!m_isValid || !(deltaTime > 0.0f) || !std::isfinite(deltaTime))
 		return false;
 
+	// Until the step ends (including the callbacks), anything added is queued instead of changing the lists being walked
+	m_isStepping = true;
+
 	SyncTransforms();
 	UpdateContacts(simulationLayers);
 	WakeTouchingBodies();
@@ -1240,7 +1278,30 @@ bool PhysicsScene2D::Simulate(float deltaTime, int simulationLayers)
 	}
 
 	DispatchContactEvents();
+
+	m_isStepping = false;
+	RegisterPending();
 	return true;
+}
+
+/*-----------------------------------------------------------------------------------------------------
+| --- RegisterPending: Registers the Collider2Ds and RigidBody2Ds that were added during the step --- |
+-----------------------------------------------------------------------------------------------------*/
+void PhysicsScene2D::RegisterPending()
+{
+	std::vector<RigidBody2D*> pendingBodies = std::move(m_pendingBodies);
+	m_pendingBodies.clear();
+	for (RigidBody2D* pBody : pendingBodies)
+	{
+		AddRigidBody2D(pBody);
+	}
+
+	std::vector<Collider2D*> pendingColliders = std::move(m_pendingColliders);
+	m_pendingColliders.clear();
+	for (Collider2D* pCollider : pendingColliders)
+	{
+		AddCollider(pCollider);
+	}
 }
 
 
