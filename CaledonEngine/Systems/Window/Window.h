@@ -3,6 +3,8 @@
 | Author: Chandler Mays
 ------------------------------*/
 #pragma once
+#include "Systems/Window/WindowConfig.h"
+
 #include <string>
 
 namespace CaledonEngine
@@ -14,13 +16,13 @@ namespace CaledonEngine
 		int m_width;															// The width of the window
 		int m_height;															// The height of the window
 		bool m_isFullscreen;													// Flag to indicate if the window is in fullscreen mode
+		bool m_isResizable;														// Flag to indicate if the user can resize the window
 		bool m_isFocused;														// Flag to indicate if the window is focused
 		bool m_isMinimized;														// Flag to indicate if the window is minimized
 		std::string m_lastError;												//
 
 	public:
-		Window(const std::string& title = "Caledon Engine",
-			int width = 1280, int height = 720, bool isFullscreen = false);		// Constructor
+		explicit Window(const WindowConfig& config = WindowConfig{});			// Constructor
 
 		virtual ~Window() = default;											// Destructor
 		Window(const Window&) = delete;											// Prevent copy-construction
@@ -43,6 +45,7 @@ namespace CaledonEngine
 		virtual int GetWidth() const;											// Returns the width of the window
 		virtual int GetHeight() const;											// Returns the height of the window
 		virtual bool IsFullscreen() const;										// Checks if the window is in fullscreen mode
+		bool IsResizable() const;												// Checks if the user can resize the window
 		virtual bool IsFocused() const;											// Checks if the window is focused
 		virtual bool IsMinimized() const;										// Checks if the window is minimized
 		const std::string& GetLastError() const;								//

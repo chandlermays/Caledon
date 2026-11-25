@@ -107,6 +107,7 @@
     <ClInclude Include="Systems\Scene\SceneSubsystem.h" />
     <ClInclude Include="Systems\Scene\Transform.h" />
     <ClInclude Include="Systems\Window\Window.h" />
+    <ClInclude Include="Systems\Window\WindowConfig.h" />
     <ClInclude Include="Systems\Window\WindowSubsystem.h" />
     <ClInclude Include="Utilities\Geometry\AABB2D.h" />
     <ClInclude Include="Utilities\Geometry\Rect.h" />

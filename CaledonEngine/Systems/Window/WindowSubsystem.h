@@ -4,6 +4,7 @@
 ------------------------------*/
 #pragma once
 #include "Systems/Engine/ISubsystem.h"
+#include "Systems/Window/WindowConfig.h"
 
 #include <memory>
 #include <string_view>
@@ -16,12 +17,13 @@ namespace CaledonEngine
 	class WindowSubsystem final : public ISubsystem
 	{
 	private:
+		WindowConfig m_config;															// How the window is opened
 		std::unique_ptr<Window> m_pWindowAPI;											// The Platform Backend Window
 
 	public:
 		static constexpr std::string_view kName = "Window";								//
 
-		WindowSubsystem();																// Constructor
+		explicit WindowSubsystem(const WindowConfig& config = WindowConfig{});			// Constructor
 		~WindowSubsystem() override;													// Destructor
 
 		std::string_view Name() const noexcept override;								//

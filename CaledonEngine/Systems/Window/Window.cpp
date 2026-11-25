@@ -10,15 +10,17 @@
 /*----------------------------------------------------------------
 | --- Constructor: Constructs the Window with default values --- |
 ----------------------------------------------------------------*/
-CaledonEngine::Window::Window(const std::string& title, int width, int height, bool isFullscreen)
-	: m_title{ title }
-	, m_width{ width }
-	, m_height{ height }
-	, m_isFullscreen{ isFullscreen }
+CaledonEngine::Window::Window(const WindowConfig& config)
+	: m_title{ config.title }
+	, m_width{ config.width }
+	, m_height{ config.height }
+	, m_isFullscreen{ config.isFullscreen }
+	, m_isResizable{ config.isResizable }
 	, m_isFocused{ true }
 	, m_isMinimized{ false }
 	, m_lastError{ }
-{ }
+{
+}
 
 /*---------------------------------------------------
 | --- GetTitle: Returns the title of the window --- |
@@ -52,6 +54,14 @@ bool CaledonEngine::Window::IsFullscreen() const
 	return m_isFullscreen;
 }
 
+/*---------------------------------------------------------------
+| --- IsResizable: Checks if the user can resize the window --- |
+---------------------------------------------------------------*/
+bool CaledonEngine::Window::IsResizable() const
+{
+	return m_isResizable;
+}
+
 /*----------------------------------------------------
 | --- IsFocused: Checks if the window is focused --- |
 ----------------------------------------------------*/
@@ -69,7 +79,7 @@ bool CaledonEngine::Window::IsMinimized() const
 }
 
 /*----------------------------------------------------------------------
-| --- GetLastError: 
+| --- GetLastError:
 ----------------------------------------------------------------------*/
 const std::string& CaledonEngine::Window::GetLastError() const
 {

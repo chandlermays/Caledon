@@ -17,9 +17,11 @@
 /*------------------------------------------------------------------------
 | --- Constructor: Constructs the WindowSubsystem with no window yet --- |
 ------------------------------------------------------------------------*/
-CaledonEngine::WindowSubsystem::WindowSubsystem()
-	: m_pWindowAPI{ nullptr }
-{ }
+CaledonEngine::WindowSubsystem::WindowSubsystem(const WindowConfig& config)
+	: m_config{ config }
+	, m_pWindowAPI{ nullptr }
+{
+}
 
 /*---------------------------------------------------------------------------
 | --- Destructor: Defined here so Window can stay a forward declaration --- |
@@ -40,7 +42,7 @@ std::string_view CaledonEngine::WindowSubsystem::Name() const noexcept
 bool CaledonEngine::WindowSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
 	// Only keep the window once it has fully opened, so a failure leaves nothing behind.
-	std::unique_ptr<Window> pWindowAPI = std::make_unique<SDLWindow>();
+	std::unique_ptr<Window> pWindowAPI = std::make_unique<SDLWindow>(m_config);
 	if (!pWindowAPI->Initialize())
 	{
 		CE_LOG(context, LogLevel::Error, "Window", std::format("Window failed to open: {}", pWindowAPI->GetLastError()));

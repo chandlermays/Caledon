@@ -15,7 +15,7 @@ namespace CaledonEngine
 		SDL_Window* m_pWindow;												// Pointer to the SDL Window
 
 	public:
-		SDLWindow();														// Constructor
+		explicit SDLWindow(const WindowConfig& config = WindowConfig{});	// Constructor
 		~SDLWindow() override;												// Destructor
 		SDLWindow(const SDLWindow&) = delete;								// Prevent copy-construction
 		SDLWindow& operator=(const SDLWindow&) = delete;					// Prevent copy-assignment
@@ -32,5 +32,8 @@ namespace CaledonEngine
 		void Hide() override;												// Hides the window
 
 		void* GetNativeHandle() const override;								// Returns the native window handle
+
+		int GetWidth() const override;										// Returns the current width of the window (it can be resized)
+		int GetHeight() const override;										// Returns the current height of the window (it can be resized)
 	};
 }

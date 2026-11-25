@@ -12,8 +12,9 @@
 /*----------------------------------------------------------------------
 | --- Constructor: Constructs the 'SDL' Window with default values --- |
 ----------------------------------------------------------------------*/
-CaledonEngine::SDLWindow::SDLWindow()
-	: m_pWindow{ nullptr }
+CaledonEngine::SDLWindow::SDLWindow(const WindowConfig& config)
+	: Window{ config }
+	, m_pWindow{ nullptr }
 {
 }
 
@@ -43,6 +44,10 @@ bool CaledonEngine::SDLWindow::Initialize()
 	if (m_isFullscreen)
 	{
 		windowFlags |= SDL_WINDOW_FULLSCREEN;
+	}
+	if (m_isResizable)
+	{
+		windowFlags |= SDL_WINDOW_RESIZABLE;
 	}
 
 	m_pWindow = SDL_CreateWindow(m_title.c_str(), m_width, m_height, windowFlags);
@@ -145,4 +150,32 @@ void CaledonEngine::SDLWindow::Hide()
 void* CaledonEngine::SDLWindow::GetNativeHandle() const
 {
 	return static_cast<void*>(m_pWindow);
+}
+
+/*-----------------------------------------------------------------------------------------
+| --- GetWidth: Returns the current width of the window. It is read from SDL, because --- |
+| ---           the user can resize the window and the cached size would go stale     --- |
+-----------------------------------------------------------------------------------------*/
+int CaledonEngine::SDLWindow::GetWidth() const
+{
+	if (!m_pWindow)
+		return m_width;
+
+	int width = 0;
+	SDL_GetWindowSize(m_pWindow, &width, nullptr);
+	return width;
+}
+
+/*-------------------------------------------------------------------------------------------
+| --- GetHeight: Returns the current height of the window. It is read from SDL, because --- |
+| ---            the user can resize the window and the cached size would go stale      --- |
+-------------------------------------------------------------------------------------------*/
+int CaledonEngine::SDLWindow::GetHeight() const
+{
+	if (!m_pWindow)
+		return m_height;
+
+	int height = 0;
+	SDL_GetWindowSize(m_pWindow, nullptr, &height);
+	return height;
 }

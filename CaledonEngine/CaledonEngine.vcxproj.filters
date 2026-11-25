@@ -358,6 +358,9 @@
     <ClInclude Include="Systems\Physics\Types\BodySlide2D.h">
       <Filter>Source Files\Systems\Physics\Types</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\Window\WindowConfig.h">
+      <Filter>Source Files\Systems\Window</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Systems\Engine\EngineManager.cpp">

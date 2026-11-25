@@ -1,0 +1,19 @@
+[LOG] [Engine] Initialized subsystem 'Logging'
+[DISPLAY] [Window] Opened window 'Caledon Editor' (1600x900)
+[LOG] [Engine] Initialized subsystem 'Window'
+[LOG] [Engine] Initialized subsystem 'Input'
+[DISPLAY] [Rendering] Renderer started (SDL)
+[LOG] [Engine] Initialized subsystem 'Rendering'
+[LOG] [Engine] Initialized subsystem 'Physics2D'
+[LOG] [Engine] Initialized subsystem 'ComponentRegistry'
+[LOG] [Engine] Initialized subsystem 'Scene'
+[DISPLAY] [Editor] Editor ready (ImGui 1.93.0 WIP)
+[LOG] [Engine] Initialized subsystem 'Editor'
+[LOG] [Engine] Shutting down subsystem 'Editor'
+[LOG] [Engine] Shutting down subsystem 'Scene'
+[LOG] [Engine] Shutting down subsystem 'ComponentRegistry'
+[LOG] [Engine] Shutting down subsystem 'Physics2D'
+[LOG] [Engine] Shutting down subsystem 'Rendering'
+[LOG] [Engine] Shutting down subsystem 'Input'
+[LOG] [Engine] Shutting down subsystem 'Window'
+[LOG] [Engine] Shutting down subsystem 'Logging'
