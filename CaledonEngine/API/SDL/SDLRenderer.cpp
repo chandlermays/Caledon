@@ -35,6 +35,7 @@ CaledonEngine::SDLRenderer::~SDLRenderer()
 ---------------------------------------------------------*/
 bool CaledonEngine::SDLRenderer::Initialize(Window* pWindow)
 {
+	// Resolve the engine window to the SDL handle required by the renderer.
 	if (!pWindow)
 		return false;
 
@@ -42,6 +43,7 @@ bool CaledonEngine::SDLRenderer::Initialize(Window* pWindow)
 	if (!pSDLWindow)
 		return false;
 
+	// Create the renderer only after confirming the native window is available.
 	m_pRenderer = SDL_CreateRenderer(pSDLWindow, NULL);
 	if (!m_pRenderer)
 		return false;
@@ -57,6 +59,7 @@ void CaledonEngine::SDLRenderer::Shutdown() noexcept
 	if (!m_pRenderer)
 		return;
 
+	// Release the SDL resource and clear the handle to make shutdown idempotent.
 	SDL_DestroyRenderer(m_pRenderer);
 	m_pRenderer = nullptr;
 }
@@ -69,6 +72,7 @@ void CaledonEngine::SDLRenderer::Clear()
 	if (!m_pRenderer)
 		return;
 
+	// Clear the current render target to opaque black.
 	SDL_SetRenderDrawColor(m_pRenderer, 0, 0, 0, 255);
 	SDL_RenderClear(m_pRenderer);
 }
@@ -100,11 +104,14 @@ std::shared_ptr<CaledonEngine::Texture> CaledonEngine::SDLRenderer::CreateRender
 	if (!m_pRenderer || width <= 0 || height <= 0)
 		return nullptr;
 
+	// Target textures can be drawn to as well as sampled by later render calls.
 	SDL_Texture* pSDLTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
 	if (!pSDLTexture)
 		return nullptr;
 
 	auto pTexture = std::make_shared<SDLTexture>();
+
+	// Transfer ownership to the engine wrapper, releasing the SDL texture if wrapping fails.
 	if (!pTexture->Load(pSDLTexture, width, height))
 	{
 		SDL_DestroyTexture(pSDLTexture);
@@ -122,6 +129,7 @@ void CaledonEngine::SDLRenderer::SetRenderTarget(Texture* pTarget)
 	if (!m_pRenderer)
 		return;
 
+	// A null target selects the window backbuffer.
 	SDL_Texture* pSDLTexture = pTarget ? static_cast<SDL_Texture*>(pTarget->GetNativeHandle()) : nullptr;
 	SDL_SetRenderTarget(m_pRenderer, pSDLTexture);
 }
@@ -137,6 +145,8 @@ void CaledonEngine::SDLRenderer::RenderTexture(Texture* pTexture, RectInt* pSrc,
 	SDL_Texture* pSDLTexture = static_cast<SDL_Texture*>(pTexture->GetNativeHandle());
 	SDL_FRect srcRect;
 	SDL_FRect destRect;
+
+	// Convert the optional source region to SDL's floating-point rectangle format.
 	if (pSrc)
 	{
 		srcRect.x = static_cast<float>(pSrc->m_x);
@@ -145,6 +155,7 @@ void CaledonEngine::SDLRenderer::RenderTexture(Texture* pTexture, RectInt* pSrc,
 		srcRect.h = static_cast<float>(pSrc->m_height);
 	}
 
+	// Copy the destination rectangle without changing its floating-point coordinates.
 	destRect.x = pDest->m_x;
 	destRect.y = pDest->m_y;
 	destRect.w = pDest->m_width;
@@ -165,11 +176,14 @@ std::shared_ptr<CaledonEngine::Texture> CaledonEngine::SDLRenderer::CreateTextur
 	if (!pSurface)
 		return nullptr;
 
+	// SDL creates a renderer-compatible texture from the image's native surface.
 	SDL_Texture* pSDLTexture = SDL_CreateTextureFromSurface(m_pRenderer, pSurface);
 	if (!pSDLTexture)
 		return nullptr;
 
 	auto pTexture = std::make_shared<SDLTexture>();
+
+	// Preserve the source dimensions in the engine texture wrapper.
 	if (!pTexture->Load(pSDLTexture, pSurface->w, pSurface->h))
 	{
 		SDL_DestroyTexture(pSDLTexture);
@@ -203,7 +217,6 @@ void CaledonEngine::SDLRenderer::SetTextureAlphaMod(Texture* pTexture, uint8_t a
 	SDL_SetTextureAlphaMod(pSDLTexture, a);
 }
 
-
 /*---------------------------------------------------
 | --- DrawRect: Draws a rectangle to the screen --- |
 ---------------------------------------------------*/
@@ -212,8 +225,10 @@ void CaledonEngine::SDLRenderer::DrawRect(const RectFloat& rect, const Color& co
 	if (!m_pRenderer)
 		return;
 
+	// SDL keeps draw color as renderer state, so set it before drawing.
 	SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
 
+	// Convert the engine rectangle to SDL's floating-point drawing format.
 	SDL_FRect sdlRect
 	{
 		rect.m_x,
@@ -242,6 +257,8 @@ void CaledonEngine::SDLRenderer::DrawCircle(float centerX, float centerY, float 
 
 	SDL_SetRenderDrawColor(m_pRenderer, color.r, color.g, color.b, color.a);
 
+	// Midpoint-circle stepping plots symmetric points while moving from the right edge
+	// toward the top; filled circles use the same steps to draw horizontal spans.
 	float x = radius;
 	float y = 0;
 	float err = 0;
@@ -312,6 +329,7 @@ void CaledonEngine::SDLRenderer::DrawTriangle(const Vector2f& v1, const Vector2f
 
 	if (filled)
 	{
+		// Scan each row and find its left and right intersections with the triangle edges.
 		int minY = static_cast<int>(std::min({ v1.y, v2.y, v3.y }));
 		int maxY = static_cast<int>(std::max({ v1.y, v2.y, v3.y }));
 
@@ -326,6 +344,7 @@ void CaledonEngine::SDLRenderer::DrawTriangle(const Vector2f& v1, const Vector2f
 				{
 					if ((p1.y <= fy && p2.y >= fy) || (p2.y <= fy && p1.y >= fy))
 					{
+						// Horizontal edges have no unique x-intersection with a scanline.
 						if (p2.y != p1.y)
 						{
 							float x = p1.x + (fy - p1.y) * (p2.x - p1.x) / (p2.y - p1.y);
@@ -342,12 +361,14 @@ void CaledonEngine::SDLRenderer::DrawTriangle(const Vector2f& v1, const Vector2f
 
 			if (foundEdge)
 			{
+				// The intersections bound the horizontal span inside this row.
 				SDL_RenderLine(m_pRenderer, minX, fy, maxX, fy);
 			}
 		}
 	}
 	else
 	{
+		// An outline is the three edges joining the supplied vertices.
 		SDL_RenderLine(m_pRenderer, v1.x, v1.y, v2.x, v2.y);
 		SDL_RenderLine(m_pRenderer, v2.x, v2.y, v3.x, v3.y);
 		SDL_RenderLine(m_pRenderer, v3.x, v3.y, v1.x, v1.y);
@@ -392,8 +413,10 @@ void CaledonEngine::SDLRenderer::DrawCapsule(const Vector2f& a, const Vector2f& 
 
 	// Body between the caps: offset the segment sideways by the radius (perpendicular to its direction)
 	const Vector2f side = (b - a).Normalized().Perpendicular() * radius;
+
+	// Both caps sit on the same point, so the capsule is just a circle
 	if (side.SqrMagnitude() == 0.0f)
-		return;																		// Both caps sit on the same point, so the capsule is just a circle
+		return;
 
 	if (filled)
 	{

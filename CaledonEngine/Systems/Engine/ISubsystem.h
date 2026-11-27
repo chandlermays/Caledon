@@ -5,18 +5,13 @@
 #pragma once
 #include <string_view>
 
-/*---------------------------------------------------------------------------------------------
-| ISubsystem: A unit of engine functionality with an explicit, deterministic lifecycle.
-|
-| Contract (enforced by EngineManager):
-| - Initialize() is called once, in registration order. Subsystems registered earlier are
-|   already initialized and can be found through the context; later ones are not visible yet.
-| - If Initialize() returns false it must leave nothing behind: Shutdown() is NOT called for a
-|   subsystem whose Initialize() failed.
-| - Shutdown() is called once, in exact reverse order, and only for initialized subsystems.
-|   It must not throw.
-| - Name() must be unique and stable. It is the lookup key behind EngineContext::Get<T>().
----------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------------
+| --- ISubsystem:    Defines the contract and deterministic lifecycle for engine subsystems.    --- |
+| ---                EngineManager initializes them in registration order and shuts them        --- |
+| ---                down in reverse order. Failed initialization must clean up itself;         --- |
+| ---                only successfully initialized subsystems are shut down. Name must be       --- |
+| ---                unique and stable for lookup through EngineContext.                        --- |
+---------------------------------------------------------------------------------------------------*/
 
 namespace CaledonEngine
 {
@@ -25,7 +20,7 @@ namespace CaledonEngine
 	class ISubsystem
 	{
 	protected:
-		ISubsystem() = default;												// Constructor (derived classes only)
+		ISubsystem() = default;												// Constructor
 
 	public:
 		virtual ~ISubsystem() = default;									// Destructor

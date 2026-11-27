@@ -17,16 +17,11 @@ namespace CaledonEngine
 	class EngineManager;
 
 	/*-----------------------------------------------------------------------------------------------
-	| EngineContext: The single handle through which subsystems (and later, game modules) reach the
-	| engine. It replaces global/singleton access.
-	|
-	| Why this exists: CaledonEngine is a static library, so every binary that links it (Editor, Game,
-	| Game Module .dll) gets its OWN copy of any global or function-local static. A singleton reached
-	| from a module would be a different, empty object. Passing the context in explicitly means every
-	| binary talks to the one instance the host created.
-	|
-	| Lookup is by subsystem name (a string), not by RTTI or per-type static IDs, because both of
-	| those are per-binary state and can disagree across a DLL boundary.
+	| --- EngineContext: Gives subsystems and game modules one explicit handle to the engine.  	--- |
+	| ---                This avoids global/singleton state, which is duplicated when           --- |
+	| ---                CaledonEngine is linked as a static library into multiple binaries.   	--- |
+	| ---                Subsystems are looked up by name, not RTTI or per-type static IDs,    	--- |
+	| ---                since those may differ across DLL boundaries.                         	--- |
 	-----------------------------------------------------------------------------------------------*/
 	class EngineContext
 	{
@@ -58,7 +53,9 @@ namespace CaledonEngine
 
 		ISubsystem* FindSubsystem(std::string_view name) const noexcept;	// Returns the published subsystem with the given name, or nullptr
 
-		// Typed lookup. T must derive from ISubsystem and expose: static constexpr std::string_view kName.
+		/*--------------------------------------------------------------------------------------------------------------
+		| --- Get: Typed lookup. T must derive from ISubsystem and expose: static constexpr std::string_view kName --- |
+		--------------------------------------------------------------------------------------------------------------*/
 		template<typename T>
 		T* Get() const noexcept
 		{

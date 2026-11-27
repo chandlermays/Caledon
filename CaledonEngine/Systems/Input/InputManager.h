@@ -1,8 +1,8 @@
 #pragma once
-#include "../Engine/ISubsystem.h"
-#include "../Engine/IUpdatable.h"
-#include "../Input/Input.h"
-#include "../Input/InputActions.h"
+#include "Systems/Engine/ISubsystem.h"
+#include "Systems/Engine/IUpdatable.h"
+#include "Systems/Input/Input.h"
+#include "Systems/Input/InputActions.h"
 
 #include <memory>
 #include <string_view>

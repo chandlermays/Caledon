@@ -12,7 +12,7 @@ namespace CaledonEngine
 	class IUpdatable
 	{
 	public:
-		virtual ~IUpdatable() = default;															// Destructor
-		virtual void Update(float deltaTime) = 0;													// Called once per frame with the frame's delta time
+		virtual ~IUpdatable() = default;										// Destructor
+		virtual void Update(float deltaTime) = 0;								// Called once per frame with the frame's delta time
 	};
 }

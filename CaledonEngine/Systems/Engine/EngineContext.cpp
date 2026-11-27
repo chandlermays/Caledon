@@ -11,10 +11,9 @@
 ------------------------------------------------------------------------------------*/
 CaledonEngine::EngineContext::EngineContext(const EngineConfig& config)
 	: m_config{ config }
-	, m_published{}
+	, m_published{ }
 	, m_quitRequested{ false }
-{
-}
+{ }
 
 /*----------------------------------------------------------------------------------------
 | --- FindSubsystem: Returns the published subsystem with the given name, or nullptr --- |

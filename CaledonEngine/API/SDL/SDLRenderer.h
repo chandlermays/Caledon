@@ -9,6 +9,10 @@ struct SDL_Renderer;
 
 namespace CaledonEngine
 {
+	/*-----------------------------------------------------------------------------------------------
+	| --- SDLRenderer: Implements the engine's rendering interface using SDL.                   --- |
+	| ---               Renders textures and primitive geometry to the active target.           --- |
+	-----------------------------------------------------------------------------------------------*/
 	class SDLRenderer : public Renderer
 	{
 	private:

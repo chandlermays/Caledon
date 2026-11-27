@@ -8,12 +8,12 @@
 #include <unordered_map>
 #include <string>
 
-// This is the class (or asset) that gets created in the Game project to define the input actions and their mappings to keys/buttons.
-
-// Contains the action maps (eg. Gameplay, UI, etc.) and the input actions within those maps.
-
 namespace CaledonEngine
 {
+	/*-----------------------------------------------------------------------------------------------
+	| --- InputActionMap: Contains the actions maps and the input actions within those maps,	--- |
+	| ---				  to define the input actions and their mappings to keys/buttons        --- |
+	-----------------------------------------------------------------------------------------------*/
 	class InputActions
 	{
 	private:

@@ -5,8 +5,8 @@
 #include "InputManager.h"
 
 #include "API/SDL/SDLInput.h"
-#include "../Engine/EngineContext.h"
-#include "../Engine/LoggingSubsystem.h"
+#include "Systems/Engine/EngineContext.h"
+#include "Systems/Engine/LoggingSubsystem.h"
 
 #include <format>
 
@@ -20,8 +20,7 @@ CaledonEngine::InputSubsystem::InputSubsystem()
 	: m_pInputAPI{ nullptr }
 	, m_pInputActions{ nullptr }
 	, m_pContext{ nullptr }
-{
-}
+{ }
 
 /*--------------------------------------------
 | --- Name: Returns the Subsystem's name --- |

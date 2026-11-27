@@ -19,10 +19,10 @@ namespace CaledonEngine
 	----------------------------------------------------------------------*/
 	enum class LogLevel
 	{
-		Error,																						// Something failed
-		Warning,																					// Something looks wrong but execution continues
-		Display,																					// Information worth showing the user
-		Log																							// General diagnostic output
+		Error,															// Something failed
+		Warning,														// Something looks wrong but execution continues
+		Display,														// Information worth showing the user
+		Log																// General diagnostic output
 	};
 
 	/*------------------------------------------------------------------------------------------
@@ -34,26 +34,28 @@ namespace CaledonEngine
 	class LoggingSubsystem final : public ISubsystem
 	{
 	private:
-		std::mutex m_mutex;																			// Guards the log file and console output across threads
-		std::ofstream m_logFile;																	// The file every message is written to
+		std::mutex m_mutex;																				// Guards the log file and console output across threads
+		std::ofstream m_logFile;																		// The file every message is written to
 
 	public:
-		static constexpr std::string_view kName = "Logging";										// Unique name used for registration and lookup
+		static constexpr std::string_view kName = "Logging";											// Unique name used for registration and lookup
 
-		LoggingSubsystem();																			// Constructor
-		~LoggingSubsystem() override;																// Destructor
+		LoggingSubsystem() = default;																	// Constructor
+		~LoggingSubsystem() override;																	// Destructor
 
-		std::string_view Name() const noexcept override;											// Returns the Subsystem's name
-		bool Initialize(EngineContext& context) override;											// Opens the log file named in the config, if any
-		void Shutdown() noexcept override;															// Closes the log file
+		std::string_view Name() const noexcept override;												// Returns the Subsystem's name
+		bool Initialize(EngineContext& context) override;												// Opens the log file named in the config, if any
+		void Shutdown() noexcept override;																// Closes the log file
 
-		void Log(const std::string& message, bool newLine = true) noexcept;							// Writes a raw message
-		void Log(LogLevel level, std::string_view category, std::string_view message) noexcept;		// Writes a message tagged with a level and category
+		void Log(const std::string& message, bool newLine = true) noexcept;								// Writes a raw message
+		void Log(LogLevel level, std::string_view category, std::string_view message) noexcept;			// Writes a message tagged with a level and category
 
+		/*-----------------------------------------------
+		| --- Log: Formats and writes a raw message --- |
+		-----------------------------------------------*/
 		template<typename... Args>
 			requires (sizeof...(Args) > 0)
-		void Log([[maybe_unused]] std::format_string<Args...> fmt, [[maybe_unused]] Args&&... args) noexcept	// Formats and writes a raw message (debug builds only)
-		{
+		void Log([[maybe_unused]] std::format_string<Args...> fmt, [[maybe_unused]] Args&&... args) noexcept
 #ifdef _DEBUG
 			try
 			{
@@ -66,9 +68,12 @@ namespace CaledonEngine
 #endif
 		}
 
+		/*--------------------------------------------------
+		| --- Log: Formats and writes a tagged message --- |
+		--------------------------------------------------*/
 		template<typename... Args>
 			requires (sizeof...(Args) > 0)
-		void Log(LogLevel level, std::string_view category, std::format_string<Args...> fmt, Args&&... args) noexcept	// Formats and writes a tagged message (debug builds only)
+		void Log(LogLevel level, std::string_view category, std::format_string<Args...> fmt, Args&&... args) noexcept
 		{
 #ifdef _DEBUG
 			try

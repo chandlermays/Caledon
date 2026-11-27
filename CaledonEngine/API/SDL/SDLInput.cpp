@@ -22,9 +22,11 @@ CaledonEngine::SDLInput::~SDLInput()
 -----------------------------------------------------------*/
 bool CaledonEngine::SDLInput::Initialize()
 {
+	// Avoid starting the SDL subsystem or rebuilding mappings more than once.
 	if (m_isInitialized)
 		return true;
 
+	// Initialize SDL's event subsystem before registering input translations.
 	if (!SDL_InitSubSystem(SDL_INIT_EVENTS))
 	{
 		m_lastError = SDL_GetError();
@@ -130,6 +132,8 @@ bool CaledonEngine::SDLInput::Initialize()
 	if (m_keyMapping.empty() || m_mouseMapping.empty())
 	{
 		m_lastError = "SDL key/mouse mappings are empty";
+
+		// Undo subsystem initialization because this backend did not finish setup.
 		SDL_QuitSubSystem(SDL_INIT_EVENTS);
 		return false;
 	}
@@ -146,6 +150,7 @@ void CaledonEngine::SDLInput::Shutdown()
 	if (!m_isInitialized)
 		return;
 
+	// Remove backend-owned state before releasing the SDL event subsystem.
 	m_keyMapping.clear();
 	m_mouseMapping.clear();
 	m_eventCallback = nullptr;
@@ -159,14 +164,17 @@ void CaledonEngine::SDLInput::Shutdown()
 -------------------------------------------------------------------------*/
 bool CaledonEngine::SDLInput::ProcessEvents()
 {
+	// Preserve the previous frame's state so press/release queries detect transitions.
 	m_prevKeyStates = m_keyStates;
 	m_prevMouseStates = m_mouseStates;
 
+	// Wheel movement is reported as a per-frame delta.
 	m_mouseWheelDelta = 0.0f;
 
 	SDL_Event event;
 	while (SDL_PollEvent(&event) != 0)
 	{
+		// Forward raw events before translating the supported ones into engine state.
 		if (m_eventCallback)
 		{
 			m_eventCallback(&event);
@@ -237,7 +245,7 @@ bool CaledonEngine::SDLInput::ProcessEvents()
 			break;
 		}
 
-		// More events, if any
+		// Ignore events not represented by this input backend.
 		default:
 			break;
 		}

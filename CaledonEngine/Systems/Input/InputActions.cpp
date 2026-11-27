@@ -13,7 +13,7 @@
 CaledonEngine::InputActions::InputActions(const std::string& assetName)
 	: m_assetName{ assetName }
 	, m_isEnabled{ true }
-{}
+{ }
 
 /*-------------------------------------------------------------
 | --- AddActionMap: Adds an input action map to the asset --- |

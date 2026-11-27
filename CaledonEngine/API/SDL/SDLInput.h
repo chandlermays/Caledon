@@ -10,6 +10,10 @@ namespace CaledonEngine
 	typedef int SDL_KeyCode;
 	typedef int SDL_MouseCode;
 
+	/*------------------------------------------------------------------------------------------------
+	| --- SDLInput: Polls SDL events and translates keyboard and mouse input into engine state.  --- |
+	| ---            Can also forward raw SDL events through an optional callback.               --- |
+	------------------------------------------------------------------------------------------------*/
 	class SDLInput : public Input
 	{
 	private:

@@ -28,13 +28,6 @@ namespace
 /*-----------------------------------
 | --- Public Method Definitions --- |
 -----------------------------------*/
-/*--------------------------------------------------------------------------
-| --- Constructor: Constructs the LoggingSubsystem with default values --- |
---------------------------------------------------------------------------*/
-CaledonEngine::LoggingSubsystem::LoggingSubsystem()
-{
-}
-
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
 -------------------------------------------------------*/

@@ -10,6 +10,10 @@ namespace CaledonEngine
 		//... set up for future expansions
 	};
 
+	/*-----------------------------------------------------------------------------------------------
+	| --- EngineConfig: Holds engine-wide settings for backend selection, frame pacing, fixed   --- |
+	| ---                updates, and logging.                                                  --- |
+	-----------------------------------------------------------------------------------------------*/
 	struct EngineConfig
 	{
 		PlatformBackend backendAPI = PlatformBackend::SDL3;				// The API Configuration for Rendering, Input, etc.

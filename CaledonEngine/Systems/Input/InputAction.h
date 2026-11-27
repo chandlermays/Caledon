@@ -33,38 +33,38 @@ namespace CaledonEngine
 	--------------------------------------------------------------------------*/
 	enum class ActionPhase
 	{
-		kStarted,											// The action began (a control left its default value)
-		kPerformed,											// The action triggered
-		kCanceled											// The action ended (the control returned to its default value)
+		kStarted,													// The action began (a control left its default value)
+		kPerformed,													// The action triggered
+		kCanceled													// The action ended (the control returned to its default value)
 	};
 
 	enum class ActionType
 	{
-		kValue,												// Responds to value changes
-		kButton												// Responds to button presses/releases
+		kValue,														// Responds to value changes
+		kButton														// Responds to button presses/releases
 	};
 
 	enum class ControlType
 	{
-		kAny,												// Responds to any control type
-		kAxis,												// Responds to axis controls
-		kVector2											// Responds to 2D vector controls
+		kAny,														// Responds to any control type
+		kAxis,														// Responds to axis controls
+		kVector2													// Responds to 2D vector controls
 	};
 
 	struct InputBinding
 	{
-		KeyCode m_keyCode;									// Key code for keyboard input
-		MouseCode m_mouseCode;								// Mouse code for mouse input
-		bool m_isMouseButton;								// Flag to indicate if this binding is for a mouse button
+		KeyCode m_keyCode;											// Key code for keyboard input
+		MouseCode m_mouseCode;										// Mouse code for mouse input
+		bool m_isMouseButton;										// Flag to indicate if this binding is for a mouse button
 
-		InputBinding(KeyCode key);							// KeyCode Constructor
-		InputBinding(MouseCode mouse);						// MouseCode Constructor
+		explicit InputBinding(KeyCode key);							// KeyCode Constructor
+		explicit InputBinding(MouseCode mouse);						// MouseCode Constructor
 	};
 
 	struct CompositeBinding
 	{
-		std::vector<InputBinding> m_positiveBindings;		// Bindings for positive direction
-		std::vector<InputBinding> m_negativeBindings;		// Bindings for negative direction
+		std::vector<InputBinding> m_positiveBindings;				// Bindings for positive direction
+		std::vector<InputBinding> m_negativeBindings;				// Bindings for negative direction
 	};
 
 	/*----------------------------------------------------------------
@@ -72,20 +72,27 @@ namespace CaledonEngine
 	----------------------------------------------------------------*/
 	struct Context
 	{
-		InputAction* m_pAction;								// The action that fired the callback
-		ActionPhase m_phase;								// The phase the action is in
-		float m_value;										// The action's current value
+		InputAction* m_pAction;										// The action that fired the callback
+		ActionPhase m_phase;										// The phase the action is in
+		float m_value;												// The action's current value
 	};
 
-	using ActionCallback = std::function<void(const Context&)>;	// Function called when an action fires
+	using ActionCallback = std::function<void(const Context&)>;		// Function called when an action fires
 
-	// Structure storing the bound target object instance alongside the executable callback
+	/*-----------------------------------------------------------------------------------------------
+	| --- CallbackDelegate: stores the bound target object instance and the executable callback --- |
+	-----------------------------------------------------------------------------------------------*/
 	struct CallbackDelegate
 	{
-		void* m_pTargetInstance{ nullptr };					// The object the callback is bound to (used to unsubscribe it)
-		ActionCallback m_callback;							// The function to call
+		void* m_pTargetInstance{ nullptr };							// The object the callback is bound to (used to unsubscribe it)
+		ActionCallback m_callback;									// The function to call
 	};
 
+	/*----------------------------------------------------------------------------------------------
+	| --- InputAction: Maps keyboard and mouse bindings to a named action, evaluates its       --- |
+	| ---              state and value, and notifies subscribers of started, performed,        --- |
+	| ---              canceled, and value-change events.                                      --- |
+	----------------------------------------------------------------------------------------------*/
 	class InputAction
 	{
 	private:
@@ -111,9 +118,7 @@ namespace CaledonEngine
 		void InvokeValueCallbacks(const Context& context);														// Invokes all registered value callbacks
 
 	public:
-		InputAction(const std::string& name,
-			ActionType type = ActionType::kButton);																// Constructor
-
+		explicit InputAction(const std::string& name, ActionType type = ActionType::kButton);					// Constructor
 		~InputAction() = default;																				// Destructor
 		InputAction(const InputAction&) = delete;																// Prevent copy-construction
 		InputAction& operator=(const InputAction&) = delete;													// Prevent copy-assignment
@@ -135,33 +140,47 @@ namespace CaledonEngine
 		void AddPositiveBinding(MouseCode mouse);																// Adds a positive mouse binding to a composite binding
 		void AddNegativeBinding(MouseCode mouse);																// Adds a negative mouse binding to a composite binding
 
+		/*-----------------------------------------------------------------
+		| --- OnStarted: Binds a member function to the started phase --- |
+		-----------------------------------------------------------------*/
 		template <typename T>
-		void OnStarted(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the started phase
+		void OnStarted(T* pInstance, void (T::* pMemberFunc)(const Context&))
 		{
 			m_onStartedCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
+		/*---------------------------------------------------------------------
+		| --- OnPerformed: Binds a member function to the performed phase --- |
+		---------------------------------------------------------------------*/
 		template <typename T>
-		void OnPerformed(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the performed phase
+		void OnPerformed(T* pInstance, void (T::* pMemberFunc)(const Context&))
 		{
 			m_onPerformedCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
+		/*-------------------------------------------------------------------
+		| --- OnCanceled: Binds a member function to the canceled phase --- |
+		-------------------------------------------------------------------*/
 		template <typename T>
-		void OnCanceled(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the canceled phase
+		void OnCanceled(T* pInstance, void (T::* pMemberFunc)(const Context&))
 		{
 			m_onCanceledCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
+		/*-----------------------------------------------------------
+		| --- OnValue: Binds a member function to value changes --- |
+		-----------------------------------------------------------*/
 		template <typename T>
-		void OnValue(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to value changes
+		void OnValue(T* pInstance, void (T::* pMemberFunc)(const Context&))
 		{
 			m_onValueCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
-		// Convenience overload for methods accepting raw float directly (e.g., OnMoveHorizontal(float))
+		/*-----------------------------------------------------------
+		| --- OnValue: Binds a member function to value changes --- |
+		-----------------------------------------------------------*/
 		template <typename T>
-		void OnValue(T* pInstance, void (T::* pMemberFunc)(float))	// Binds a member function to value changes (receives the raw value)
+		void OnValue(T* pInstance, void (T::* pMemberFunc)(float))
 		{
 			m_onValueCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx.m_value); } });
 		}

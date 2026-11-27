@@ -71,6 +71,11 @@ namespace CaledonEngine
 
 	using EventCallback = std::function<void(const void*)>;
 
+	/*-----------------------------------------------------------------------------------------------
+	| --- Input: Defines the backend-independent input interface and shared keyboard/mouse      --- |
+	| ---        state. Provides held and per-frame transition queries, mouse position, and     --- |
+	| ---        wheel movement for concrete input backends.                                    --- |
+	-----------------------------------------------------------------------------------------------*/
 	class Input
 	{
 	protected:

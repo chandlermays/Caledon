@@ -6,36 +6,51 @@
 #include <algorithm>
 #include <cmath>
 
-// The accumulator behind IFixedUpdatable. Pure arithmetic (no clock, no engine types) so it is trivially testable.
-//
-// Each frame, feed it the real frame time; it answers "how many fixed steps should run now?".
-//   - Time that doesn't fill a whole step carries over to the next frame (no drift).
-//   - A frame that would need more than maxStepsPerFrame steps (after a hitch, a breakpoint, a dragged window) runs the
-//     cap and DISCARDS the rest. Otherwise every slow frame would demand more steps, making the next frame slower:
-//     the "spiral of death". The simulation briefly runs slower than real time instead.
-//   - Alpha() is the leftover fraction of a step (0..1), reserved for render interpolation (BodyInterpolation2D).
-
 namespace CaledonEngine
 {
+	/*-----------------------------------------------------------------------------------------------
+	| --- FixedTimestep: Accumulates frame time and determines how many fixed simulation steps  --- |
+	| ---                to run, carrying fractional time between frames. A step cap drops      --- |
+	| ---                excess backlog to avoid the spiral of death; Alpha provides the        --- |
+	| ---                remaining fraction for render interpolation.                           --- |
+	-----------------------------------------------------------------------------------------------*/
 	class FixedTimestep
 	{
 	private:
-		double m_step;																				// Seconds per fixed step (0 = disabled)
-		int m_maxSteps;																				// Cap on steps returned per frame (>= 1)
-		double m_accumulator;																		// Unspent time carried between frames
+		double m_step;														// Seconds per fixed step (0 = disabled)
+		int m_maxSteps;														// Cap on steps returned per frame (>= 1)
+		double m_accumulator;												// Unspent time carried between frames
 
 	public:
-		FixedTimestep(double stepSeconds, int maxStepsPerFrame) noexcept							// Constructor
+		/*---------------------
+		| --- Constructor --- |
+		---------------------*/
+		FixedTimestep(double stepSeconds, int maxStepsPerFrame) noexcept
 			: m_step{ stepSeconds > 0.0 ? stepSeconds : 0.0 }
 			, m_maxSteps{ std::max(maxStepsPerFrame, 1) }
 			, m_accumulator{ 0.0 }
+		{ }
+
+		/*---------------------------------------------------------
+		| --- IsEnabled: Returns whether fixed stepping is on --- |
+		---------------------------------------------------------*/
+		bool IsEnabled() const noexcept
 		{
+			return m_step > 0.0;
 		}
 
-		bool IsEnabled() const noexcept { return m_step > 0.0; }									// Returns whether fixed stepping is on
-		double Step() const noexcept { return m_step; }												// Returns the seconds per fixed step
-
-		int Advance(double frameSeconds) noexcept													// Returns the number of fixed steps to run this frame
+		/*--------------------------------------------------
+		| --- Step: Returns the seconds per fixed step --- |
+		--------------------------------------------------*/
+		double Step() const noexcept
+		{
+			return m_step; 
+		}
+		
+		/*----------------------------------------------------------------------
+		| --- Advance: Returns the number of fixed steps to run this frame --- |
+		----------------------------------------------------------------------*/
+		int Advance(double frameSeconds) noexcept
 		{
 			if (m_step <= 0.0 || frameSeconds <= 0.0)
 				return 0;
@@ -46,7 +61,9 @@ namespace CaledonEngine
 			if (steps > m_maxSteps)
 			{
 				steps = m_maxSteps;
-				m_accumulator = std::fmod(m_accumulator, m_step);									// Drop the backlog, keep the partial step
+
+				// Drop the backlog, keep the partial step
+				m_accumulator = std::fmod(m_accumulator, m_step);
 			}
 			else
 			{
@@ -56,7 +73,20 @@ namespace CaledonEngine
 			return steps;
 		}
 
-		double Alpha() const noexcept { return (m_step > 0.0) ? m_accumulator / m_step : 0.0; }		// Returns the leftover fraction of a step (0..1)
-		void Reset() noexcept { m_accumulator = 0.0; }												// Discards any carried-over time
+		/*----------------------------------------------------------------
+		| --- Alpha: Returns the leftover fraction of a step (0...1) --- |
+		----------------------------------------------------------------*/
+		double Alpha() const noexcept
+		{
+			return (m_step > 0.0) ? m_accumulator / m_step : 0.0;
+		}
+
+		/*-----------------------------------------------
+		| --- Reset: Discards any carried-over time --- |
+		-----------------------------------------------*/
+		void Reset() noexcept
+		{
+			m_accumulator = 0.0;
+		}
 	};
 }

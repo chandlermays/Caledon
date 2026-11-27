@@ -16,8 +16,7 @@ CaledonEngine::SDLTexture::SDLTexture()
     : m_pTexture{ nullptr }
     , m_width{ 0 }
     , m_height{ 0 }
-{
-}
+{ }
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |

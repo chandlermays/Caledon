@@ -12,7 +12,7 @@ namespace CaledonEngine
 	class IFixedUpdatable
 	{
 	public:
-		virtual ~IFixedUpdatable() = default;														// Destructor
-		virtual void FixedUpdate(float deltaTime) = 0;												// Called once per fixed step with the fixed delta time
+		virtual ~IFixedUpdatable() = default;									// Destructor
+		virtual void FixedUpdate(float deltaTime) = 0;							// Called once per fixed step with the fixed delta time
 	};
 }
