@@ -114,25 +114,25 @@ void CaledonEngine::Scene::SetActive(bool isActive)
 	m_isActive = isActive;
 }
 
-/*---------------------------------------------------------------
-| --- IsDirty:
----------------------------------------------------------------*/
+/*-----------------------------------------------------------------
+| --- IsDirty: Returns whether this Scene has unsaved changes --- |
+-----------------------------------------------------------------*/
 bool CaledonEngine::Scene::IsDirty() const
 {
 	return m_isDirty;
 }
 
 /*---------------------------------------------------------------
-| --- SetDirty:
+| --- SetDirty: Sets whether this Scene has unsaved changes --- |
 ---------------------------------------------------------------*/
 void CaledonEngine::Scene::SetDirty(bool dirty)
 {
 	m_isDirty = dirty;
 }
 
-/*---------------------------------------------------------------
-| --- MarkClean:
----------------------------------------------------------------*/
+/*----------------------------------------------
+| --- MarkClean: Marks this Scene as saved --- |
+----------------------------------------------*/
 void CaledonEngine::Scene::MarkClean()
 {
 	m_isDirty = false;
@@ -146,33 +146,33 @@ bool CaledonEngine::Scene::IsValid() const
 	return m_isLoaded && !m_gameObjects.empty();
 }
 
-/*---------------------------------------------------------------
-| --- GetFilePath:
----------------------------------------------------------------*/
+/*-----------------------------------------------------------------------
+| --- GetFilePath: Returns the file path this Scene was loaded from --- |
+-----------------------------------------------------------------------*/
 const std::string& CaledonEngine::Scene::GetFilePath() const
 {
 	return m_filePath;
 }
 
-/*---------------------------------------------------------------
-| --- SetFilePath:
----------------------------------------------------------------*/
+/*----------------------------------------------------------------
+| --- SetFilePath: Sets the file path this Scene is saved to --- |
+----------------------------------------------------------------*/
 void CaledonEngine::Scene::SetFilePath(const std::string& filePath)
 {
 	m_filePath = filePath;
 }
 
-/*------------------------------------------------------------------------
-| --- GetPhysicsScene2D:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------
+| --- GetPhysicsScene2D: Returns the PhysicsScene2D this Scene uses --- |
+-----------------------------------------------------------------------*/
 CaledonEngine::PhysicsScene2D* CaledonEngine::Scene::GetPhysicsScene2D() const noexcept
 {
 	return m_pPhysicsScene2D;
 }
 
-/*------------------------------------------------------------------------
-| --- SetPhysicsScene2D:
-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- SetPhysicsScene2D: Sets the PhysicsScene2D this Scene uses --- |
+--------------------------------------------------------------------*/
 void CaledonEngine::Scene::SetPhysicsScene2D(PhysicsScene2D* pPhysicsScene)
 {
 	m_pPhysicsScene2D = pPhysicsScene;

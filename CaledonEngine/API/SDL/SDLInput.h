@@ -13,8 +13,8 @@ namespace CaledonEngine
 	class SDLInput : public Input
 	{
 	private:
-		EventCallback m_eventCallback;												//
-		bool m_isInitialized = false;												//
+		EventCallback m_eventCallback;												// The function called for every raw SDL event (e.g. to feed ImGui)
+		bool m_isInitialized = false;												// Flag to indicate the SDL input subsystem has started
 
 		std::unordered_map<SDL_KeyCode, KeyCode> m_keyMapping;						// Mapping from SDL Key Codes to Engine Key Codes
 		std::unordered_map<SDL_MouseCode, MouseCode> m_mouseMapping;				// Mapping from SDL Mouse Codes to Engine Mouse Codes
@@ -31,6 +31,6 @@ namespace CaledonEngine
 		void Shutdown() override;													// Shuts down and cleans up the SDL Input System
 		bool ProcessEvents() override;												// Processes input events from the SDL Input System
 
-		void SetEventCallback(EventCallback callback) override;						//
+		void SetEventCallback(EventCallback callback) override;						// Sets the function called for every raw SDL event
 	};
 }

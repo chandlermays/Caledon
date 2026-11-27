@@ -15,12 +15,12 @@ namespace CaledonEngine
 	class Component
 	{
 	protected:
+		friend class GameObject;															// Marks the Component for destruction (GameObject::RemoveComponent)
+
 		GameObject* m_pOwner;																// Pointer to the owning GameObject
 		std::string m_id;																	// The unique identifier of the Component
 		bool m_isActive;																	// Whether the Component is active or not
 		bool m_isPendingDestroy;															// Whether the Component is waiting to be destroyed at the end of the frame
-
-		friend class GameObject;															// Marks the Component for destruction (GameObject::RemoveComponent)
 
 	public:
 		Component();																		// Constructor

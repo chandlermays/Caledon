@@ -15,7 +15,8 @@
 CaledonEngine::DynamicLibrary::DynamicLibrary()
     : m_pHandle{ nullptr }
     , m_lastError{ 0 }
-{}
+{
+}
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -25,9 +26,9 @@ CaledonEngine::DynamicLibrary::~DynamicLibrary()
     Unload();
 }
 
-/*--------------------------------------------------------------------------
-| --- Load:
---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------
+| --- Load: Loads a library, unloading any current one first --- |
+----------------------------------------------------------------*/
 bool CaledonEngine::DynamicLibrary::Load(const std::string& path)
 {
     Unload();
@@ -41,9 +42,9 @@ bool CaledonEngine::DynamicLibrary::Load(const std::string& path)
     return m_pHandle != nullptr;
 }
 
-/*--------------------------------------------------------------------------
-| --- Unload:
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------
+| --- Unload: Unloads the library, if one is loaded --- |
+-------------------------------------------------------*/
 void CaledonEngine::DynamicLibrary::Unload()
 {
     if (m_pHandle)
@@ -53,25 +54,25 @@ void CaledonEngine::DynamicLibrary::Unload()
     }
 }
 
-/*--------------------------------------------------------------------------
-| --- IsLoaded:
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------
+| --- IsLoaded: Returns whether a library is loaded --- |
+-------------------------------------------------------*/
 bool CaledonEngine::DynamicLibrary::IsLoaded() const
 {
     return m_pHandle != nullptr;
 }
 
-/*--------------------------------------------------------------------------
-| --- GetLastError:
---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+| --- GetLastError: Returns the OS error code from the last failed load --- |
+---------------------------------------------------------------------------*/
 unsigned long CaledonEngine::DynamicLibrary::GetLastError() const
 {
     return m_lastError;
 }
 
-/*--------------------------------------------------------------------------
-| --- GetFunctionAddress:
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------
+| --- GetFunctionAddress: Returns the address of an exported function, or nullptr --- |
+-------------------------------------------------------------------------------------*/
 void* CaledonEngine::DynamicLibrary::GetFunctionAddress(const std::string& functionName) const
 {
     if (!m_pHandle)

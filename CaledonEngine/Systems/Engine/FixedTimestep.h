@@ -20,21 +20,22 @@ namespace CaledonEngine
 	class FixedTimestep
 	{
 	private:
-		double m_step;																	// Seconds per fixed step (0 = disabled)
-		int m_maxSteps;																	// Cap on steps returned per frame (>= 1)
-		double m_accumulator;															// Unspent time carried between frames
+		double m_step;																				// Seconds per fixed step (0 = disabled)
+		int m_maxSteps;																				// Cap on steps returned per frame (>= 1)
+		double m_accumulator;																		// Unspent time carried between frames
 
 	public:
-		FixedTimestep(double stepSeconds, int maxStepsPerFrame) noexcept
+		FixedTimestep(double stepSeconds, int maxStepsPerFrame) noexcept							// Constructor
 			: m_step{ stepSeconds > 0.0 ? stepSeconds : 0.0 }
 			, m_maxSteps{ std::max(maxStepsPerFrame, 1) }
 			, m_accumulator{ 0.0 }
-		{ }
+		{
+		}
 
-		bool IsEnabled() const noexcept { return m_step > 0.0; }
-		double Step() const noexcept { return m_step; }
+		bool IsEnabled() const noexcept { return m_step > 0.0; }									// Returns whether fixed stepping is on
+		double Step() const noexcept { return m_step; }												// Returns the seconds per fixed step
 
-		int Advance(double frameSeconds) noexcept											// Returns the number of fixed steps to run this frame
+		int Advance(double frameSeconds) noexcept													// Returns the number of fixed steps to run this frame
 		{
 			if (m_step <= 0.0 || frameSeconds <= 0.0)
 				return 0;
@@ -45,7 +46,7 @@ namespace CaledonEngine
 			if (steps > m_maxSteps)
 			{
 				steps = m_maxSteps;
-				m_accumulator = std::fmod(m_accumulator, m_step);							// Drop the backlog, keep the partial step
+				m_accumulator = std::fmod(m_accumulator, m_step);									// Drop the backlog, keep the partial step
 			}
 			else
 			{
@@ -55,7 +56,7 @@ namespace CaledonEngine
 			return steps;
 		}
 
-		double Alpha() const noexcept { return (m_step > 0.0) ? m_accumulator / m_step : 0.0; }
-		void Reset() noexcept { m_accumulator = 0.0; }
+		double Alpha() const noexcept { return (m_step > 0.0) ? m_accumulator / m_step : 0.0; }		// Returns the leftover fraction of a step (0..1)
+		void Reset() noexcept { m_accumulator = 0.0; }												// Discards any carried-over time
 	};
 }

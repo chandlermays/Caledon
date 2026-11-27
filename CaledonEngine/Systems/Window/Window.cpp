@@ -78,9 +78,9 @@ bool CaledonEngine::Window::IsMinimized() const
 	return m_isMinimized;
 }
 
-/*----------------------------------------------------------------------
-| --- GetLastError:
-----------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- GetLastError: Returns the reason the last operation failed --- |
+--------------------------------------------------------------------*/
 const std::string& CaledonEngine::Window::GetLastError() const
 {
 	return m_lastError;

@@ -24,7 +24,8 @@ namespace
 CaledonEngine::Physics2DSubsystem::Physics2DSubsystem()
 	: m_settings{ }
 	, m_defaultScene{ m_settings }
-{ }
+{
+}
 
 /*-------------------------------------------------
 | --- Name: Returns the name of the subsystem --- |
@@ -241,9 +242,9 @@ bool CaledonEngine::Physics2DSubsystem::IsTouching(const Collider2D* pCollider, 
 	return m_defaultScene.IsTouching(pCollider, contactFilter);
 }
 
-/*-------------------------------------------------------------------------------------
-| --- IsTouching: --- |
--------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------
+| --- IsTouching: Returns whether any contact passes the ContactFilter2D (not implemented yet) --- |
+--------------------------------------------------------------------------------------------------*/
 bool CaledonEngine::Physics2DSubsystem::IsTouching(const ContactFilter2D& contactFilter) const
 {
 	return m_defaultScene.IsTouching(contactFilter);

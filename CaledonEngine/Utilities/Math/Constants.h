@@ -26,8 +26,8 @@ namespace CaledonEngine::Math
 	template<FloatingPoint T> inline constexpr T Epsilon_v				=			std::numeric_limits<T>::epsilon();										// Machine epsilon (difference between 1 and next representable value)
 	template<FloatingPoint T> inline constexpr T Denorm_v				=			std::numeric_limits<T>::denorm_min();									// Smallest positive subnormal value
 
-	template<FloatingPoint T> inline constexpr T TightTolerance_v		=			static_cast<T>(1e-8L);													// 
-	template<FloatingPoint T> inline constexpr T LooseTolerance_v		=			static_cast<T>(1e-4L);													//
+	template<FloatingPoint T> inline constexpr T TightTolerance_v		=			static_cast<T>(1e-8L);													// Strict threshold for treating a distance as zero
+	template<FloatingPoint T> inline constexpr T LooseTolerance_v		=			static_cast<T>(1e-4L);													// Forgiving threshold for near-zero lengths and near-parallel checks
 
 	//--------------------------------------------------------------------------
 	// Mathematical constants

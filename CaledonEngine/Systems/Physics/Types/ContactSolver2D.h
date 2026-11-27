@@ -74,12 +74,12 @@ namespace CaledonEngine
 		int bodyA = -1;																							// Index of body A in the body array
 		int bodyB = -1;																							// Index of body B in the body array
 		Vector2f normal{ };																						// From A to B
-		float friction = 0.0f;
-		float restitution = 0.0f;
+		float friction = 0.0f;																					// Combined friction of the two colliders
+		float restitution = 0.0f;																				// Combined bounciness of the two colliders
 		float angleA = 0.0f;																					// Rotation of A when built (anchors are rotated by the change since then)
-		float angleB = 0.0f;
-		int pointCount = 0;
-		ContactPointConstraint2D points[2];
+		float angleB = 0.0f;																					// Rotation of B when built
+		int pointCount = 0;																						// How many of the points are in use (1 or 2)
+		ContactPointConstraint2D points[2];																		// The contact points being solved
 	};
 
 	namespace ContactSolver2D
@@ -91,7 +91,7 @@ namespace CaledonEngine
 		void SolveVelocity(std::span<ContactConstraint2D> constraints, std::span<SolverBody2D> bodies);											// Iteratively resolves relative velocities along contact normals and tangents
 		bool SolvePosition(std::span<const ContactConstraint2D> constraints, std::span<SolverBody2D> bodies,									// Corrects positional overlap and returns whether the constraints have sufficiently converged
 			const ContactSolverSettings2D& settings);
-		
+
 		ContactImpulses2D GetImpulses(const ContactConstraint2D& constraint) noexcept;															// Retrieves the accumulated normal and frition impulses from a contact constraint
 	}
 }

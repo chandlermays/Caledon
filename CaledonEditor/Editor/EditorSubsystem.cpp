@@ -37,9 +37,9 @@ CaledonEditor::EditorSubsystem::~EditorSubsystem()
 	Shutdown();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEditor::EditorSubsystem::Name() const noexcept
 {
 	return kName;

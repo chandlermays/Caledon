@@ -25,7 +25,8 @@ CaledonEngine::EngineManager::EngineManager(const EngineConfig& config)
 	, m_pUpdatables{ }
 	, m_pRenderables{ }
 	, m_state{ State::Created }
-{}
+{
+}
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -35,9 +36,9 @@ CaledonEngine::EngineManager::~EngineManager()
 	Shutdown();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initialize:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------
+| --- Initialize: Initializes every subsystem in registration order --- |
+-----------------------------------------------------------------------*/
 bool CaledonEngine::EngineManager::Initialize()
 {
 	if (m_state != State::Created)
@@ -75,9 +76,9 @@ bool CaledonEngine::EngineManager::Initialize()
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Run:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------
+| --- Run: Runs the main loop until a quit is requested --- |
+-----------------------------------------------------------*/
 void CaledonEngine::EngineManager::Run()
 {
 	if (m_state != State::Initialized)
@@ -132,17 +133,17 @@ void CaledonEngine::EngineManager::Run()
 	m_state = State::Initialized;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- RequestQuit:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+| --- RequestQuit: Asks the main loop to stop at the end of the frame --- |
+-------------------------------------------------------------------------*/
 void CaledonEngine::EngineManager::RequestQuit() noexcept
 {
 	m_context.RequestQuit();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
+| --- Shutdown: Shuts down and destroys every subsystem in reverse order --- |
+----------------------------------------------------------------------------*/
 void CaledonEngine::EngineManager::Shutdown() noexcept
 {
 	if (m_state == State::Shutdown)
@@ -174,9 +175,9 @@ void CaledonEngine::EngineManager::Shutdown() noexcept
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Context:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Context: Returns the EngineContext --- |
+--------------------------------------------*/
 CaledonEngine::EngineContext& CaledonEngine::EngineManager::Context() noexcept
 {
 	return m_context;
@@ -187,9 +188,9 @@ CaledonEngine::EngineContext& CaledonEngine::EngineManager::Context() noexcept
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*---------------------------------------------------------------------------------------
-| --- AddSubsystem:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+| --- AddSubsystem: Stores a subsystem and the interfaces it implements --- |
+---------------------------------------------------------------------------*/
 bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSubsystem, IFixedUpdatable* pFixedUpdatable, IUpdatable* pUpdatable, IRenderable* pRenderable)
 {
 	if (m_state != State::Created || !pSubsystem)
@@ -221,9 +222,9 @@ bool CaledonEngine::EngineManager::AddSubsystem(std::unique_ptr<ISubsystem> pSub
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- FixedUpdate: 
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------
+| --- FixedUpdate: Ticks every fixed-rate subsystem once --- |
+------------------------------------------------------------*/
 void CaledonEngine::EngineManager::FixedUpdate(float fixedDeltaTime)
 {
 	for (IFixedUpdatable* pFixedUpdatable : m_pFixedUpdatables)
@@ -232,9 +233,9 @@ void CaledonEngine::EngineManager::FixedUpdate(float fixedDeltaTime)
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Update:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------
+| --- Update: Ticks every per-frame subsystem --- |
+-------------------------------------------------*/
 void CaledonEngine::EngineManager::Update(float deltaTime)
 {
 	for (IUpdatable* pUpdatable : m_pUpdatables)
@@ -243,9 +244,9 @@ void CaledonEngine::EngineManager::Update(float deltaTime)
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Render:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------
+| --- Render: Runs BeginFrame, Render and EndFrame across every renderable subsystem --- |
+----------------------------------------------------------------------------------------*/
 void CaledonEngine::EngineManager::Render()
 {
 	for (IRenderable* pRenderable : m_pRenderables)

@@ -12,8 +12,11 @@
 
 namespace
 {
-	std::shared_ptr<PacmanModule::PacmanInputActions> g_pInputActions;
+	std::shared_ptr<PacmanModule::PacmanInputActions> g_pInputActions;								// The game's InputActions, shared by every PacmanController
 
+	/*----------------------------------------------------------------------------------
+	| --- CreateMovementComponent: Creates a MovementComponent with PacMan's speed --- |
+	----------------------------------------------------------------------------------*/
 	CaledonEngine::Component* CreateMovementComponent()
 	{
 		auto* pMovement = new PacmanModule::MovementComponent();
@@ -21,6 +24,9 @@ namespace
 		return pMovement;
 	}
 
+	/*---------------------------------------------------------------------------------------------
+	| --- CreatePacmanController: Creates a PacmanController wired to the game's InputActions --- |
+	---------------------------------------------------------------------------------------------*/
 	CaledonEngine::Component* CreatePacmanController()
 	{
 		auto* pController = new PacmanModule::PacmanController();
@@ -29,9 +35,9 @@ namespace
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- CaledonModule_Register:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------
+| --- CaledonModule_Register: Registers the game's Components and InputActions with the engine --- |
+--------------------------------------------------------------------------------------------------*/
 CALEDON_MODULE_API bool CaledonModule_Register(const CaledonEngine::ModuleInterface::Host* pHost)
 {
 	if (!pHost || pHost->version != CaledonEngine::ModuleInterface::kVersion)
@@ -51,9 +57,9 @@ CALEDON_MODULE_API bool CaledonModule_Register(const CaledonEngine::ModuleInterf
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- CaledonModule_Unregister:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- CaledonModule_Unregister: Releases the game's InputActions --- |
+--------------------------------------------------------------------*/
 CALEDON_MODULE_API void CaledonModule_Unregister(const CaledonEngine::ModuleInterface::Host*)
 {
 	g_pInputActions.reset();

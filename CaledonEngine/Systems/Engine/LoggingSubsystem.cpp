@@ -6,9 +6,9 @@
 
 #include <iostream>
 
-/*---------------------------------------------------------------------------------------
-| --- LevelToString:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- LevelToString: Returns the display name of a LogLevel --- |
+---------------------------------------------------------------*/
 namespace
 {
 	[[maybe_unused]] const char* LevelToString(CaledonEngine::LogLevel level) noexcept
@@ -32,7 +32,8 @@ namespace
 | --- Constructor: Constructs the LoggingSubsystem with default values --- |
 --------------------------------------------------------------------------*/
 CaledonEngine::LoggingSubsystem::LoggingSubsystem()
-{}
+{
+}
 
 /*-------------------------------------------------------
 | --- Destructor: Cleans up any allocated resources --- |
@@ -45,17 +46,17 @@ CaledonEngine::LoggingSubsystem::~LoggingSubsystem()
 		m_logFile.close();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::LoggingSubsystem::Name() const noexcept
 {
 	return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initiailze:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- Initialize: Opens the log file named in the config, if any --- |
+--------------------------------------------------------------------*/
 bool CaledonEngine::LoggingSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
 #ifdef _DEBUG
@@ -73,9 +74,9 @@ bool CaledonEngine::LoggingSubsystem::Initialize([[maybe_unused]] EngineContext&
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------
+| --- Shutdown: Closes the log file --- |
+---------------------------------------*/
 void CaledonEngine::LoggingSubsystem::Shutdown() noexcept
 {
 	try
@@ -87,9 +88,9 @@ void CaledonEngine::LoggingSubsystem::Shutdown() noexcept
 	catch (...) {}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Log:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- Log: Writes a raw message to the console and log file --- |
+---------------------------------------------------------------*/
 void CaledonEngine::LoggingSubsystem::Log([[maybe_unused]] const std::string& message, [[maybe_unused]] bool newLine) noexcept
 {
 #ifdef _DEBUG
@@ -111,9 +112,9 @@ void CaledonEngine::LoggingSubsystem::Log([[maybe_unused]] const std::string& me
 #endif
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Log:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- Log: Writes a message prefixed with its level and category --- |
+--------------------------------------------------------------------*/
 void CaledonEngine::LoggingSubsystem::Log([[maybe_unused]] LogLevel level, [[maybe_unused]] std::string_view category, [[maybe_unused]] std::string_view message) noexcept
 {
 #ifdef _DEBUG

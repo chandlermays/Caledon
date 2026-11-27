@@ -14,6 +14,16 @@ namespace CaledonEngine
 	class GameObject;
 	class PhysicsScene2D;
 
+	/*--------------------------------------------------------------------------------
+	| --- Scene: Owns a hierarchy of GameObjects and updates them each frame.    --- |
+	| ---        Changes made while it is updating are deferred so the hierarchy --- |
+	| ---        never changes under the loop: new GameObjects are queued, and   --- |
+	| ---        Destroy() and RemoveComponent() only mark, until                --- |
+	| ---        FlushPendingChanges runs at the end of the frame                --- |
+	| ---                                                                        --- |
+	| ---        A Scene is handed a PhysicsScene2D, which its physics           --- |
+	| ---        components register with                                        --- |
+	--------------------------------------------------------------------------------*/
 	class Scene
 	{
 	private:
@@ -62,16 +72,16 @@ namespace CaledonEngine
 		bool IsActive() const;																						// Returns whether this Scene is active or not
 		void SetActive(bool isActive);																				// Sets whether this Scene is active or not
 
-		bool IsDirty() const;																						//
-		void SetDirty(bool dirty);																					//
-		void MarkClean();																							// 
+		bool IsDirty() const;																						// Returns whether this Scene has unsaved changes
+		void SetDirty(bool dirty);																					// Sets whether this Scene has unsaved changes
+		void MarkClean();																							// Marks this Scene as saved
 		bool IsValid() const;																						// Checks if this Scene is valid
 
-		const std::string& GetFilePath() const;																		//
-		void SetFilePath(const std::string& filePath);																// 
+		const std::string& GetFilePath() const;																		// Returns the file path this Scene was loaded from
+		void SetFilePath(const std::string& filePath);																// Sets the file path this Scene is saved to
 
-		PhysicsScene2D* GetPhysicsScene2D() const noexcept;															//
-		void SetPhysicsScene2D(PhysicsScene2D* pPhysicsScene);														//
+		PhysicsScene2D* GetPhysicsScene2D() const noexcept;															// Returns the PhysicsScene2D this Scene's physics components use
+		void SetPhysicsScene2D(PhysicsScene2D* pPhysicsScene);														// Sets the PhysicsScene2D this Scene's physics components use
 
 		GameObject* AddGameObject(std::unique_ptr<GameObject> pGameObject, GameObject* pParent = nullptr);			// Adds a GameObject (queued while updating; initialized if the Scene is loaded)
 		void FlushPendingChanges();																					// Adds the queued GameObjects, then destroys the marked Components and GameObjects

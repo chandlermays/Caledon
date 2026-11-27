@@ -35,9 +35,9 @@ void CaledonEngine::CircleCollider2D::SetRadius(float radius)
     RefreshBounds();
 }
 
-/*---------------------------------------------------------------------------
-| --- AddLocalShapes: 
----------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------
+| --- AddLocalShapes: Adds this CircleCollider2D's circle to the physics shape group --- |
+----------------------------------------------------------------------------------------*/
 int CaledonEngine::CircleCollider2D::AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
     return (physicsShapeGroup.AddCircle(GetOffset(), m_radius) >= 0) ? 1 : 0;

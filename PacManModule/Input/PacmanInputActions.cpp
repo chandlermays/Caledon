@@ -15,9 +15,9 @@ PacmanModule::PacmanInputActions::PacmanInputActions()
 	, m_pGameplayActionMap{ nullptr }
 {}
 
-/*----------------------------------------------------------------------------
-| --- Initialize: 
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------
+| --- Initialize: Builds every action map (only once) --- |
+---------------------------------------------------------*/
 void PacmanModule::PacmanInputActions::Initialize()
 {
 	// Early return if the map has already been initialized
@@ -27,9 +27,9 @@ void PacmanModule::PacmanInputActions::Initialize()
 	ConfigureGameplayMap();
 }
 
-/*----------------------------------------------------------------------------
-| --- GetGameplayActionMap: 
-----------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- GetGameplayActionMap: Returns the gameplay action map --- |
+---------------------------------------------------------------*/
 CaledonEngine::InputActionMap* PacmanModule::PacmanInputActions::GetGameplayActionMap() const
 {
 	return m_pGameplayActionMap;
@@ -40,9 +40,9 @@ CaledonEngine::InputActionMap* PacmanModule::PacmanInputActions::GetGameplayActi
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*----------------------------------------------------------------------------
-| --- ConfigureGameplayMap:
-----------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------
+| --- ConfigureGameplayMap: Creates the gameplay actions and their bindings --- |
+-------------------------------------------------------------------------------*/
 void PacmanModule::PacmanInputActions::ConfigureGameplayMap()
 {
 	using CaledonEngine::ActionType;

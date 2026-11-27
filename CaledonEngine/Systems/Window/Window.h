@@ -9,6 +9,11 @@
 
 namespace CaledonEngine
 {
+	/*-------------------------------------------------------------------------------
+	| --- Window: The platform-independent window interface. A backend (e.g.    --- |
+	| ---         SDLWindow) opens and manages the real window; the rest of the --- |
+	| ---         engine only talks to this class                               --- |
+	-------------------------------------------------------------------------------*/
 	class Window
 	{
 	protected:
@@ -19,7 +24,7 @@ namespace CaledonEngine
 		bool m_isResizable;														// Flag to indicate if the user can resize the window
 		bool m_isFocused;														// Flag to indicate if the window is focused
 		bool m_isMinimized;														// Flag to indicate if the window is minimized
-		std::string m_lastError;												//
+		std::string m_lastError;												// The reason the last operation failed (empty if none)
 
 	public:
 		explicit Window(const WindowConfig& config = WindowConfig{});			// Constructor
@@ -48,6 +53,6 @@ namespace CaledonEngine
 		bool IsResizable() const;												// Checks if the user can resize the window
 		virtual bool IsFocused() const;											// Checks if the window is focused
 		virtual bool IsMinimized() const;										// Checks if the window is minimized
-		const std::string& GetLastError() const;								//
+		const std::string& GetLastError() const;								// Returns the reason the last operation failed
 	};
 }

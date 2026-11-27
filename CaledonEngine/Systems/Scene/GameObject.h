@@ -18,6 +18,8 @@ namespace CaledonEngine
 	class GameObject
 	{
 	private:
+		friend class Scene;																					// The Scene moves GameObjects in and out of the hierarchy during its end-of-frame flush
+
 		std::uint64_t m_id;																					// The stable, unique identifier of this GameObject (never 0)
 		Scene* m_pScene;																					// Pointer to the Scene this GameObject is in
 		GameObject* m_pParent;																				// Pointer to this GameObject's parent
@@ -38,8 +40,6 @@ namespace CaledonEngine
 		std::unique_ptr<Component> ReleaseComponent(Component* pComponent);									// Hands ownership of a Component to the caller without destroying it
 		void DestroyImmediate() noexcept;																	// Destroys the children and Components right away (destructor and end-of-frame flush only)
 
-		friend class Scene;																					// The Scene moves GameObjects in and out of the hierarchy during its end-of-frame flush
-
 	public:
 		GameObject();																						// Constructor
 		~GameObject();																						// Destructor
@@ -58,13 +58,12 @@ namespace CaledonEngine
 		void SetScene(Scene* pScene);																		// Sets the Scene this GameObject (and its children) is in
 
 		GameObject* GetParent() const;																		// Returns a pointer to this GameObject's parent
-		bool SetParent(GameObject* pNewParent, bool worldPositionStays = true);							// Moves this GameObject under a new parent (nullptr = scene root), keeping its world pose by default
+		bool SetParent(GameObject* pNewParent, bool worldPositionStays = true);								// Moves this GameObject under a new parent (nullptr = scene root), keeping its world pose by default
 		bool IsAncestorOf(const GameObject* pGameObject) const;												// Returns whether this GameObject is a parent, grandparent, etc. of the given one
 
 		const std::vector<std::unique_ptr<CaledonEngine::GameObject>>& GetChildren() const;					// Returns a vector of pointers to this GameObject's children
 		GameObject* AddChild(std::unique_ptr<GameObject> pChild);											// Adds a new child (deferred to the end of the frame while its Scene is updating)
 		void DetachChildren();																				// Moves every child to the scene root, keeping their world poses (Unity's DetachChildren)
-		// Adds a new child (deferred to the end of the frame while its Scene is updating)
 
 		const std::string& GetName() const;																	// Returns the name of this GameObject
 		void SetName(const std::string& name);																// Sets the name of this GameObject

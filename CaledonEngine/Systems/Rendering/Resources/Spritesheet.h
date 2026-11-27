@@ -13,13 +13,17 @@ namespace CaledonEngine
 	class Texture;
 	class Sprite;
 
+	/*------------------------------------------------------------------------------
+	| --- SpriteSheet: A texture cut into equal-sized frames, numbered left to --- |
+	| ---              right, top to bottom, that Sprites can be created from  --- |
+	------------------------------------------------------------------------------*/
 	class SpriteSheet
 	{
 	private:
-		std::shared_ptr<Texture> m_pTexture;
-		int m_frameWidth;
-		int m_frameHeight;
-		int m_columns;
+		std::shared_ptr<Texture> m_pTexture;																				// The texture holding every frame
+		int m_frameWidth;																									// The width of a single frame, in pixels
+		int m_frameHeight;																									// The height of a single frame, in pixels
+		int m_columns;																										// The number of frames in each row of the texture
 
 	public:
 		SpriteSheet(std::shared_ptr<Texture> pTexture, int frameWidth, int frameHeight);									// Constructor

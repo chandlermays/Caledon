@@ -40,17 +40,17 @@ CaledonEngine::RenderingSubsystem::RenderingSubsystem()
 -----------------------------------------------------------------------------*/
 CaledonEngine::RenderingSubsystem::~RenderingSubsystem() = default;
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::RenderingSubsystem::Name() const noexcept
 {
 	return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initialize:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------
+| --- Initialize: Starts the platform renderer on the open window --- |
+---------------------------------------------------------------------*/
 bool CaledonEngine::RenderingSubsystem::Initialize(EngineContext& context)
 {
 	WindowSubsystem* pWindowSubsystem = context.Get<WindowSubsystem>();
@@ -75,9 +75,9 @@ bool CaledonEngine::RenderingSubsystem::Initialize(EngineContext& context)
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------
+| --- Shutdown: Shuts down the platform renderer --- |
+----------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::Shutdown() noexcept
 {
 	m_pContext = nullptr;
@@ -92,9 +92,9 @@ void CaledonEngine::RenderingSubsystem::Shutdown() noexcept
 	m_pRendererAPI.reset();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- BeginFrame:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------
+| --- BeginFrame: Begins the renderer's frame --- |
+-------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::BeginFrame()
 {
 	if (m_pRendererAPI)
@@ -103,9 +103,9 @@ void CaledonEngine::RenderingSubsystem::BeginFrame()
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Render:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------
+| --- Render: Draws the current Scene's sprites in layer order --- |
+------------------------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::Render()
 {
 	if (!m_pRendererAPI)
@@ -151,9 +151,9 @@ void CaledonEngine::RenderingSubsystem::Render()
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- EndFrame:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------
+| --- EndFrame: Presents the frame --- |
+--------------------------------------*/
 void CaledonEngine::RenderingSubsystem::EndFrame()
 {
 	if (m_pRendererAPI)
@@ -162,25 +162,25 @@ void CaledonEngine::RenderingSubsystem::EndFrame()
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetRenderTarget:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- GetRenderTarget: Returns the Texture being drawn into --- |
+---------------------------------------------------------------*/
 CaledonEngine::Texture* CaledonEngine::RenderingSubsystem::GetRenderTarget() const noexcept
 {
 	return m_pRenderTarget;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetRenderTarget:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------
+| --- SetRenderTarget: Sets the Texture to draw into --- |
+--------------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::SetRenderTarget(Texture* pTarget)
 {
 	m_pRenderTarget = pTarget;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetRenderer:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------
+| --- GetRenderer: Returns the platform renderer --- |
+----------------------------------------------------*/
 CaledonEngine::Renderer* CaledonEngine::RenderingSubsystem::GetRenderer() const noexcept
 {
 	return m_pRendererAPI.get();
@@ -191,9 +191,9 @@ CaledonEngine::Renderer* CaledonEngine::RenderingSubsystem::GetRenderer() const 
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*---------------------------------------------------------------------------------------
-| --- CacheSprites:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| --- CacheSprites: Adds a GameObject's drawable sprites to the draw list --- |
+-----------------------------------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::CacheSprites(const GameObject& gameObject)
 {
 	// A GameObject waiting to be destroyed (and so its children) is no longer drawn
@@ -216,9 +216,9 @@ void CaledonEngine::RenderingSubsystem::CacheSprites(const GameObject& gameObjec
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- RenderSprite:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- RenderSprite: Draws one sprite with its owner's world pose --- |
+--------------------------------------------------------------------*/
 void CaledonEngine::RenderingSubsystem::RenderSprite(const SpriteComponent& sprite)
 {
 	const GameObject* pOwner = sprite.GetOwner();

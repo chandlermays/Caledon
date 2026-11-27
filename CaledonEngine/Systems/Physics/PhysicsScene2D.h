@@ -102,7 +102,7 @@ namespace CaledonEngine
 
 		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;																		// Returns whether the two Collider2D were in contact during the latest step
 		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;																// Returns whether the given Collider2D was touching any other Collider2D that passes the ContactFilter2D during the latest step
-		bool IsTouching(const ContactFilter2D& contactFilter) const;																							// 
+		bool IsTouching(const ContactFilter2D& contactFilter) const;																							// Returns whether any contact passes the ContactFilter2D (not implemented yet)
 		bool IsTouchingLayers(LayerMask = LayerMask{ -1 }) const;																								// Returns whether any Collider2D is touching another Collider2D on the specified LayerMask
 
 		/*----------------------------------------------------------------------------------------------------------

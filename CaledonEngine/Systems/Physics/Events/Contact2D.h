@@ -22,14 +22,18 @@ namespace CaledonEngine
 {
 	class Collider2D;
 
+	/*-------------------------------------------------------------------------------
+	| --- ContactKey2D: Identifies one touching shape pair, so a contact can be --- |
+	| ---               matched with itself from one step to the next           --- |
+	-------------------------------------------------------------------------------*/
 	struct ContactKey2D
 	{
-		const Collider2D* pColliderA = nullptr;
-		const Collider2D* pColliderB = nullptr;
-		int shapeIndexA = 0;
-		int shapeIndexB = 0;
+		const Collider2D* pColliderA = nullptr;																		// The first collider
+		const Collider2D* pColliderB = nullptr;																		// The second collider
+		int shapeIndexA = 0;																						// Which shape of A
+		int shapeIndexB = 0;																						// Which shape of B
 
-		bool operator==(const ContactKey2D& other) const noexcept
+		bool operator==(const ContactKey2D& other) const noexcept													// Returns whether both keys name the same shape pair
 		{
 			return pColliderA == other.pColliderA && pColliderB == other.pColliderB && shapeIndexA == other.shapeIndexA && shapeIndexB == other.shapeIndexB;
 		}
@@ -37,7 +41,7 @@ namespace CaledonEngine
 
 	struct ContactKey2DHash
 	{
-		std::size_t operator()(const ContactKey2D& key) const noexcept
+		std::size_t operator()(const ContactKey2D& key) const noexcept												// Combines the key's fields into one hash
 		{
 			std::size_t hash = std::hash<const void*>{}(key.pColliderA);
 			hash = hash * 31u + std::hash<const void*>{}(key.pColliderB);

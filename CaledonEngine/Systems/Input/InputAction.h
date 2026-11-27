@@ -28,11 +28,14 @@ namespace CaledonEngine
 {
 	class InputAction;
 
+	/*--------------------------------------------------------------------------
+	| --- ActionPhase: The stage of an action that a callback is fired for --- |
+	--------------------------------------------------------------------------*/
 	enum class ActionPhase
 	{
-		kStarted,
-		kPerformed,
-		kCanceled
+		kStarted,											// The action began (a control left its default value)
+		kPerformed,											// The action triggered
+		kCanceled											// The action ended (the control returned to its default value)
 	};
 
 	enum class ActionType
@@ -64,20 +67,23 @@ namespace CaledonEngine
 		std::vector<InputBinding> m_negativeBindings;		// Bindings for negative direction
 	};
 
+	/*----------------------------------------------------------------
+	| --- Context: What a callback receives when an action fires --- |
+	----------------------------------------------------------------*/
 	struct Context
 	{
-		InputAction* m_pAction;
-		ActionPhase m_phase;
-		float m_value;
+		InputAction* m_pAction;								// The action that fired the callback
+		ActionPhase m_phase;								// The phase the action is in
+		float m_value;										// The action's current value
 	};
 
-	using ActionCallback = std::function<void(const Context&)>;
+	using ActionCallback = std::function<void(const Context&)>;	// Function called when an action fires
 
 	// Structure storing the bound target object instance alongside the executable callback
 	struct CallbackDelegate
 	{
-		void* m_pTargetInstance{ nullptr };
-		ActionCallback m_callback;
+		void* m_pTargetInstance{ nullptr };					// The object the callback is bound to (used to unsubscribe it)
+		ActionCallback m_callback;							// The function to call
 	};
 
 	class InputAction
@@ -98,7 +104,7 @@ namespace CaledonEngine
 		std::vector<CallbackDelegate> m_onCanceledCallbacks;													// Callbacks for when the action cancels
 		std::vector<CallbackDelegate> m_onValueCallbacks;														// Callbacks for when the action value changes
 
-		void InvokeCallbacks(const std::vector<CallbackDelegate>& callbacks, const Context& context);			// 
+		void InvokeCallbacks(const std::vector<CallbackDelegate>& callbacks, const Context& context);			// Invokes every callback in the given list
 		void InvokeStartedCallbacks(const Context& context);													// Invokes all registered started callbacks
 		void InvokePerformedCallbacks(const Context& context);													// Invokes all registered performed callbacks
 		void InvokeCanceledCallbacks(const Context& context);													// Invokes all registered canceled callbacks
@@ -130,32 +136,32 @@ namespace CaledonEngine
 		void AddNegativeBinding(MouseCode mouse);																// Adds a negative mouse binding to a composite binding
 
 		template <typename T>
-		void OnStarted(T* pInstance, void (T::* pMemberFunc)(const Context&))
+		void OnStarted(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the started phase
 		{
 			m_onStartedCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
 		template <typename T>
-		void OnPerformed(T* pInstance, void (T::* pMemberFunc)(const Context&))
+		void OnPerformed(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the performed phase
 		{
 			m_onPerformedCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
 		template <typename T>
-		void OnCanceled(T* pInstance, void (T::* pMemberFunc)(const Context&))
+		void OnCanceled(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to the canceled phase
 		{
 			m_onCanceledCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
 		template <typename T>
-		void OnValue(T* pInstance, void (T::* pMemberFunc)(const Context&))
+		void OnValue(T* pInstance, void (T::* pMemberFunc)(const Context&))	// Binds a member function to value changes
 		{
 			m_onValueCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx); } });
 		}
 
 		// Convenience overload for methods accepting raw float directly (e.g., OnMoveHorizontal(float))
 		template <typename T>
-		void OnValue(T* pInstance, void (T::* pMemberFunc)(float))
+		void OnValue(T* pInstance, void (T::* pMemberFunc)(float))	// Binds a member function to value changes (receives the raw value)
 		{
 			m_onValueCallbacks.push_back({ pInstance, [pInstance, pMemberFunc](const Context& ctx) { (pInstance->*pMemberFunc)(ctx.m_value); } });
 		}

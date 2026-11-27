@@ -174,11 +174,11 @@ bool CaledonEngine::SDLInput::ProcessEvents()
 
 		switch (event.type)
 		{
-		// Window Event: Closing the Window
+			// Window Event: Closing the Window
 		case SDL_EVENT_QUIT:
 			return true;
 
-		// Keyboard Event: Key Pressed
+			// Keyboard Event: Key Pressed
 		case SDL_EVENT_KEY_DOWN:
 		{
 			const auto it = m_keyMapping.find(event.key.key);
@@ -246,9 +246,9 @@ bool CaledonEngine::SDLInput::ProcessEvents()
 	return false;
 }
 
-/*-------------------------------------------------------------------------
-| --- SetEventCallback:
--------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
+| --- SetEventCallback: Sets the function called for every raw SDL event --- |
+----------------------------------------------------------------------------*/
 void CaledonEngine::SDLInput::SetEventCallback(EventCallback callback)
 {
 	m_eventCallback = std::move(callback);

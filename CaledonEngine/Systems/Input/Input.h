@@ -96,9 +96,9 @@ namespace CaledonEngine
 		virtual void Shutdown() = 0;														// Shuts down the Input System
 		virtual bool ProcessEvents() = 0;													// Processes Input Events
 
-		virtual void SetEventCallback(EventCallback callback) = 0;							//
+		virtual void SetEventCallback(EventCallback callback) = 0;							// Sets the function called for every raw input event
 
-		const std::string& GetLastError() const noexcept { return m_lastError; }
+		const std::string& GetLastError() const noexcept { return m_lastError; }			// Returns the reason the last operation failed
 
 		virtual bool IsKeyHeld(KeyCode key) const;											// Returns true if the specified key is currently held down
 		virtual bool IsKeyPressed(KeyCode key) const;										// Returns true if the specified key was pressed this frame

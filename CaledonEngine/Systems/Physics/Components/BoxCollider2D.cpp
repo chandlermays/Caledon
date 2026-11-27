@@ -26,8 +26,8 @@ CaledonEngine::BoxCollider2D::BoxCollider2D()
 --------------------------------------------------------------*/
 const std::string& CaledonEngine::BoxCollider2D::GetTypeName() const
 {
-    static const std::string typeName = "BoxCollider2D";
-    return typeName;
+	static const std::string typeName = "BoxCollider2D";
+	return typeName;
 }
 
 /*-------------------------------------------------------------------
@@ -48,9 +48,9 @@ void CaledonEngine::BoxCollider2D::SetSize(const Vector2f& size)
 	RefreshBounds();
 }
 
-/*-----------------------------------------------------------------------
-| --- AddLocalShapes: 
------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------
+| --- AddLocalShapes: Adds this BoxCollider2D's box to the physics shape group --- |
+----------------------------------------------------------------------------------*/
 int CaledonEngine::BoxCollider2D::AddLocalShapes(PhysicsShapeGroup2D& physicsShapeGroup) const
 {
 	return (physicsShapeGroup.AddBox(GetOffset(), m_size, 0.0f, m_edgeRadius) >= 0) ? 1 : 0;

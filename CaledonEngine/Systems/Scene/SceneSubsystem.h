@@ -16,18 +16,33 @@ namespace CaledonEngine
 	class Physics2DSubsystem;
 	class Scene;
 
+	/*---------------------------------------------------------------------------------------------
+	| --- SceneSubsystem: Owns every Scene and tracks which one is current. Each frame it     --- |
+	| ---                 updates only the current Scene (and only while it is active), but  --- |
+	| ---                 flushes every Scene's queued adds and destructions, so the Editor's --- |
+	| ---                 changes go through even when the Scene isn't being updated         --- |
+	| ---                                                                                     --- |
+	| ---                 Scenes can be added before or after the Subsystem is initialized:   --- |
+	| ---                 ones added before are initialized in Initialize, ones added after   --- |
+	| ---                 are initialized right away. Each Scene is handed the default 2D     --- |
+	| ---                 Physics Scene, or nullptr when there is no Physics2DSubsystem       --- |
+	| ---                                                                                     --- |
+	| ---                 The first Scene added becomes current. Only an owned Scene can be   --- |
+	| ---                 made current, and removing the current Scene leaves none current    --- |
+	| ---                 (there is no automatic fallback to another Scene)                   --- |
+	---------------------------------------------------------------------------------------------*/
 	class SceneSubsystem final : public ISubsystem, public IUpdatable
 	{
 	private:
-		std::vector<std::unique_ptr<Scene>> m_pScenes;								//
-		Scene* m_pCurrentScene;														//
-		EngineContext* m_pContext;													//
-		Physics2DSubsystem* m_pPhysics2D;											//
+		std::vector<std::unique_ptr<Scene>> m_pScenes;								// Every Scene owned by the Subsystem
+		Scene* m_pCurrentScene;														// Non-owning pointer to the Scene updated each frame
+		EngineContext* m_pContext;													// Non-owning pointer to the EngineContext, set in Initialize
+		Physics2DSubsystem* m_pPhysics2D;											// Non-owning pointer to the 2D Physics Subsystem (may be nullptr)
 
-		bool InitializeScene(Scene& scene);											//
+		bool InitializeScene(Scene& scene);											// Assigns 2D physics and initializes a Scene
 
 	public:
-		static constexpr std::string_view kName = "Scene";							//
+		static constexpr std::string_view kName = "Scene";							// Unique name used for registration and lookup
 
 		SceneSubsystem();															// Constructor
 		~SceneSubsystem() override;													// Destructor
@@ -36,18 +51,18 @@ namespace CaledonEngine
 		SceneSubsystem(SceneSubsystem&&) = delete;									// Prevent move-construction
 		SceneSubsystem& operator=(SceneSubsystem&&) = delete;						// Prevent move-assignment
 
-		std::string_view Name() const noexcept override;							//
-		bool Initialize(EngineContext& context) override;							//
-		void Shutdown() noexcept override;											//
-		void Update(float deltaTime) override;										//
+		std::string_view Name() const noexcept override;							// Returns the Subsystem's name
+		bool Initialize(EngineContext& context) override;							// Caches dependencies and initializes owned Scenes
+		void Shutdown() noexcept override;											// Unloads all Scenes and clears cached pointers
+		void Update(float deltaTime) override;										// Updates the current Scene and flushes pending changes
 
-		void UnloadAllScenes();														//
+		void UnloadAllScenes();														// Destroys every Scene
 
-		bool AddScene(std::unique_ptr<Scene> pScene);								//
-		void RemoveScene(Scene* pScene);											//
+		bool AddScene(std::unique_ptr<Scene> pScene);								// Takes ownership of and initializes a Scene
+		void RemoveScene(Scene* pScene);											// Destroys the given Scene
 
-		Scene* GetCurrentScene() const;												//
-		void SetCurrentScene(Scene* pScene);										//
-		int GetSceneIndex(Scene* pScene) const;										//
+		Scene* GetCurrentScene() const;												// Returns the current Scene
+		void SetCurrentScene(Scene* pScene);										// Sets the current Scene if it's owned
+		int GetSceneIndex(Scene* pScene) const;										// Returns the Scene's index, or -1 if not found
 	};
 }

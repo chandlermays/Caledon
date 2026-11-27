@@ -13,11 +13,12 @@ CaledonEngine::EngineContext::EngineContext(const EngineConfig& config)
 	: m_config{ config }
 	, m_published{}
 	, m_quitRequested{ false }
-{}
+{
+}
 
-/*---------------------------------------------------------------------------------------
-| --- FindSubsystem:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------------------
+| --- FindSubsystem: Returns the published subsystem with the given name, or nullptr --- |
+----------------------------------------------------------------------------------------*/
 CaledonEngine::ISubsystem* CaledonEngine::EngineContext::FindSubsystem(std::string_view name) const noexcept
 {
 	for (const PublishedEntry& entry : m_published)
@@ -29,41 +30,41 @@ CaledonEngine::ISubsystem* CaledonEngine::EngineContext::FindSubsystem(std::stri
 	return nullptr;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Config:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------
+| --- Config: Returns the engine configuration --- |
+--------------------------------------------------*/
 const CaledonEngine::EngineConfig& CaledonEngine::EngineContext::Config() const noexcept
 {
 	return m_config;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- RequestQuit:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+| --- RequestQuit: Asks the main loop to stop at the end of the frame --- |
+-------------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::RequestQuit() noexcept
 {
 	m_quitRequested.store(true);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- IsQuitRequested:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- IsQuitRequested: Returns whether a quit has been requested --- |
+--------------------------------------------------------------------*/
 bool CaledonEngine::EngineContext::IsQuitRequested() const noexcept
 {
 	return m_quitRequested.load();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Publish:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------
+| --- Publish: Makes an initialized subsystem available for lookup --- |
+----------------------------------------------------------------------*/
 void CaledonEngine::EngineContext::Publish(ISubsystem& subsystem)
 {
 	m_published.push_back(PublishedEntry{ std::string{ subsystem.Name() }, &subsystem });
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Retract:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------
+| --- Retract: Removes a subsystem from lookup --- |
+--------------------------------------------------*/
 void CaledonEngine::EngineContext::Retract(ISubsystem& subsystem) noexcept
 {
 	std::erase_if(m_published, [&subsystem](const PublishedEntry& entry)
@@ -72,9 +73,9 @@ void CaledonEngine::EngineContext::Retract(ISubsystem& subsystem) noexcept
 		});
 }
 
-/*---------------------------------------------------------------------------------------
-| --- ResetQuit:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- ResetQuit: Clears the quit request --- |
+--------------------------------------------*/
 void CaledonEngine::EngineContext::ResetQuit() noexcept
 {
 	m_quitRequested.store(false);

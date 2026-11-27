@@ -28,17 +28,17 @@ CaledonEngine::WindowSubsystem::WindowSubsystem(const WindowConfig& config)
 ---------------------------------------------------------------------------*/
 CaledonEngine::WindowSubsystem::~WindowSubsystem() = default;
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::WindowSubsystem::Name() const noexcept
 {
 	return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initialize:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------
+| --- Initialize: Opens the window through the platform backend --- |
+-------------------------------------------------------------------*/
 bool CaledonEngine::WindowSubsystem::Initialize([[maybe_unused]] EngineContext& context)
 {
 	// Only keep the window once it has fully opened, so a failure leaves nothing behind.
@@ -56,9 +56,9 @@ bool CaledonEngine::WindowSubsystem::Initialize([[maybe_unused]] EngineContext& 
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------
+| --- Shutdown: Closes and destroys the window --- |
+--------------------------------------------------*/
 void CaledonEngine::WindowSubsystem::Shutdown() noexcept
 {
 	if (!m_pWindowAPI)
@@ -68,9 +68,9 @@ void CaledonEngine::WindowSubsystem::Shutdown() noexcept
 	m_pWindowAPI.reset();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetWindow:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- GetWindow: Returns the window, or nullptr if it isn't open --- |
+--------------------------------------------------------------------*/
 CaledonEngine::Window* CaledonEngine::WindowSubsystem::GetWindow() const noexcept
 {
 	return m_pWindowAPI.get();

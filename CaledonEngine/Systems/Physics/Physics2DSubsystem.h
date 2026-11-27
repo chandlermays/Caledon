@@ -60,10 +60,10 @@ namespace CaledonEngine
 		--------------------------------------------------------------------------------------------------------------------*/
 		// (NOT YET) PhysicsJobOptions2D jobOptions: will live in Physics2DSettings once the job system exists
 
-		const Physics2DSettings& Settings() const noexcept								{ return m_settings; }						// Returns the physics settings for the Physics2DSubsystem and its default PhysicsScene2D (read-only)
+		const Physics2DSettings& Settings() const noexcept { return m_settings; }						// Returns the physics settings for the Physics2DSubsystem and its default PhysicsScene2D (read-only)
 		void SetSettings(const Physics2DSettings& settings);																		// Sets the physics settings for the Physics2DSubsystem and its default PhysicsScene2D (write access)
-		PhysicsScene2D& GetDefaultPhysicsScene() noexcept								{ return m_defaultScene; }					// Returns a reference to the default PhysicsScene2D automatically created when Caledon starts (read/write)
-		const PhysicsScene2D& GetDefaultPhysicsScene() const noexcept					{ return m_defaultScene; }					// Returns a const reference to the default PhysicsScene2D automatically created when Caledon starts (read-only)
+		PhysicsScene2D& GetDefaultPhysicsScene() noexcept { return m_defaultScene; }					// Returns a reference to the default PhysicsScene2D automatically created when Caledon starts (read/write)
+		const PhysicsScene2D& GetDefaultPhysicsScene() const noexcept { return m_defaultScene; }					// Returns a const reference to the default PhysicsScene2D automatically created when Caledon starts (read-only)
 
 		void SetGravity(const Vector2f& gravity);																					// Sets the global gravity vector for the 2D physics simulation
 		void SetPositionIterations(int iterations);																					// Sets the number of iterations of the physics solver when considering objects' positions
@@ -86,7 +86,7 @@ namespace CaledonEngine
 
 		bool IsTouching(const Collider2D* pCollider1, const Collider2D* pCollider2) const;											// Returns whether the two Collider2D were in contact during the latest step
 		bool IsTouching(const Collider2D* pCollider, const ContactFilter2D& contactFilter) const;									// Returns whether the given Collider2D was touching any other Collider2D that passes the ContactFilter2D during the latest step
-		bool IsTouching(const ContactFilter2D& contactFilter) const;																// 
+		bool IsTouching(const ContactFilter2D& contactFilter) const;																// Returns whether any contact passes the ContactFilter2D (not implemented yet)
 		bool IsTouchingLayers(const Collider2D* pCollider, LayerMask layerMask = AllLayers) const;									// Returns whether the given Collider2D is touching any other Collider2D on the specified LayerMask
 
 		/*--------------------------------------------------------------------------------------------------------------

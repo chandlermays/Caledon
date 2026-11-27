@@ -34,7 +34,7 @@ namespace CaledonEditor
 		void DrawMainMenuBar();														// Draws the File and View menus along the top of the window
 
 	public:
-		static constexpr std::string_view kName = "Editor";							//
+		static constexpr std::string_view kName = "Editor";							// Unique name used for registration and lookup
 
 		EditorSubsystem();															// Constructor
 		~EditorSubsystem() override;												// Destructor
@@ -43,7 +43,7 @@ namespace CaledonEditor
 		EditorSubsystem(EditorSubsystem&&) = delete;								// Prevent move-construction
 		EditorSubsystem& operator=(EditorSubsystem&&) = delete;						// Prevent move-assignment
 
-		std::string_view Name() const noexcept override;							//
+		std::string_view Name() const noexcept override;							// Returns the Subsystem's name
 		bool Initialize(CaledonEngine::EngineContext& context) override;			// Starts ImGui on the engine's window and renderer
 		void Shutdown() noexcept override;											// Stops forwarding events and shuts ImGui down
 

@@ -31,23 +31,23 @@ namespace CaledonEngine
 	class EngineContext
 	{
 	private:
-		friend class EngineManager;											//
+		friend class EngineManager;											// Lets the EngineManager construct the context and publish/retract subsystems
 
 		struct PublishedEntry
 		{
-			std::string name;												//
-			ISubsystem* pSubsystem;											//
+			std::string name;												// The subsystem's name, used as its lookup key
+			ISubsystem* pSubsystem;											// Non-owning pointer to the published subsystem
 		};
 
-		EngineConfig m_config;												//
-		std::vector<PublishedEntry> m_published;							//
-		std::atomic<bool> m_quitRequested;									//
+		EngineConfig m_config;												// The configuration the engine was created with
+		std::vector<PublishedEntry> m_published;							// The initialized subsystems that can be looked up by name
+		std::atomic<bool> m_quitRequested;									// Flag to indicate the main loop should stop
 
 		explicit EngineContext(const EngineConfig& config);					// Constructor
 
-		void Publish(ISubsystem& subsystem);								//
-		void Retract(ISubsystem& subsystem) noexcept;						//
-		void ResetQuit() noexcept;											//
+		void Publish(ISubsystem& subsystem);								// Makes an initialized subsystem available for lookup
+		void Retract(ISubsystem& subsystem) noexcept;						// Removes a subsystem from lookup before it shuts down
+		void ResetQuit() noexcept;											// Clears the quit request
 
 	public:
 		~EngineContext() = default;											// Destructor
@@ -56,7 +56,7 @@ namespace CaledonEngine
 		EngineContext(EngineContext&&) = delete;							// Prevent move-construction
 		EngineContext& operator=(EngineContext&&) = delete;					// Prevent move-assignment
 
-		ISubsystem* FindSubsystem(std::string_view name) const noexcept;	//
+		ISubsystem* FindSubsystem(std::string_view name) const noexcept;	// Returns the published subsystem with the given name, or nullptr
 
 		// Typed lookup. T must derive from ISubsystem and expose: static constexpr std::string_view kName.
 		template<typename T>
@@ -66,9 +66,9 @@ namespace CaledonEngine
 			return static_cast<T*>(FindSubsystem(T::kName));
 		}
 
-		const EngineConfig& Config() const noexcept;						//
+		const EngineConfig& Config() const noexcept;						// Returns the engine configuration
 
-		void RequestQuit() noexcept;										//
-		bool IsQuitRequested() const noexcept;								//
+		void RequestQuit() noexcept;										// Asks the main loop to stop at the end of the frame
+		bool IsQuitRequested() const noexcept;								// Returns whether a quit has been requested
 	};
 }

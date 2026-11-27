@@ -37,9 +37,9 @@ const std::string& PacmanModule::PacmanController::GetTypeName() const
 	return typeName;
 }
 
-/*------------------------------------------------------------------------
-| --- SetInputActions:
-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- SetInputActions: Sets the InputActions to listen to and subscribes to its actions --- |
+-------------------------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::SetInputActions(std::shared_ptr<PacmanInputActions> pInputActions)
 {
 	// Drop any previous subscriptions first
@@ -57,9 +57,9 @@ void PacmanModule::PacmanController::SetInputActions(std::shared_ptr<PacmanInput
 	ConfigureInputBindings();
 }
 
-/*------------------------------------------------------------------------
-| --- OnMoveHorizontal:
-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+| --- OnMoveHorizontal: Moves horizontally, clearing vertical movement --- |
+--------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 {
 	if (value == 0.0f)
@@ -71,7 +71,7 @@ void PacmanModule::PacmanController::OnMoveHorizontal(float value)
 }
 
 /*------------------------------------------------------------------------
-| --- OnMoveVertical:
+| --- OnMoveVertical: Moves vertically, clearing horizontal movement --- |
 ------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::OnMoveVertical(float value)
 {
@@ -88,9 +88,9 @@ void PacmanModule::PacmanController::OnMoveVertical(float value)
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*------------------------------------------------------------------------
-| --- ConfigureInputBindings:
-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- ConfigureInputBindings: Subscribes to the MoveHorizontal and MoveVertical actions --- |
+-------------------------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::ConfigureInputBindings()
 {
 	if (!m_pGameplayActionMap)
@@ -112,9 +112,9 @@ void PacmanModule::PacmanController::ConfigureInputBindings()
 	}
 }
 
-/*------------------------------------------------------------------------
-| --- UnsubscribeAll:
-------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------
+| --- UnsubscribeAll: Unsubscribes from every subscribed action --- |
+-------------------------------------------------------------------*/
 void PacmanModule::PacmanController::UnsubscribeAll()
 {
 	for (CaledonEngine::InputAction* pAction : m_subscribedActions)
@@ -128,9 +128,9 @@ void PacmanModule::PacmanController::UnsubscribeAll()
 	m_subscribedActions.clear();
 }
 
-/*------------------------------------------------------------------------
-| --- UpdateMovement:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| --- UpdateMovement: Passes the input direction to the MovementComponent --- |
+-----------------------------------------------------------------------------*/
 void PacmanModule::PacmanController::UpdateMovement()
 {
 	if (MovementComponent* pMovement = GetComponent<MovementComponent>())

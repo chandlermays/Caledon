@@ -8,11 +8,15 @@
 
 namespace CaledonEngine
 {
+	/*---------------------------------------------------------------------------------
+	| --- DynamicLibrary: Loads a shared library (.dll) and looks up its exported --- |
+	| ---                 functions. The library is unloaded on destruction       --- |
+	---------------------------------------------------------------------------------*/
 	class DynamicLibrary
 	{
 	private:
-		void* m_pHandle;
-		unsigned long m_lastError;
+		void* m_pHandle;																	// The OS handle of the loaded library (nullptr when none)
+		unsigned long m_lastError;															// The OS error code from the last failed load
 
 	public:
 		DynamicLibrary();																	// Constructor
@@ -22,15 +26,15 @@ namespace CaledonEngine
 		DynamicLibrary(DynamicLibrary&&) = delete;											// Prevent move-construction
 		DynamicLibrary& operator=(DynamicLibrary&&) = delete;								// Prevent move-assignment
 
-		bool Load(const std::string& path);
-		void Unload();
-		bool IsLoaded() const;
-		unsigned long GetLastError() const;
+		bool Load(const std::string& path);													// Loads a library, unloading any current one first
+		void Unload();																		// Unloads the library, if one is loaded
+		bool IsLoaded() const;																// Returns whether a library is loaded
+		unsigned long GetLastError() const;													// Returns the OS error code from the last failed load
 
-		void* GetFunctionAddress(const std::string& functionName) const;
+		void* GetFunctionAddress(const std::string& functionName) const;					// Returns the address of an exported function, or nullptr
 
 		template<typename FuncPtr>
-		FuncPtr GetFunction(const std::string& functionName) const
+		FuncPtr GetFunction(const std::string& functionName) const							// Returns an exported function cast to the given pointer type
 		{
 			return reinterpret_cast<FuncPtr>(GetFunctionAddress(functionName));
 		}

@@ -83,9 +83,9 @@ namespace
 		return view;
 	}
 
-	/*----------------------------------------------------------------------------------------------------------------------------
-	| --- AddCapsuleShape: NOTE: Shouldn't this method be added to PhysicsShapeGroup2D?
-	----------------------------------------------------------------------------------------------------------------------------*/
+	/*---------------------------------------------------------------------------------------
+	| --- AddCapsuleShape: NOTE: Shouldn't this method be added to PhysicsShapeGroup2D? --- |
+	---------------------------------------------------------------------------------------*/
 	bool AddCapsuleShape(PhysicsShapeGroup2D& group, const Vector2f& center, const Vector2f& size,
 		CapsuleDirection2D capsuleDirection, float angle)
 	{
@@ -687,9 +687,9 @@ bool PhysicsScene2D::IsTouching(const Collider2D* pCollider, const ContactFilter
 	return GetContactColliders(pCollider, contactFilter, touching) > 0;
 }
 
-/*-------------------------------------------------------------------------------------
-| --- IsTouching: --- |
--------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------------------
+| --- IsTouching: Returns whether any contact passes the ContactFilter2D (not implemented yet) --- |
+--------------------------------------------------------------------------------------------------*/
 bool PhysicsScene2D::IsTouching(const ContactFilter2D& contactFilter) const
 {
 	// TODO: Implement -> the contact filter is used to filter the results differently, such as by layer mask, Z depth, or normal angle

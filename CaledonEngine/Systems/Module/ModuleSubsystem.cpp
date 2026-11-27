@@ -25,19 +25,20 @@ CaledonEngine::ModuleSubsystem::ModuleSubsystem(std::string modulePath)
     , m_pRegistry{ nullptr }
     , m_pInput{ nullptr }
     , m_hasInputActions{ false }
-{ }
+{
+}
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::ModuleSubsystem::Name() const noexcept
 {
     return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initialize:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+| --- Initialize: Loads the module and lets it register with the engine --- |
+---------------------------------------------------------------------------*/
 bool CaledonEngine::ModuleSubsystem::Initialize(EngineContext& context)
 {
     m_pContext = &context;
@@ -85,9 +86,9 @@ bool CaledonEngine::ModuleSubsystem::Initialize(EngineContext& context)
     return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------
+| --- Shutdown: Unregisters and unloads the module --- |
+------------------------------------------------------*/
 void CaledonEngine::ModuleSubsystem::Shutdown() noexcept
 {
     Teardown();
@@ -98,9 +99,9 @@ void CaledonEngine::ModuleSubsystem::Shutdown() noexcept
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*---------------------------------------------------------------------------------------
-| --- HostRegisterComponent:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+| --- HostRegisterComponent: Registers one of the module's Components --- |
+-------------------------------------------------------------------------*/
 bool CaledonEngine::ModuleSubsystem::HostRegisterComponent(void* user, const char* name, Component* (*create)())
 {
     auto* self = static_cast<ModuleSubsystem*>(user);
@@ -115,9 +116,9 @@ bool CaledonEngine::ModuleSubsystem::HostRegisterComponent(void* user, const cha
     return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- HostSetInputActions:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------
+| --- HostSetInputActions: Hands the module's InputActions to the InputSubsystem --- |
+------------------------------------------------------------------------------------*/
 void CaledonEngine::ModuleSubsystem::HostSetInputActions(void* user, InputActions* pActions)
 {
     auto* self = static_cast<ModuleSubsystem*>(user);
@@ -128,9 +129,9 @@ void CaledonEngine::ModuleSubsystem::HostSetInputActions(void* user, InputAction
     self->m_hasInputActions = (pActions != nullptr);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Teardown:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------
+| --- Teardown: Undoes everything the module registered and unloads it --- |
+--------------------------------------------------------------------------*/
 void CaledonEngine::ModuleSubsystem::Teardown() noexcept
 {
     // Unregister the container of components

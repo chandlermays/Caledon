@@ -20,19 +20,20 @@ CaledonEngine::InputSubsystem::InputSubsystem()
 	: m_pInputAPI{ nullptr }
 	, m_pInputActions{ nullptr }
 	, m_pContext{ nullptr }
-{}
+{
+}
 
-/*---------------------------------------------------------------------------------------
-| --- Name:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::InputSubsystem::Name() const noexcept
 {
 	return kName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Initiailze:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------
+| --- Initialize: Starts the platform input backend --- |
+-------------------------------------------------------*/
 bool CaledonEngine::InputSubsystem::Initialize(EngineContext& context)
 {
 	m_pInputAPI = std::make_unique<SDLInput>();
@@ -47,9 +48,9 @@ bool CaledonEngine::InputSubsystem::Initialize(EngineContext& context)
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Shutdown:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------
+| --- Shutdown: Shuts down the platform input backend --- |
+---------------------------------------------------------*/
 void CaledonEngine::InputSubsystem::Shutdown() noexcept
 {
 	if (m_pInputAPI)
@@ -61,9 +62,9 @@ void CaledonEngine::InputSubsystem::Shutdown() noexcept
 	m_pContext = nullptr;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- Update:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------
+| --- Update: Processes events and requests a quit when the OS asks for one --- |
+-------------------------------------------------------------------------------*/
 void CaledonEngine::InputSubsystem::Update([[maybe_unused]] float deltaTime)
 {
 	if (ProcessEvents() && m_pContext)
@@ -73,9 +74,9 @@ void CaledonEngine::InputSubsystem::Update([[maybe_unused]] float deltaTime)
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- ProcessEvents:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------------
+| --- ProcessEvents: Processes events and actions; returns true if a quit was requested --- |
+-------------------------------------------------------------------------------------------*/
 bool CaledonEngine::InputSubsystem::ProcessEvents()
 {
 	if (m_pInputAPI)
@@ -91,25 +92,25 @@ bool CaledonEngine::InputSubsystem::ProcessEvents()
 	return false;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetInputActions:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------
+| --- SetInputActions: Sets the InputActions to process --- |
+-----------------------------------------------------------*/
 void CaledonEngine::InputSubsystem::SetInputActions(InputActions* pInputActions)
 {
 	m_pInputActions = pInputActions;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetInputAPI:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------
+| --- GetInputAPI: Returns the platform input backend --- |
+---------------------------------------------------------*/
 CaledonEngine::Input* CaledonEngine::InputSubsystem::GetInputAPI() const
 {
 	return m_pInputAPI.get();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetInputActions:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------
+| --- GetInputActions: Returns the active InputActions --- |
+----------------------------------------------------------*/
 CaledonEngine::InputActions* CaledonEngine::InputSubsystem::GetInputActions() const
 {
 	return m_pInputActions;
@@ -120,9 +121,9 @@ CaledonEngine::InputActions* CaledonEngine::InputSubsystem::GetInputActions() co
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*---------------------------------------------------------------------------------------
-| --- ProcessInputActions:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------------
+| --- ProcessInputActions: Processes every action in every enabled InputActionMap --- |
+-------------------------------------------------------------------------------------*/
 void CaledonEngine::InputSubsystem::ProcessInputActions()
 {
 	if (!m_pInputActions || !m_pInputActions->IsEnabled())
@@ -143,9 +144,9 @@ void CaledonEngine::InputSubsystem::ProcessInputActions()
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- ProcessAction:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------
+| --- ProcessAction: Reads an action's bindings and passes its value to the action --- |
+--------------------------------------------------------------------------------------*/
 void CaledonEngine::InputSubsystem::ProcessAction(InputAction* pAction)
 {
 	if (!pAction || !pAction->IsEnabled())
@@ -177,9 +178,9 @@ void CaledonEngine::InputSubsystem::ProcessAction(InputAction* pAction)
 	pAction->Process(value);
 }
 
-/*---------------------------------------------------------------------------------------
-| --- CalculateAxisValue:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------------
+| --- CalculateAxisValue: Combines an action's bindings into a value in [-1, 1] --- |
+-----------------------------------------------------------------------------------*/
 float CaledonEngine::InputSubsystem::CalculateAxisValue(InputAction* pAction)
 {
 	if (!pAction || !m_pInputAPI)

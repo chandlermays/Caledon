@@ -30,11 +30,11 @@ namespace Game
 		bool LoadSandbox(int sandbox);											// Destroys the active Sandbox scene and builds the requested one in its place
 
 	public:
-		static constexpr std::string_view kName = "SceneSandbox";				//
+		static constexpr std::string_view kName = "SceneSandbox";				// Unique name used for registration and lookup
 
-		std::string_view Name() const noexcept override;						//
-		bool Initialize(CaledonEngine::EngineContext& context) override;		//
-		void Shutdown() noexcept override;										//
+		std::string_view Name() const noexcept override;						// Returns the Subsystem's name
+		bool Initialize(CaledonEngine::EngineContext& context) override;		// Rescales the physics settings for pixels and loads Sandbox 1
+		void Shutdown() noexcept override;										// Forgets the active Sandbox
 		void Update(float deltaTime) override;									// Switches Sandbox when the 1, 2, 3, 4 or 5 key is pressed and moves the roll marker
 	};
 }

@@ -13,21 +13,27 @@
 
 namespace PacmanModule
 {
+	/*-----------------------------------------------------------------------------------
+	| --- PacmanController: Turns PacMan's movement input into a direction for      --- |
+	| ---                   the MovementComponent on the same GameObject. Only one  --- |
+	| ---                   axis moves at a time, like the arcade game: a new       --- |
+	| ---                   horizontal input clears the vertical one and vice versa --- |
+	-----------------------------------------------------------------------------------*/
 	class PacmanController : public CaledonEngine::Component
 	{
 	private:
-		std::shared_ptr<PacmanInputActions> m_pInputActions;								//
-		CaledonEngine::InputActionMap* m_pGameplayActionMap;								//
+		std::shared_ptr<PacmanInputActions> m_pInputActions;								// The PacMan InputActions this controller listens to
+		CaledonEngine::InputActionMap* m_pGameplayActionMap;								// Non-owning pointer to the gameplay action map
 
-		std::vector<CaledonEngine::InputAction*> m_subscribedActions;						//
+		std::vector<CaledonEngine::InputAction*> m_subscribedActions;						// The actions this controller subscribed to, so it can unsubscribe
 
-		float m_horizontalInput;															//
-		float m_verticalInput;																//
+		float m_horizontalInput;															// The latest horizontal input (-1, 0 or 1)
+		float m_verticalInput;																// The latest vertical input (-1, 0 or 1)
 
-		void ConfigureInputBindings();														//
-		void UnsubscribeAll();																//
+		void ConfigureInputBindings();														// Subscribes to the MoveHorizontal and MoveVertical actions
+		void UnsubscribeAll();																// Unsubscribes from every subscribed action
 
-		void UpdateMovement();																//
+		void UpdateMovement();																// Passes the input direction to the MovementComponent
 
 	public:
 		PacmanController();																	// Constructor
@@ -39,9 +45,9 @@ namespace PacmanModule
 
 		const std::string& GetTypeName() const override;									// Returns the type name of the Component
 
-		void SetInputActions(std::shared_ptr<PacmanInputActions> pInputActions);			//
+		void SetInputActions(std::shared_ptr<PacmanInputActions> pInputActions);			// Sets the InputActions to listen to and subscribes to its actions
 
-		void OnMoveHorizontal(float value);													//
-		void OnMoveVertical(float value);													//
+		void OnMoveHorizontal(float value);													// Moves horizontally (clears vertical, so movement stays on one axis)
+		void OnMoveVertical(float value);													// Moves vertically (clears horizontal, so movement stays on one axis)
 	};
 }

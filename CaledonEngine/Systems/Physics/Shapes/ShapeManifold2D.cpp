@@ -119,13 +119,13 @@ namespace
 
 	struct EdgeSeparation
 	{
-		std::size_t edge = 0;
-		float separation = -Math::MaxFloat;
+		std::size_t edge = 0;										// Index of the edge (of the first polygon) with the largest separation
+		float separation = -Math::MaxFloat;							// How far the second polygon lies outside that edge (negative = overlap)
 	};
 
-	/*------------------------------------------------------------------------------------------------------------------------
-	| --- FindMaxSeparation:
-	------------------------------------------------------------------------------------------------------------------------*/
+	/*------------------------------------------------------------------------------------------------------------
+	| --- FindMaxSeparation: Finds the edge of polygon a that the vertices of polygon b are farthest outside --- |
+	------------------------------------------------------------------------------------------------------------*/
 	EdgeSeparation FindMaxSeparation(std::span<const Vector2f> a, std::span<const Vector2f> b)
 	{
 		EdgeSeparation best;
@@ -149,9 +149,9 @@ namespace
 		return best;
 	}
 
-	/*-------------------------------------------------------------------------------------------------------------------------
-	| --- ClipSegment:
-	-------------------------------------------------------------------------------------------------------------------------*/
+	/*---------------------------------------------------------------------------------------------------
+	| --- ClipSegment: Keeps the part of a segment behind a plane; returns how many points are left --- |
+	---------------------------------------------------------------------------------------------------*/
 	int ClipSegment(const Vector2f in[2], Vector2f out[2], const Vector2f& normal, float offset) noexcept
 	{
 		const float distance0 = Vector2f::Dot(normal, in[0]) - offset;
@@ -176,9 +176,9 @@ namespace
 		return count;
 	}
 
-	/*-------------------------------------------------------------------------------------------------------------------------------
-	| --- CollidePolygons:
-	-------------------------------------------------------------------------------------------------------------------------------*/
+	/*----------------------------------------------------------------------------------------------------------------------------------
+	| --- CollidePolygons: Builds the manifold for two (rounded) polygons by clipping the incident edge against the reference edge --- |
+	----------------------------------------------------------------------------------------------------------------------------------*/
 	bool CollidePolygons(const ShapeView2D& a, const ShapeView2D& b, ShapeManifold2D& manifold)
 	{
 		const float totalRadius = a.radius + b.radius;
@@ -269,9 +269,9 @@ namespace
 	}
 }
 
-/*---------------------------------------------------------------------------------------------------------------------------------------
-| --- Collide:
----------------------------------------------------------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------
+| --- Collide: Builds the contact manifold for any pair of supported shapes --- |
+-------------------------------------------------------------------------------*/
 bool CaledonEngine::ShapeManifold2DQueries::Collide(const ShapeView2D& shapeA, const ShapeView2D& shapeB, ShapeManifold2D& manifold)
 {
 	manifold.Clear();

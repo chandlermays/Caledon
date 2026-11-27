@@ -1,3 +1,7 @@
+/*------------------------------
+| File: SceneSubsystem.cpp
+| Author: Chandler Mays
+------------------------------*/
 #include "SceneSubsystem.h"
 
 #include "Systems/Scene/Scene.h"
@@ -29,18 +33,18 @@ CaledonEngine::SceneSubsystem::~SceneSubsystem()
 	Shutdown();
 }
 
-/*------------------------------------------------------------------------
-| --- Name:
-------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- Name: Returns the Subsystem's name --- |
+--------------------------------------------*/
 std::string_view CaledonEngine::SceneSubsystem::Name() const noexcept
 {
 	return kName;
 }
 
-/*------------------------------------------------------------------------
-| --- Initialize:
-------------------------------------------------------------------------*/
-bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& context)
+/*----------------------------------------------------------------------
+| --- Initialize: Caches dependencies and initializes owned Scenes --- |
+----------------------------------------------------------------------*/
+bool CaledonEngine::SceneSubsystem::Initialize(EngineContext& context)
 {
 	m_pContext = &context;
 	m_pPhysics2D = context.Get<Physics2DSubsystem>();
@@ -53,9 +57,9 @@ bool CaledonEngine::SceneSubsystem::Initialize([[maybe_unused]] EngineContext& c
 	return true;
 }
 
-/*------------------------------------------------------------------------
-| --- Shutdown:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------
+| --- Shutdown: Unloads all Scenes and clears cached pointers --- |
+-----------------------------------------------------------------*/
 void CaledonEngine::SceneSubsystem::Shutdown() noexcept
 {
 	UnloadAllScenes();
@@ -63,11 +67,9 @@ void CaledonEngine::SceneSubsystem::Shutdown() noexcept
 	m_pPhysics2D = nullptr;
 }
 
-/*-----------------------------------------------------------------------------------------------------
-| --- Update: Updates the current Scene, then flushes every Scene's queued adds and destructions. --- |
-| ---         The flush runs every frame even when the Scene isn't updated (Stage 5h's Edit and   --- |
-| ---         Paused modes will gate only the Update), so the Editor's deletions still go through --- |
------------------------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------
+| --- Update: Updates the current Scene and flushes pending changes --- |
+-----------------------------------------------------------------------*/
 void CaledonEngine::SceneSubsystem::Update(float deltaTime)
 {
 	if (m_pCurrentScene != nullptr && m_pCurrentScene->IsActive())
@@ -75,6 +77,8 @@ void CaledonEngine::SceneSubsystem::Update(float deltaTime)
 		m_pCurrentScene->Update(deltaTime);
 	}
 
+	// Flush runs even when the Scene isn't updated (Stage 5h's Edit/Paused modes gate only the Update),
+	// so the Editor's deletions still go through
 	for (const auto& pScene : m_pScenes)
 	{
 		if (pScene)
@@ -84,18 +88,18 @@ void CaledonEngine::SceneSubsystem::Update(float deltaTime)
 	}
 }
 
-/*------------------------------------------------------------------------
-| --- UnloadAllScenes:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------
+| --- UnloadAllScenes: Destroys every Scene --- |
+-----------------------------------------------*/
 void CaledonEngine::SceneSubsystem::UnloadAllScenes()
 {
 	m_pScenes.clear();
 	m_pCurrentScene = nullptr;
 }
 
-/*------------------------------------------------------------------------
-| --- AddScene:
-------------------------------------------------------------------------*/
+/*--------------------------------------------------------------
+| --- AddScene: Takes ownership of and initializes a Scene --- |
+--------------------------------------------------------------*/
 bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 {
 	if (!pScene)
@@ -113,9 +117,9 @@ bool CaledonEngine::SceneSubsystem::AddScene(std::unique_ptr<Scene> pScene)
 	return true;
 }
 
-/*------------------------------------------------------------------------
-| --- RemoveScene:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------
+| --- RemoveScene: Destroys the given Scene --- |
+-----------------------------------------------*/
 void CaledonEngine::SceneSubsystem::RemoveScene(Scene* pScene)
 {
 	if (pScene == nullptr)
@@ -130,28 +134,28 @@ void CaledonEngine::SceneSubsystem::RemoveScene(Scene* pScene)
 		[pScene](const std::unique_ptr<Scene>& p) { return p.get() == pScene; }), m_pScenes.end());
 }
 
-/*------------------------------------------------------------------------
-| --- GetCurrentScene:
-------------------------------------------------------------------------*/
+/*----------------------------------------------------
+| --- GetCurrentScene: Returns the current Scene --- |
+----------------------------------------------------*/
 CaledonEngine::Scene* CaledonEngine::SceneSubsystem::GetCurrentScene() const
 {
 	return m_pCurrentScene;
 }
 
-/*------------------------------------------------------------------------
-| --- SetCurrentScene:
-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- SetCurrentScene: Sets the current Scene if it's owned --- |
+---------------------------------------------------------------*/
 void CaledonEngine::SceneSubsystem::SetCurrentScene(Scene* pScene)
 {
-	if (pScene != nullptr)
+	if (GetSceneIndex(pScene) != -1)
 	{
 		m_pCurrentScene = pScene;
 	}
 }
 
-/*------------------------------------------------------------------------
-| --- GetSceneIndex:
-------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------
+| --- GetSceneIndex: Returns the Scene's index, or -1 if not found --- |
+----------------------------------------------------------------------*/
 int CaledonEngine::SceneSubsystem::GetSceneIndex(Scene* pScene) const
 {
 	if (!pScene)
@@ -171,9 +175,9 @@ int CaledonEngine::SceneSubsystem::GetSceneIndex(Scene* pScene) const
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*------------------------------------------------------------------------
-| --- InitializeScene:
-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------
+| --- InitializeScene: Assigns 2D physics and initializes a Scene --- |
+---------------------------------------------------------------------*/
 bool CaledonEngine::SceneSubsystem::InitializeScene(Scene& scene)
 {
 	scene.SetPhysicsScene2D(m_pPhysics2D ? &m_pPhysics2D->GetDefaultPhysicsScene() : nullptr);

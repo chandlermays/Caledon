@@ -12,7 +12,7 @@
 namespace
 {
 	/*---------------------------------------------------------------------------------------
-	| --- WeldVertices:
+	| --- WeldVertices: Removes vertices closer than minDistance to the one before them --- |
 	---------------------------------------------------------------------------------------*/
 	void WeldVertices(std::vector<CaledonEngine::Vector2f>& loop, float minDistance)
 	{
@@ -59,7 +59,8 @@ CaledonEngine::CompositeCollider2D::CompositeCollider2D()
 	, m_geometryType{ GeometryType::Outlines }
 	, m_useDelaunayMesh{ false }
 	, m_isGeometryDirty{ false }
-{ }
+{
+}
 
 /*--------------------------------------------------------------
 | --- GetTypeName: Returns the type name of this Component --- |
@@ -70,9 +71,9 @@ const std::string& CaledonEngine::CompositeCollider2D::GetTypeName() const
 	return typeName;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetEdgeRadius: 
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------
+| --- SetEdgeRadius: Sets the edge radius (clamped to 0 or more) --- |
+--------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetEdgeRadius(float edgeRadius)
 {
 	edgeRadius = std::max(edgeRadius, 0.0f);
@@ -83,9 +84,9 @@ void CaledonEngine::CompositeCollider2D::SetEdgeRadius(float edgeRadius)
 	OnChanged();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetGenerationType:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------
+| --- SetGenerationType: Sets the generation type, regenerating now if it became synchronous --- |
+------------------------------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetGenerationType(GenerationType generationType)
 {
 	m_generationType = generationType;
@@ -96,9 +97,9 @@ void CaledonEngine::CompositeCollider2D::SetGenerationType(GenerationType genera
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetGeometryType:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------
+| --- SetGeometryType: Sets the geometry type --- |
+-------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetGeometryType(GeometryType geometryType)
 {
 	if (geometryType == m_geometryType)
@@ -108,9 +109,9 @@ void CaledonEngine::CompositeCollider2D::SetGeometryType(GeometryType geometryTy
 	OnChanged();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetOffsetDistance:
----------------------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------
+| --- SetOffsetDistance: Sets the offset distance (clamped to 0 or more) --- |
+----------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetOffsetDistance(float offsetDistance)
 {
 	offsetDistance = std::max(offsetDistance, 0.0f);
@@ -121,9 +122,9 @@ void CaledonEngine::CompositeCollider2D::SetOffsetDistance(float offsetDistance)
 	OnChanged();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetUseDelaunayMesh:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------
+| --- SetUseDelaunayMesh: Sets whether a Delaunay mesh is used for triangulation --- |
+------------------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetUseDelaunayMesh(bool useDelaunayMesh)
 {
 	if (useDelaunayMesh == m_useDelaunayMesh)
@@ -133,9 +134,9 @@ void CaledonEngine::CompositeCollider2D::SetUseDelaunayMesh(bool useDelaunayMesh
 	OnChanged();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- SetVertexDistance:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------
+| --- SetVertexDistance: Sets the vertex weld distance (clamped to 0 or more) --- |
+---------------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::SetVertexDistance(float vertexDistance)
 {
 	vertexDistance = std::max(vertexDistance, 0.0f);
@@ -146,9 +147,9 @@ void CaledonEngine::CompositeCollider2D::SetVertexDistance(float vertexDistance)
 	OnChanged();
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GenerateGeometry:
----------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------
+| --- GenerateGeometry: Rebuilds the paths from the composited colliders' shapes --- |
+------------------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::GenerateGeometry()
 {
 	PhysicsShapeGroup2D shapes;
@@ -166,18 +167,18 @@ void CaledonEngine::CompositeCollider2D::GenerateGeometry()
 	m_isGeometryDirty = false;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetCompositedColliders:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------------------------
+| --- GetCompositedColliders: Copies the composited colliders into a list --- |
+-----------------------------------------------------------------------------*/
 int CaledonEngine::CompositeCollider2D::GetCompositedColliders(std::vector<Collider2D*>& colliders) const
 {
 	colliders.assign(m_compositedColliders.begin(), m_compositedColliders.end());
 	return static_cast<int>(colliders.size());
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetPath:
----------------------------------------------------------------------------------------*/
+/*--------------------------------------------
+| --- GetPath: Returns a path's vertices --- |
+--------------------------------------------*/
 std::span<const CaledonEngine::Vector2f> CaledonEngine::CompositeCollider2D::GetPath(int index) const noexcept
 {
 	if (index < 0 || index >= GetPathCount())
@@ -187,26 +188,26 @@ std::span<const CaledonEngine::Vector2f> CaledonEngine::CompositeCollider2D::Get
 	return std::span<const Vector2f>(m_pathVertices.data() + range.start, static_cast<std::size_t>(range.count));
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetPath:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------
+| --- GetPath: Copies a path's vertices into a list --- |
+-------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::GetPath(int index, std::vector<Vector2f>& points) const
 {
 	const std::span<const Vector2f> path = GetPath(index);
 	points.assign(path.begin(), path.end());
 }
 
-/*---------------------------------------------------------------------------------------
-| --- GetPathPointCount:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------
+| --- GetPathPointCount: Returns the number of vertices in a path --- |
+---------------------------------------------------------------------*/
 int CaledonEngine::CompositeCollider2D::GetPathPointCount(int index) const noexcept
 {
 	return static_cast<int>(GetPath(index).size());
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddCompositeCollider:
----------------------------------------------------------------------------------------*/
+/*-----------------------------------------------------------
+| --- AddCompositedCollider: Adds a collider to combine --- |
+-----------------------------------------------------------*/
 bool CaledonEngine::CompositeCollider2D::AddCompositedCollider(Collider2D* pCollider)
 {
 	if (!pCollider || pCollider == this)
@@ -220,9 +221,9 @@ bool CaledonEngine::CompositeCollider2D::AddCompositedCollider(Collider2D* pColl
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- RemoveCompositedCollider:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------
+| --- RemoveCompositedCollider: Removes a combined collider --- |
+---------------------------------------------------------------*/
 bool CaledonEngine::CompositeCollider2D::RemoveCompositedCollider(Collider2D* pCollider)
 {
 	const auto it = std::find(m_compositedColliders.begin(), m_compositedColliders.end(), pCollider);
@@ -234,9 +235,9 @@ bool CaledonEngine::CompositeCollider2D::RemoveCompositedCollider(Collider2D* pC
 	return true;
 }
 
-/*---------------------------------------------------------------------------------------
-| --- AddCompositedColliders:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------
+| --- AddCompositedColliders: Adds several colliders to combine --- |
+-------------------------------------------------------------------*/
 int CaledonEngine::CompositeCollider2D::AddCompositedColliders(std::span<Collider2D* const> colliders)
 {
 	int added = 0;
@@ -267,9 +268,9 @@ int CaledonEngine::CompositeCollider2D::AddCompositedColliders(std::span<Collide
 /*------------------------------------
 | --- Private Method Definitions --- |
 ------------------------------------*/
-/*---------------------------------------------------------------------------------------
-| --- OnChanged:
----------------------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------------
+| --- OnChanged: Marks the geometry dirty and regenerates it if synchronous --- |
+-------------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::OnChanged()
 {
 	m_isGeometryDirty = true;
@@ -280,9 +281,9 @@ void CaledonEngine::CompositeCollider2D::OnChanged()
 	}
 }
 
-/*---------------------------------------------------------------------------------------
-| --- MergeShapesIntoPaths:
----------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+| --- MergeShapesIntoPaths: Turns each polygon shape into a welded path --- |
+---------------------------------------------------------------------------*/
 void CaledonEngine::CompositeCollider2D::MergeShapesIntoPaths(const PhysicsShapeGroup2D& shapes)
 {
 	std::vector<Vector2f> loop;

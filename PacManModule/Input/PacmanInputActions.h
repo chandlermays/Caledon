@@ -11,12 +11,16 @@
 
 namespace PacmanModule
 {
+	/*------------------------------------------------------------------------------
+	| --- PacmanInputActions: The PacMan game's InputActions: its action maps, --- |
+	| ---                     actions and their key bindings                   --- |
+	------------------------------------------------------------------------------*/
 	class PacmanInputActions : public CaledonEngine::InputActions
 	{
 	private:
-		CaledonEngine::InputActionMap* m_pGameplayActionMap;
+		CaledonEngine::InputActionMap* m_pGameplayActionMap;									// Non-owning pointer to the map of in-game actions (movement, etc.)
 
-		void ConfigureGameplayMap();
+		void ConfigureGameplayMap();															// Creates the gameplay actions and their bindings
 
 	public:
 		PacmanInputActions();																	// Constructor
@@ -26,8 +30,8 @@ namespace PacmanModule
 		PacmanInputActions(PacmanInputActions&&) = delete;										// Prevent move-construction
 		PacmanInputActions& operator=(PacmanInputActions&&) = delete;							// Prevent move-assignment
 
-		void Initialize();
+		void Initialize();																		// Builds every action map
 
-		CaledonEngine::InputActionMap* GetGameplayActionMap() const;
+		CaledonEngine::InputActionMap* GetGameplayActionMap() const;							// Returns the gameplay action map
 	};
 }

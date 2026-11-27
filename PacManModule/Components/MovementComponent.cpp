@@ -18,7 +18,8 @@ PacmanModule::MovementComponent::MovementComponent()
     : Component()
     , m_direction{ 0.0f, 0.0f }
     , m_speed{ 0.0f }
-{ }
+{
+}
 
 /*-------------------------------------------------------------
 | --- GetTypeName: Returns the type name of the Component --- |
@@ -29,9 +30,9 @@ const std::string& PacmanModule::MovementComponent::GetTypeName() const
     return typeName;
 }
 
-/*------------------------------------------------------------------------
-| --- Update:
-------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------
+| --- Update: Moves the owner (through its RigidBody2D when it has one) --- |
+---------------------------------------------------------------------------*/
 void PacmanModule::MovementComponent::Update(float deltaTime)
 {
     // With a RigidBody2D the physics system moves the object (and stops it at colliders), so drive its velocity instead of the Transform
@@ -55,41 +56,41 @@ void PacmanModule::MovementComponent::Update(float deltaTime)
     }
 }
 
-/*------------------------------------------------------------------------
-| --- SetDirection:
-------------------------------------------------------------------------*/
+/*-----------------------------------------------------
+| --- SetDirection: Sets the direction to move in --- |
+-----------------------------------------------------*/
 void PacmanModule::MovementComponent::SetDirection(const CaledonEngine::Vector2f direction)
 {
     m_direction = direction;
 }
 
-/*------------------------------------------------------------------------
-| --- GetDirection:
-------------------------------------------------------------------------*/
+/*--------------------------------------------------------
+| --- GetDirection: Returns the direction to move in --- |
+--------------------------------------------------------*/
 const CaledonEngine::Vector2f& PacmanModule::MovementComponent::GetDirection() const
 {
     return m_direction;
 }
 
-/*------------------------------------------------------------------------
-| --- SetSpeed:
-------------------------------------------------------------------------*/
+/*---------------------------------------------
+| --- SetSpeed: Sets the speed to move at --- |
+---------------------------------------------*/
 void PacmanModule::MovementComponent::SetSpeed(float speed)
 {
     m_speed = speed;
 }
 
-/*------------------------------------------------------------------------
-| --- GetSped:
-------------------------------------------------------------------------*/
+/*------------------------------------------------
+| --- GetSpeed: Returns the speed to move at --- |
+------------------------------------------------*/
 float PacmanModule::MovementComponent::GetSpeed() const
 {
     return m_speed;
 }
 
-/*------------------------------------------------------------------------
-| --- Stop:
-------------------------------------------------------------------------*/
+/*------------------------------------------------------
+| --- Stop: Stops moving by clearing the direction --- |
+------------------------------------------------------*/
 void PacmanModule::MovementComponent::Stop()
 {
     m_direction = CaledonEngine::Vector2f::Zero();
